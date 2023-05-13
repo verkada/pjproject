@@ -36,14 +36,15 @@
 #include <libavutil/avutil.h>
 #include <libavcodec/avcodec.h>
 
-
-#ifdef PJMEDIA_USE_OLD_FFMPEG
-#   define AVPixelFormat        PixelFormat
-#   define AV(str)              str
-#   define PIX_FMT_GBRP         PIX_FMT_GBR24P
-#else
-#   define AV(str)              AV_ ## str
-#endif
+#undef PJMEDIA_USE_OLD_FFMPEG
+// #ifdef PJMEDIA_USE_OLD_FFMPEG
+// #   define AVPixelFormat        PixelFormat
+// #   define AV(str)              str
+// #   define PIX_FMT_GBRP         PIX_FMT_GBR24P
+// #else
+// #   define AV(str)              AV_ ## str
+// #endif
+#define AV(str)              AV_ ## str
 
 #define LIBAVCODEC_VER_AT_LEAST(major,minor)  (LIBAVCODEC_VERSION_MAJOR > major || \
                                                (LIBAVCODEC_VERSION_MAJOR == major && \
