@@ -675,7 +675,8 @@ static int read_whole_file(char *filename, pj_uint8_t *buffer, pj_size_t size) {
 
     if (totalRead != sizeof(buffer))
         return -120;
-    return 0;    
+    pj_file_close(fd);
+    return totalRead;    
 }
 
 static filenamecounter = 0;
@@ -697,6 +698,9 @@ static pj_status_t verkada_stream_get_frame(pjmedia_vid_dev_stream *strm,
     const char baseName[] = "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.";
     sprintf(filename, "%s%04d", baseName, filenamecounter);
     filenamecounter++;
+    if (filenamecounter > 15000) {
+        filenamecounter = 0;
+    }
     file = fopen(filename, "rb");
         if (file == NULL) {
         printf("Failed to open the file.\n");
@@ -731,6 +735,8 @@ static pj_status_t verkada_stream_get_frame(pjmedia_vid_dev_stream *strm,
         fclose(file);
         return 1;
     }
+    fclose(file);
+    frame->size = bytesRead;
     return PJ_SUCCESS;
     // return spectrum_run(stream, frame->buf, frame->size);
 }
