@@ -3,6 +3,7 @@ lib/
 bin/
 output/
 tmp/
+videos/
 
 # VS stuff
 *.ncb

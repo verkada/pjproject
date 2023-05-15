@@ -452,6 +452,7 @@ static int main_func(int argc, char *argv[])
 
     int c;
     int option_index;
+    char fmt_name[16];
 
 
     pj_bzero(&remote_addr, sizeof(remote_addr));
@@ -750,6 +751,7 @@ static int main_func(int argc, char *argv[])
         /* Set as active for all video devices */
         vpp.active = PJ_TRUE;
 
+
         /* Create video device port. */
         if (dir & PJMEDIA_DIR_ENCODING) {
             /* Create capture */
@@ -761,8 +763,14 @@ static int main_func(int argc, char *argv[])
                 goto on_exit;
 
             pjmedia_format_copy(&vpp.vidparam.fmt, &codec_param.enc_fmt);
-            vpp.vidparam.fmt.id = codec_param.dec_fmt.id;
+            pjmedia_fourcc_name(codec_param.enc_fmt.id, fmt_name);
+            printf("enc_fmt video format %s\n", fmt_name);
+            pjmedia_fourcc_name(codec_param.dec_fmt.id, fmt_name);
+            printf("dec_fmt video format %s\n", fmt_name);
+            // vpp.vidparam.fmt.id = codec_param.dec_fmt.id;
+            // vpp.vidparam.fmt.id = 
             vpp.vidparam.dir = PJMEDIA_DIR_CAPTURE;
+            vpp.vidparam.cap_id = 3;
             
             status = pjmedia_vid_port_create(pool, &vpp, &capture);
             if (status != PJ_SUCCESS)

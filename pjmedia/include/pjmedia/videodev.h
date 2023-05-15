@@ -147,7 +147,7 @@ enum pjmedia_vid_dev_std_index
     /**
      * Constant to denote default capture device
      */
-    PJMEDIA_VID_DEFAULT_CAPTURE_DEV = -1,
+    PJMEDIA_VID_DEFAULT_CAPTURE_DEV = 3,
 
     /**
      * Constant to denote default render device

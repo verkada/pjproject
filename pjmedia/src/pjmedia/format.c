@@ -91,6 +91,7 @@ static pjmedia_video_format_info built_in_vid_fmt_info[] =
     {PJMEDIA_FORMAT_I422JPEG, "I422JPG", PJMEDIA_COLOR_MODEL_YUV, 16, 3, &apply_planar_422},
     {PJMEDIA_FORMAT_NV12,  "NV12", PJMEDIA_COLOR_MODEL_YUV, 12, 2, &apply_biplanar_420},
     {PJMEDIA_FORMAT_NV21,  "NV21", PJMEDIA_COLOR_MODEL_YUV, 12, 2, &apply_biplanar_420},
+    {PJMEDIA_FORMAT_H264, "I420H264", PJMEDIA_COLOR_MODEL_YUV, 12, 3, &apply_planar_420},
 };
 
 PJ_DEF(void) pjmedia_format_init_video( pjmedia_format *fmt,

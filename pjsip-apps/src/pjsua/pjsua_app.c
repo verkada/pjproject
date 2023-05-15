@@ -1713,6 +1713,9 @@ static pj_status_t app_init(void)
 
             app_config_init_video(&acc_cfg);
             acc_cfg.rtp_cfg = app_config.rtp_cfg;
+            acc_cfg.vid_in_auto_show = PJ_FALSE;
+            acc_cfg.vid_out_auto_transmit = PJ_TRUE;
+            acc_cfg.vid_cap_dev = 3;
             acc_cfg.ipv6_media_use = PJSUA_IPV6_ENABLED;
             pjsua_acc_modify(aid, &acc_cfg);
         }

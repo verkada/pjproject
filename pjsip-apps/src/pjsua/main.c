@@ -153,7 +153,7 @@ int main_func(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    pj_log_set_level(1);
+    pj_log_set_level(4);
 
     return pj_run_app(&main_func, argc, argv, 0);
 }

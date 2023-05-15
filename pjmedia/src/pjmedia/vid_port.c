@@ -202,7 +202,16 @@ static pj_status_t create_converter(pjmedia_vid_port *vp)
         pjmedia_converter_destroy(vp->conv.conv);
         vp->conv.conv = NULL;
     }
-
+    char fmt_name[5];
+    // 875967048
+    pjmedia_fourcc_name(vp->conv.conv_param.src.id, fmt_name);
+    PJ_LOG(3,(THIS_FILE,
+            "Source format=%s",
+            fmt_name));
+    pjmedia_fourcc_name(vp->conv.conv_param.dst.id, fmt_name);
+    PJ_LOG(3,(THIS_FILE,
+            "Destination format=%s",
+            fmt_name));            
     /* Instantiate converter if necessary */
     if (vp->conv.conv_param.src.id != vp->conv.conv_param.dst.id ||
         (vp->conv.conv_param.src.det.vid.size.w !=
@@ -552,7 +561,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_port_create( pj_pool_t *pool,
 
     pj_ansi_snprintf(dev_name, sizeof(dev_name), "%s [%s]", di.name, di.driver);
     pjmedia_fourcc_name(vparam.fmt.id, fmt_name);
-    PJ_LOG(4,(THIS_FILE,
+    PJ_LOG(3,(THIS_FILE,
               "Opening device %s for %s: format=%s, size=%dx%d @%d:%d fps",
               dev_name,
               vid_dir_name(prm->vidparam.dir), fmt_name,
@@ -614,8 +623,8 @@ PJ_DEF(pj_status_t) pjmedia_vid_port_create( pj_pool_t *pool,
         goto on_error;
 
     pjmedia_fourcc_name(vparam.fmt.id, fmt_name);
-    PJ_LOG(4,(THIS_FILE,
-              "Device %s opened: format=%s, size=%dx%d @%d:%d fps",
+    PJ_LOG(3,(THIS_FILE,
+              "Hello Hello Device %s opened: format=%s, size=%dx%d @%d:%d fps",
               dev_name, fmt_name,
               vparam.fmt.det.vid.size.w, vparam.fmt.det.vid.size.h,
               vparam.fmt.det.vid.fps.num, vparam.fmt.det.vid.fps.denum));
@@ -631,7 +640,10 @@ PJ_DEF(pj_status_t) pjmedia_vid_port_create( pj_pool_t *pool,
         pjmedia_format_copy(&vp->conv.conv_param.src, &prm->vidparam.fmt);
         pjmedia_format_copy(&vp->conv.conv_param.dst, &vparam.fmt);
     }
-
+    pjmedia_fourcc_name(prm->vidparam.fmt.id, fmt_name);
+    PJ_LOG(3,(THIS_FILE,
+            "Converting to: format=%s",
+            fmt_name));
     status = create_converter(vp);
     if (status != PJ_SUCCESS)
         goto on_error;
@@ -824,13 +836,13 @@ PJ_DEF(pj_status_t) pjmedia_vid_port_start(pjmedia_vid_port *vp)
     PJ_ASSERT_RETURN(vp, PJ_EINVAL);
 
     /* Initialize buffer with black color */
-    status = pjmedia_video_format_fill_black(&vp->conv.conv_param.src,
-                                             vp->frm_buf->buf,
-                                             vp->frm_buf_size);
-    if (status != PJ_SUCCESS) {
-        PJ_PERROR(4,(THIS_FILE, status,
-                     "Warning: failed to init buffer with black"));
-    }
+    // status = pjmedia_video_format_fill_black(&vp->conv.conv_param.src,
+    //                                          vp->frm_buf->buf,
+    //                                          vp->frm_buf_size);
+    // if (status != PJ_SUCCESS) {
+    //     PJ_PERROR(4,(THIS_FILE, status,
+    //                  "Warning: failed to init buffer with black"));
+    // }
 
     status = pjmedia_vid_dev_stream_start(vp->strm);
     if (status != PJ_SUCCESS)

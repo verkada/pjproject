@@ -30,8 +30,8 @@
 
 #define THIS_FILE               "verkada_dev.c"
 #define DEFAULT_CLOCK_RATE      90000
-#define DEFAULT_WIDTH           320 //640
-#define DEFAULT_HEIGHT          240 //480
+#define DEFAULT_WIDTH           720 //640
+#define DEFAULT_HEIGHT          480 //480
 #define DEFAULT_FPS             25
 
 
@@ -68,19 +68,19 @@ struct verkada_fmt_info {
 static struct verkada_fmt_info verkada_fmts[] =
 {
     /* Packed formats */
-    { PJMEDIA_FORMAT_YUY2,      {0, 1, 3}, {2, 4, 4} },
-    { PJMEDIA_FORMAT_UYVY,      {1, 0, 2}, {2, 4, 4} },
-    { PJMEDIA_FORMAT_YVYU,      {0, 3, 1}, {2, 4, 4} },
-    { PJMEDIA_FORMAT_RGBA,      {0, 1, 2}, {4, 4, 4} },
-    { PJMEDIA_FORMAT_RGB24,     {0, 1, 2}, {3, 3, 3} },
-    { PJMEDIA_FORMAT_BGRA,      {2, 1, 0}, {4, 4, 4} },
+    // { PJMEDIA_FORMAT_YUY2,      {0, 1, 3}, {2, 4, 4} },
+    // { PJMEDIA_FORMAT_UYVY,      {1, 0, 2}, {2, 4, 4} },
+    // { PJMEDIA_FORMAT_YVYU,      {0, 3, 1}, {2, 4, 4} },
+    // { PJMEDIA_FORMAT_RGBA,      {0, 1, 2}, {4, 4, 4} },
+    // { PJMEDIA_FORMAT_RGB24,     {0, 1, 2}, {3, 3, 3} },
+    // { PJMEDIA_FORMAT_BGRA,      {2, 1, 0}, {4, 4, 4} },
 
     /* Planar formats */
-    // { PJMEDIA_FORMAT_H264 },
-    { PJMEDIA_FORMAT_I420 },
-    { PJMEDIA_FORMAT_I422 },
-    { PJMEDIA_FORMAT_I420JPEG },
-    { PJMEDIA_FORMAT_I422JPEG },
+    { PJMEDIA_FORMAT_H264 },
+    // { PJMEDIA_FORMAT_I420 },
+    // { PJMEDIA_FORMAT_I422 },
+    // { PJMEDIA_FORMAT_I420JPEG },
+    // { PJMEDIA_FORMAT_I422JPEG },
 };
 
 /* Video stream. */
@@ -452,7 +452,7 @@ static pj_status_t verkada_factory_create_stream(
         return PJMEDIA_EVID_BADFORMAT;
 
     /* Create and Initialize stream descriptor */
-    pool = pj_pool_create(cf->pf, "cbar-dev", 512, 512, NULL);
+    pool = pj_pool_create(cf->pf, "verkada-dev", 512, 512, NULL);
     PJ_ASSERT_RETURN(pool != NULL, PJ_ENOMEM);
 
     strm = PJ_POOL_ZALLOC_T(pool, struct verkada_stream);
@@ -481,26 +481,26 @@ static pj_status_t verkada_factory_create_stream(
 */
 
     /* Active role? */
-    if (param->cap_id == 1 && cb && cb->capture_cb) {
-        pjmedia_clock_param clock_param;
-        pj_status_t status;
+    // if (param->cap_id == 1 && cb && cb->capture_cb) {
+    //     pjmedia_clock_param clock_param;
+    //     pj_status_t status;
 
-        /* Allocate buffer */
-        strm->clock_buf = pj_pool_alloc(pool, strm->vafp.framebytes);
+    //     /* Allocate buffer */
+    //     strm->clock_buf = pj_pool_alloc(pool, strm->vafp.framebytes);
 
-        /* Create clock */
-        pj_bzero(&clock_param, sizeof(clock_param));
-        clock_param.usec_interval = PJMEDIA_PTIME(&vfd->fps);
-        clock_param.clock_rate = param->clock_rate;
-        status = pjmedia_clock_create2(pool, &clock_param,
-                                       PJMEDIA_CLOCK_NO_HIGHEST_PRIO,
-                                       &clock_cb,
-                                       strm, &strm->clock);
-        if (status != PJ_SUCCESS) {
-            pj_pool_release(pool);
-            return status;
-        }
-    }
+    //     /* Create clock */
+    //     pj_bzero(&clock_param, sizeof(clock_param));
+    //     clock_param.usec_interval = PJMEDIA_PTIME(&vfd->fps);
+    //     clock_param.clock_rate = param->clock_rate;
+    //     status = pjmedia_clock_create2(pool, &clock_param,
+    //                                    PJMEDIA_CLOCK_NO_HIGHEST_PRIO,
+    //                                    &clock_cb,
+    //                                    strm, &strm->clock);
+    //     if (status != PJ_SUCCESS) {
+    //         pj_pool_release(pool);
+    //         return status;
+    //     }
+    // }
 
     /* Done */
     strm->base.op = &stream_op;
@@ -559,10 +559,10 @@ static pj_status_t verkada_stream_set_cap(pjmedia_vid_dev_stream *s,
 
     PJ_ASSERT_RETURN(s && pval, PJ_EINVAL);
 
-    if (cap==PJMEDIA_VID_DEV_CAP_INPUT_SCALE)
-    {
-        return PJ_SUCCESS;
-    }
+    // if (cap==PJMEDIA_VID_DEV_CAP_INPUT_SCALE)
+    // {
+    //     return PJ_SUCCESS;
+    // }
 
     return PJMEDIA_EVID_INVCAP;
 }
@@ -641,17 +641,98 @@ static pj_status_t spectrum_run(struct verkada_stream *d, pj_uint8_t *p,
     return PJ_SUCCESS;
 }
 
+#include <pj/file_io.h>
+
+static int read_whole_file(char *filename, pj_uint8_t *buffer, pj_size_t size) {
+    pj_oshandle_t fd = 0;
+    pj_status_t status;
+    /*
+     * Re-open the file and read data.
+     */
+    status = pj_file_open(NULL, filename, PJ_O_RDONLY, &fd);
+    if (status != PJ_SUCCESS) {
+        printf("...file_open() error", status);
+        return -100;
+    }
+    pj_ssize_t totalRead;
+    totalRead = 0;
+    while (totalRead < size) {
+        pj_ssize_t read;
+        read = 1;
+        status = pj_file_read(fd, &buffer[totalRead], &read);
+        if (status != PJ_SUCCESS) {
+            PJ_LOG(3,("", "...error reading file after %ld bytes "
+                          "(error follows)", totalRead));
+            printf("...error", status);
+            return -110;
+        }
+        if (read == 0) {
+            // EOF
+            break;
+        }
+        totalRead += read;
+    }
+
+    if (totalRead != sizeof(buffer))
+        return -120;
+    return 0;    
+}
+
+static filenamecounter = 0;
 /* API: Get frame from stream */
 static pj_status_t verkada_stream_get_frame(pjmedia_vid_dev_stream *strm,
                                          pjmedia_frame *frame)
 {
     struct verkada_stream *stream = (struct verkada_stream*)strm;
+    FILE *file;
+    char filename[256];
+    long fileSize;
+    size_t bytesRead;
 
     frame->type = PJMEDIA_FRAME_TYPE_VIDEO;
     frame->bit_info = 0;
     frame->timestamp = stream->ts;
     stream->ts.u64 += stream->ts_inc;
-    return spectrum_run(stream, frame->buf, frame->size);
+
+    const char baseName[] = "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.";
+    sprintf(filename, "%s%04d", baseName, filenamecounter);
+    filenamecounter++;
+    file = fopen(filename, "rb");
+        if (file == NULL) {
+        printf("Failed to open the file.\n");
+        return 1;
+    }
+
+    // Move the file pointer to the end of the file
+    fseek(file, 0, SEEK_END);
+
+    // Get the current position of the file pointer, which represents the file size
+    fileSize = ftell(file);
+    if (fileSize == -1) {
+        printf("Failed to determine the file size.\n");
+        fclose(file);
+        return 1;
+    }
+
+    // Print the file size
+    printf("File size: %ld bytes\n", fileSize);
+
+    if (fileSize > frame->size) {
+        printf("File size is larger than the buffer size.\n");
+        fclose(file);
+        return 1;
+    }
+
+    bytesRead = read_whole_file(filename, frame->buf, fileSize);
+    // bytesRead = fread(frame->buf, 1, fileSize, file);
+    if (bytesRead == 0) {
+        perror("fread");
+        printf("Failed to read the file.\n");
+        fclose(file);
+        return 1;
+    }
+    return PJ_SUCCESS;
+    // return spectrum_run(stream, frame->buf, frame->size);
 }
 
 /* API: Start stream. */
@@ -659,7 +740,7 @@ static pj_status_t verkada_stream_start(pjmedia_vid_dev_stream *strm)
 {
     struct verkada_stream *stream = (struct verkada_stream*)strm;
 
-    PJ_LOG(4, (THIS_FILE, "Starting cbar video stream"));
+    PJ_LOG(4, (THIS_FILE, "Starting verkada video stream"));
 
     if (stream->clock)
         return pjmedia_clock_start(stream->clock);
@@ -672,7 +753,7 @@ static pj_status_t verkada_stream_stop(pjmedia_vid_dev_stream *strm)
 {
     struct verkada_stream *stream = (struct verkada_stream*)strm;
 
-    PJ_LOG(4, (THIS_FILE, "Stopping cbar video stream"));
+    PJ_LOG(4, (THIS_FILE, "Stopping verkada video stream"));
 
     if (stream->clock)
         return pjmedia_clock_stop(stream->clock);
