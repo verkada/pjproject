@@ -3420,15 +3420,19 @@ PJ_DECL(pj_status_t) pjsua_transport_lis_start( pjsua_transport_id id,
  * Bit value used in pjsua_acc_config.reg_use_proxy field to indicate that
  * the global outbound proxy list should be added to the REGISTER request.
  */
-#define PJSUA_REG_USE_OUTBOUND_PROXY		1
-
+// #define PJSUA_REG_USE_OUTBOUND_PROXY		1
 
 /**
  * Bit value used in pjsua_acc_config.reg_use_proxy field to indicate that
  * the account proxy list should be added to the REGISTER request.
  */
-#define PJSUA_REG_USE_ACC_PROXY			2
-
+// #define PJSUA_REG_USE_ACC_PROXY			2
+// Verkada: Creating enum so that we get a respective entry in pjsua2.go
+enum pjsua_reg_use_acc_proxy_const_
+{
+    PJSUA_REG_USE_OUTBOUND_PROXY = 1,
+    PJSUA_REG_USE_ACC_PROXY = 2
+};
 
 /**
  * This enumeration specifies how we should offer call hold request to
