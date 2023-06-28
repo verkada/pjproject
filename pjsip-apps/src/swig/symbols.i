@@ -913,3 +913,9 @@ typedef enum pjsua_dtmf_method
   PJSUA_DTMF_METHOD_SIP_INFO
 } pjsua_dtmf_method;
 
+// Verkada: Creating enum so that we get a respective entry in pjsua2.go
+enum pjsua_reg_use_acc_proxy_const_
+{
+    PJSUA_REG_USE_OUTBOUND_PROXY = 1,
+    PJSUA_REG_USE_ACC_PROXY = 2
+};
