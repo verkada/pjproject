@@ -107,13 +107,17 @@ pj_status_t pjsua_vid_subsys_init(void)
 #endif
 
 #if PJMEDIA_HAS_VIDEO && PJMEDIA_HAS_FFMPEG_VID_CODEC
-    status = pjmedia_codec_ffmpeg_vid_init(NULL, &pjsua_var.cp.factory);
+    // status = pjmedia_codec_ffmpeg_vid_init(NULL, &pjsua_var.cp.factory);
+    // if (status != PJ_SUCCESS) {
+    //     pjsua_perror(THIS_FILE, "Error initializing ffmpeg library", status);
+    //     goto on_error;
+    // }
+#endif
+    status = pjmedia_codec_verkada_vid_init(NULL, &pjsua_var.cp.factory);
     if (status != PJ_SUCCESS) {
         pjsua_perror(THIS_FILE, "Error initializing ffmpeg library", status);
         goto on_error;
     }
-#endif
-
 #if PJMEDIA_HAS_VIDEO && PJMEDIA_HAS_VPX_CODEC
     status = pjmedia_codec_vpx_vid_init(NULL, &pjsua_var.cp.factory);
     if (status != PJ_SUCCESS) {

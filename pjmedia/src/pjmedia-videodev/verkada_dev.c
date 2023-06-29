@@ -673,7 +673,7 @@ static int read_whole_file(char *filename, pj_uint8_t *buffer, pj_size_t size) {
         totalRead += read;
     }
 
-    if (totalRead != sizeof(buffer))
+    if (totalRead != size)
         return -120;
     pj_file_close(fd);
     return totalRead;    
@@ -695,48 +695,49 @@ static pj_status_t verkada_stream_get_frame(pjmedia_vid_dev_stream *strm,
     frame->timestamp = stream->ts;
     stream->ts.u64 += stream->ts_inc;
 
-    const char baseName[] = "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.";
-    sprintf(filename, "%s%04d", baseName, filenamecounter);
-    filenamecounter++;
-    if (filenamecounter > 15000) {
-        filenamecounter = 0;
-    }
-    file = fopen(filename, "rb");
-        if (file == NULL) {
-        printf("Failed to open the file.\n");
-        return 1;
-    }
+    // const char baseName[] = "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.";
+    // sprintf(filename, "%s%04d", baseName, filenamecounter);
+    // filenamecounter++;
+    // if (filenamecounter > 15000) {
+    //     filenamecounter = 0;
+    // }
+    // file = fopen(filename, "rb");
+    //     if (file == NULL) {
+    //     printf("Failed to open the file.\n");
+    //     return 1;
+    // }
 
-    // Move the file pointer to the end of the file
-    fseek(file, 0, SEEK_END);
+    // // Move the file pointer to the end of the file
+    // fseek(file, 0, SEEK_END);
 
-    // Get the current position of the file pointer, which represents the file size
-    fileSize = ftell(file);
-    if (fileSize == -1) {
-        printf("Failed to determine the file size.\n");
-        fclose(file);
-        return 1;
-    }
+    // // Get the current position of the file pointer, which represents the file size
+    // fileSize = ftell(file);
+    // if (fileSize == -1) {
+    //     printf("Failed to determine the file size.\n");
+    //     fclose(file);
+    //     return 1;
+    // }
 
-    // Print the file size
-    printf("File size: %ld bytes\n", fileSize);
+    // // Print the file size
+    // // printf("File size: %ld bytes\n", fileSize);
 
-    if (fileSize > frame->size) {
-        printf("File size is larger than the buffer size.\n");
-        fclose(file);
-        return 1;
-    }
-
-    bytesRead = read_whole_file(filename, frame->buf, fileSize);
-    // bytesRead = fread(frame->buf, 1, fileSize, file);
-    if (bytesRead == 0) {
-        perror("fread");
-        printf("Failed to read the file.\n");
-        fclose(file);
-        return 1;
-    }
-    fclose(file);
-    frame->size = bytesRead;
+    // if (fileSize > frame->size) {
+    //     printf("File size is larger than the buffer size.\n");
+    //     fclose(file);
+    //     return 1;
+    // }
+    // bytesRead = 100;
+    // //memset(frame->buf, 0, frame->size);
+    // bytesRead = read_whole_file(filename, frame->buf, fileSize);
+    // // bytesRead = fread(frame->buf, 1, fileSize, file);
+    // if (bytesRead == 0) {
+    //     perror("fread");
+    //     printf("Failed to read the file.\n");
+    //     fclose(file);
+    //     return 1;
+    // }
+    // fclose(file);
+    // frame->size = bytesRead;
     return PJ_SUCCESS;
     // return spectrum_run(stream, frame->buf, frame->size);
 }

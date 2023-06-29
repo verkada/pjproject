@@ -1136,6 +1136,12 @@ static pj_status_t convert_frame(pjmedia_vid_port *vp,
         dst_frame->bit_info  = src_frame->bit_info;
         status = pjmedia_converter_convert(vp->conv.conv,
                                            src_frame, dst_frame);
+    } else {
+        dst_frame->buf  = src_frame->buf;
+        dst_frame->size = src_frame->size;
+        dst_frame->type      = src_frame->type;
+        dst_frame->timestamp = src_frame->timestamp;
+        dst_frame->bit_info  = src_frame->bit_info;
     }
     
     return status;
