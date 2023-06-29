@@ -24,15 +24,15 @@
 
 
 #if defined(PJMEDIA_HAS_VIDEO) && PJMEDIA_HAS_VIDEO != 0 && \
-    defined(PJMEDIA_VIDEO_DEV_HAS_VERKADA_SRC) && \
-    PJMEDIA_VIDEO_DEV_HAS_VERKADA_SRC != 0
+    defined(PJMEDIA_VERKADA_INTERCOM) && \
+    PJMEDIA_VERKADA_INTERCOM != 0
     
 
 #define THIS_FILE               "verkada_dev.c"
 #define DEFAULT_CLOCK_RATE      90000
-#define DEFAULT_WIDTH           720 //640
+#define DEFAULT_WIDTH           720 //640 (800x600)-> 24 fps
 #define DEFAULT_HEIGHT          480 //480
-#define DEFAULT_FPS             25
+#define DEFAULT_FPS             24
 
 
 /* verkada_ device info */
@@ -67,20 +67,8 @@ struct verkada_fmt_info {
 /* Colorbar video source supports */
 static struct verkada_fmt_info verkada_fmts[] =
 {
-    /* Packed formats */
-    // { PJMEDIA_FORMAT_YUY2,      {0, 1, 3}, {2, 4, 4} },
-    // { PJMEDIA_FORMAT_UYVY,      {1, 0, 2}, {2, 4, 4} },
-    // { PJMEDIA_FORMAT_YVYU,      {0, 3, 1}, {2, 4, 4} },
-    // { PJMEDIA_FORMAT_RGBA,      {0, 1, 2}, {4, 4, 4} },
-    // { PJMEDIA_FORMAT_RGB24,     {0, 1, 2}, {3, 3, 3} },
-    // { PJMEDIA_FORMAT_BGRA,      {2, 1, 0}, {4, 4, 4} },
-
     /* Planar formats */
-    { PJMEDIA_FORMAT_H264 },
-    // { PJMEDIA_FORMAT_I420 },
-    // { PJMEDIA_FORMAT_I422 },
-    // { PJMEDIA_FORMAT_I420JPEG },
-    // { PJMEDIA_FORMAT_I422JPEG },
+    { PJMEDIA_FORMAT_I420 },
 };
 
 /* Video stream. */
@@ -216,25 +204,6 @@ static pj_status_t verkada_factory_init(pjmedia_vid_dev_factory *f)
                                   DEFAULT_WIDTH, DEFAULT_HEIGHT,
                                   DEFAULT_FPS, 1);
     }
-
-    // /* Active capturer */
-    // ddi = &cf->dev_info[1];
-    // pj_bzero(ddi, sizeof(*ddi));
-    // pj_ansi_strxcpy(ddi->info.name, "Verkada-active",
-    //                 sizeof(ddi->info.name));
-    // pj_ansi_strxcpy(ddi->info.driver, "Verkada", 
-    //                 sizeof(ddi->info.driver));
-    // ddi->info.dir = PJMEDIA_DIR_CAPTURE;
-    // ddi->info.has_callback = PJ_TRUE;
-
-    // ddi->info.caps = PJMEDIA_VID_DEV_CAP_FORMAT;
-    // ddi->info.fmt_cnt = PJ_ARRAY_SIZE(verkada_fmts);
-    // for (i = 0; i < ddi->info.fmt_cnt; i++) {
-    //     pjmedia_format *fmt = &ddi->info.fmt[i];
-    //     pjmedia_format_init_video(fmt, verkada_fmts[i].fmt_id,
-    //                               DEFAULT_WIDTH, DEFAULT_HEIGHT,
-    //                               DEFAULT_FPS, 1);
-    // }
 
     PJ_LOG(4, (THIS_FILE, "Colorbar video src initialized with %d device(s):",
                cf->dev_count));
@@ -397,25 +366,6 @@ static void fill_first_line(pj_uint8_t *first_lines[],
     }
 }
 
-
-static void clock_cb(const pj_timestamp *ts, void *user_data)
-{
-    struct verkada_stream *stream = (struct verkada_stream*)user_data;
-    pjmedia_frame f;
-    pj_status_t status;
-
-    PJ_UNUSED_ARG(ts);
-
-    pj_bzero(&f, sizeof(f));
-    f.buf = stream->clock_buf;
-    f.size = stream->vafp.framebytes;
-    status = verkada_stream_get_frame(&stream->base, &f);
-    if (status == PJ_SUCCESS) {
-        (*stream->vid_cb.capture_cb)(&stream->base, stream->user_data, &f);
-    }
-}
-
-
 /* API: create stream */
 static pj_status_t verkada_factory_create_stream(
                                         pjmedia_vid_dev_factory *f,
@@ -472,36 +422,6 @@ static pj_status_t verkada_factory_create_stream(
 
     fill_first_line(strm->first_line, strm->cbfi, vfi, &strm->vafp);
 
-    /* Apply the remaining settings */
-/*    if (param->flags & PJMEDIA_VID_DEV_CAP_INPUT_SCALE) {
-        verkada_stream_set_cap(&strm->base,
-                            PJMEDIA_VID_DEV_CAP_INPUT_SCALE,
-                            &param->fmt);
-    }
-*/
-
-    /* Active role? */
-    // if (param->cap_id == 1 && cb && cb->capture_cb) {
-    //     pjmedia_clock_param clock_param;
-    //     pj_status_t status;
-
-    //     /* Allocate buffer */
-    //     strm->clock_buf = pj_pool_alloc(pool, strm->vafp.framebytes);
-
-    //     /* Create clock */
-    //     pj_bzero(&clock_param, sizeof(clock_param));
-    //     clock_param.usec_interval = PJMEDIA_PTIME(&vfd->fps);
-    //     clock_param.clock_rate = param->clock_rate;
-    //     status = pjmedia_clock_create2(pool, &clock_param,
-    //                                    PJMEDIA_CLOCK_NO_HIGHEST_PRIO,
-    //                                    &clock_cb,
-    //                                    strm, &strm->clock);
-    //     if (status != PJ_SUCCESS) {
-    //         pj_pool_release(pool);
-    //         return status;
-    //     }
-    // }
-
     /* Done */
     strm->base.op = &stream_op;
     *p_vid_strm = &strm->base;
@@ -519,12 +439,6 @@ static pj_status_t verkada_stream_get_param(pjmedia_vid_dev_stream *s,
 
     pj_memcpy(pi, &strm->param, sizeof(*pi));
 
-/*    if (verkada_stream_get_cap(s, PJMEDIA_VID_DEV_CAP_INPUT_SCALE,
-                            &pi->fmt.info_size) == PJ_SUCCESS)
-    {
-        pi->flags |= PJMEDIA_VID_DEV_CAP_INPUT_SCALE;
-    }
-*/
     return PJ_SUCCESS;
 }
 
@@ -539,13 +453,14 @@ static pj_status_t verkada_stream_get_cap(pjmedia_vid_dev_stream *s,
 
     PJ_ASSERT_RETURN(s && pval, PJ_EINVAL);
 
-    if (cap==PJMEDIA_VID_DEV_CAP_INPUT_SCALE)
-    {
-        return PJMEDIA_EVID_INVCAP;
-//      return PJ_SUCCESS;
-    } else {
-        return PJMEDIA_EVID_INVCAP;
-    }
+// TODO: this feels bit hacky,which capability it supports then ?
+//     if (cap==PJMEDIA_VID_DEV_CAP_INPUT_SCALE)
+//     {
+//         return PJMEDIA_EVID_INVCAP;
+// //      return PJ_SUCCESS;
+//     } else {
+//         return PJMEDIA_EVID_INVCAP;
+//     }
 }
 
 /* API: set capability */
@@ -559,6 +474,7 @@ static pj_status_t verkada_stream_set_cap(pjmedia_vid_dev_stream *s,
 
     PJ_ASSERT_RETURN(s && pval, PJ_EINVAL);
 
+// TODO: similar here which capability it supports then ?
     // if (cap==PJMEDIA_VID_DEV_CAP_INPUT_SCALE)
     // {
     //     return PJ_SUCCESS;
@@ -641,45 +557,6 @@ static pj_status_t spectrum_run(struct verkada_stream *d, pj_uint8_t *p,
     return PJ_SUCCESS;
 }
 
-#include <pj/file_io.h>
-
-static int read_whole_file(char *filename, pj_uint8_t *buffer, pj_size_t size) {
-    pj_oshandle_t fd = 0;
-    pj_status_t status;
-    /*
-     * Re-open the file and read data.
-     */
-    status = pj_file_open(NULL, filename, PJ_O_RDONLY, &fd);
-    if (status != PJ_SUCCESS) {
-        printf("...file_open() error", status);
-        return -100;
-    }
-    pj_ssize_t totalRead;
-    totalRead = 0;
-    while (totalRead < size) {
-        pj_ssize_t read;
-        read = 1;
-        status = pj_file_read(fd, &buffer[totalRead], &read);
-        if (status != PJ_SUCCESS) {
-            PJ_LOG(3,("", "...error reading file after %ld bytes "
-                          "(error follows)", totalRead));
-            printf("...error", status);
-            return -110;
-        }
-        if (read == 0) {
-            // EOF
-            break;
-        }
-        totalRead += read;
-    }
-
-    if (totalRead != size)
-        return -120;
-    pj_file_close(fd);
-    return totalRead;    
-}
-
-static filenamecounter = 0;
 /* API: Get frame from stream */
 static pj_status_t verkada_stream_get_frame(pjmedia_vid_dev_stream *strm,
                                          pjmedia_frame *frame)
@@ -695,49 +572,6 @@ static pj_status_t verkada_stream_get_frame(pjmedia_vid_dev_stream *strm,
     frame->timestamp = stream->ts;
     stream->ts.u64 += stream->ts_inc;
 
-    // const char baseName[] = "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.";
-    // sprintf(filename, "%s%04d", baseName, filenamecounter);
-    // filenamecounter++;
-    // if (filenamecounter > 15000) {
-    //     filenamecounter = 0;
-    // }
-    // file = fopen(filename, "rb");
-    //     if (file == NULL) {
-    //     printf("Failed to open the file.\n");
-    //     return 1;
-    // }
-
-    // // Move the file pointer to the end of the file
-    // fseek(file, 0, SEEK_END);
-
-    // // Get the current position of the file pointer, which represents the file size
-    // fileSize = ftell(file);
-    // if (fileSize == -1) {
-    //     printf("Failed to determine the file size.\n");
-    //     fclose(file);
-    //     return 1;
-    // }
-
-    // // Print the file size
-    // // printf("File size: %ld bytes\n", fileSize);
-
-    // if (fileSize > frame->size) {
-    //     printf("File size is larger than the buffer size.\n");
-    //     fclose(file);
-    //     return 1;
-    // }
-    // bytesRead = 100;
-    // //memset(frame->buf, 0, frame->size);
-    // bytesRead = read_whole_file(filename, frame->buf, fileSize);
-    // // bytesRead = fread(frame->buf, 1, fileSize, file);
-    // if (bytesRead == 0) {
-    //     perror("fread");
-    //     printf("Failed to read the file.\n");
-    //     fclose(file);
-    //     return 1;
-    // }
-    // fclose(file);
-    // frame->size = bytesRead;
     return PJ_SUCCESS;
     // return spectrum_run(stream, frame->buf, frame->size);
 }

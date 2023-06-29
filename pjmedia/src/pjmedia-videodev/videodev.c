@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,62 +13,65 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 #include <pjmedia-videodev/videodev_imp.h>
 #include <pj/assert.h>
 
+
 #if defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0)
 
-#define THIS_FILE "videodev.c"
+
+#define THIS_FILE   "videodev.c"
+
 
 /* extern functions to create factories */
 #if PJMEDIA_VIDEO_DEV_HAS_DSHOW
-pjmedia_vid_dev_factory *pjmedia_dshow_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_dshow_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_CBAR_SRC
-pjmedia_vid_dev_factory *pjmedia_cbar_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_cbar_factory(pj_pool_factory *pf);
 #endif
 
-#if PJMEDIA_VIDEO_DEV_HAS_VERKADA_SRC
+#if PJMEDIA_VERKADA_INTERCOM
 pjmedia_vid_dev_factory *pjmedia_verkada_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_SDL
-pjmedia_vid_dev_factory *pjmedia_sdl_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_sdl_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_FFMPEG
-pjmedia_vid_dev_factory *pjmedia_ffmpeg_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_ffmpeg_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_V4L2
-pjmedia_vid_dev_factory *pjmedia_v4l2_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_v4l2_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_QT
-pjmedia_vid_dev_factory *pjmedia_qt_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_qt_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_DARWIN
-pjmedia_vid_dev_factory *pjmedia_darwin_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_darwin_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_OPENGL
-pjmedia_vid_dev_factory *pjmedia_opengl_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_opengl_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_VIDEO_DEV_HAS_ANDROID
-pjmedia_vid_dev_factory *pjmedia_and_factory(pj_pool_factory *pf);
+pjmedia_vid_dev_factory* pjmedia_and_factory(pj_pool_factory *pf);
 #endif
 
-#define MAX_DRIVERS PJMEDIA_VID_DEV_MAX_DRIVERS
-#define MAX_DEVS PJMEDIA_VID_DEV_MAX_DEVS
+#define MAX_DRIVERS     PJMEDIA_VID_DEV_MAX_DRIVERS
+#define MAX_DEVS        PJMEDIA_VID_DEV_MAX_DEVS
+
 
 /* API: Initialize the video device subsystem. */
-PJ_DEF(pj_status_t)
-pjmedia_vid_dev_subsys_init(pj_pool_factory *pf)
+PJ_DEF(pj_status_t) pjmedia_vid_dev_subsys_init(pj_pool_factory *pf)
 {
     unsigned i;
     pj_status_t status = PJ_SUCCESS;
@@ -77,14 +80,13 @@ pjmedia_vid_dev_subsys_init(pj_pool_factory *pf)
     /* Allow init() to be called multiple times as long as there is matching
      * number of shutdown().
      */
-    if (vid_subsys->init_count++ != 0)
-    {
+    if (vid_subsys->init_count++ != 0) {
         return PJ_SUCCESS;
     }
 
     /* Register error subsystem */
-    pj_register_strerror(PJMEDIA_VIDEODEV_ERRNO_START,
-                         PJ_ERRNO_SPACE_SIZE,
+    pj_register_strerror(PJMEDIA_VIDEODEV_ERRNO_START, 
+                         PJ_ERRNO_SPACE_SIZE, 
                          &pjmedia_videodev_strerror);
 
     /* Init */
@@ -126,11 +128,9 @@ pjmedia_vid_dev_subsys_init(pj_pool_factory *pf)
     vid_subsys->drv[vid_subsys->drv_cnt++].create = &pjmedia_verkada_factory;
 
     /* Initialize each factory and build the device ID list */
-    for (i = 0; i < vid_subsys->drv_cnt; ++i)
-    {
+    for (i=0; i<vid_subsys->drv_cnt; ++i) {
         status = pjmedia_vid_driver_init(i, PJ_FALSE);
-        if (status != PJ_SUCCESS)
-        {
+        if (status != PJ_SUCCESS) {
             pjmedia_vid_driver_deinit(i);
             continue;
         }
@@ -154,12 +154,10 @@ pjmedia_vid_register_factory(pjmedia_vid_dev_factory_create_func_ptr adf,
     vid_subsys->drv[vid_subsys->drv_cnt].create = adf;
     vid_subsys->drv[vid_subsys->drv_cnt].f = factory;
 
-    if (factory)
-    {
+    if (factory) {
         /* Call factory->init() */
         status = factory->op->init(factory);
-        if (status != PJ_SUCCESS)
-        {
+        if (status != PJ_SUCCESS) {
             factory->op->destroy(factory);
             return status;
         }
@@ -167,12 +165,9 @@ pjmedia_vid_register_factory(pjmedia_vid_dev_factory_create_func_ptr adf,
     }
 
     status = pjmedia_vid_driver_init(vid_subsys->drv_cnt, refresh);
-    if (status == PJ_SUCCESS)
-    {
+    if (status == PJ_SUCCESS) {
         vid_subsys->drv_cnt++;
-    }
-    else
-    {
+    } else {
         pjmedia_vid_driver_deinit(vid_subsys->drv_cnt);
     }
 
@@ -190,12 +185,10 @@ pjmedia_vid_unregister_factory(pjmedia_vid_dev_factory_create_func_ptr adf,
     if (vid_subsys->init_count == 0)
         return PJMEDIA_EVID_INIT;
 
-    for (i = 0; i < vid_subsys->drv_cnt; ++i)
-    {
+    for (i=0; i<vid_subsys->drv_cnt; ++i) {
         pjmedia_vid_driver *drv = &vid_subsys->drv[i];
 
-        if ((factory && drv->f == factory) || (adf && drv->create == adf))
-        {
+        if ((factory && drv->f==factory) || (adf && drv->create == adf)) {
             for (j = drv->start_idx; j < drv->start_idx + drv->dev_cnt; j++)
             {
                 vid_subsys->dev_list[j] = (pj_uint32_t)PJMEDIA_VID_INVALID_DEV;
@@ -211,16 +204,14 @@ pjmedia_vid_unregister_factory(pjmedia_vid_dev_factory_create_func_ptr adf,
 }
 
 /* API: get the pool factory registered to the video device subsystem. */
-PJ_DEF(pj_pool_factory *)
-pjmedia_vid_dev_subsys_get_pool_factory(void)
+PJ_DEF(pj_pool_factory*) pjmedia_vid_dev_subsys_get_pool_factory(void)
 {
     pjmedia_vid_subsys *vid_subsys = pjmedia_get_vid_subsys();
     return vid_subsys->pf;
 }
 
 /* API: Shutdown the video device subsystem. */
-PJ_DEF(pj_status_t)
-pjmedia_vid_dev_subsys_shutdown(void)
+PJ_DEF(pj_status_t) pjmedia_vid_dev_subsys_shutdown(void)
 {
     unsigned i;
     pjmedia_vid_subsys *vid_subsys = pjmedia_get_vid_subsys();
@@ -228,16 +219,13 @@ pjmedia_vid_dev_subsys_shutdown(void)
     /* Allow shutdown() to be called multiple times as long as there is
      * matching number of init().
      */
-    if (vid_subsys->init_count == 0)
-    {
+    if (vid_subsys->init_count == 0) {
         return PJ_SUCCESS;
     }
     --vid_subsys->init_count;
 
-    if (vid_subsys->init_count == 0)
-    {
-        for (i = 0; i < vid_subsys->drv_cnt; ++i)
-        {
+    if (vid_subsys->init_count == 0) {
+        for (i=0; i<vid_subsys->drv_cnt; ++i) {
             pjmedia_vid_driver_deinit(i);
         }
 
@@ -245,5 +233,6 @@ pjmedia_vid_dev_subsys_shutdown(void)
     }
     return PJ_SUCCESS;
 }
+
 
 #endif /* PJMEDIA_HAS_VIDEO */

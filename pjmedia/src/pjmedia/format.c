@@ -439,51 +439,52 @@ PJ_DEF(pj_status_t) pjmedia_video_format_fill_black(const pjmedia_format *fmt,
                                                     void *buf,
                                                     pj_size_t buf_size)
 {
-    // const pjmedia_video_format_info *vfi;
-    // pjmedia_video_apply_fmt_param vafp;
-    // pjmedia_format_id fmt_id;
-    // pj_status_t status;
+#ifndef PJMEDIA_VERKADA_INTERCOM
+    const pjmedia_video_format_info *vfi;
+    pjmedia_video_apply_fmt_param vafp;
+    pjmedia_format_id fmt_id;
+    pj_status_t status;
 
-    // PJ_ASSERT_RETURN(fmt && buf && buf_size, PJ_EINVAL);
+    PJ_ASSERT_RETURN(fmt && buf && buf_size, PJ_EINVAL);
 
-    // fmt_id = fmt->id;
-    // vfi = pjmedia_get_video_format_info(NULL, fmt_id);
-    // pj_bzero(&vafp, sizeof(vafp));
-    // vafp.size = fmt->det.vid.size;
-    // status = (*vfi->apply_fmt)(vfi, &vafp);
-    // if (status != PJ_SUCCESS)
-    //     return status;
+    fmt_id = fmt->id;
+    vfi = pjmedia_get_video_format_info(NULL, fmt_id);
+    pj_bzero(&vafp, sizeof(vafp));
+    vafp.size = fmt->det.vid.size;
+    status = (*vfi->apply_fmt)(vfi, &vafp);
+    if (status != PJ_SUCCESS)
+        return status;
 
-    // if (buf_size < vafp.framebytes)
-    //     return PJ_ETOOSMALL;
+    if (buf_size < vafp.framebytes)
+        return PJ_ETOOSMALL;
 
-    // if (vfi->color_model == PJMEDIA_COLOR_MODEL_RGB) {
-    //     pj_memset(buf, 0, vafp.framebytes);
-    // } else if (fmt_id == PJMEDIA_FORMAT_I420 ||
-    //            fmt_id == PJMEDIA_FORMAT_YV12 ||
-    //            fmt_id == PJMEDIA_FORMAT_I422)
-    // {
-    //     pj_memset(buf, 16, vafp.plane_bytes[0]);
-    //     pj_memset((pj_uint8_t*)buf + vafp.plane_bytes[0], 0x80,
-    //               vafp.plane_bytes[1] * 2);
-    // } else if (fmt_id == PJMEDIA_FORMAT_NV12 ||
-    //            fmt_id == PJMEDIA_FORMAT_NV21)
-    // {
-    //     pj_memset(buf, 16, vafp.plane_bytes[0]);
-    //     pj_memset((pj_uint8_t*)buf + vafp.plane_bytes[0], 0x80,
-    //               vafp.plane_bytes[1]);
-    // } else if (fmt_id == PJMEDIA_FORMAT_YUY2) {
-    //     pj_uint8_t *ptr = (pj_uint8_t *)buf;
-    //     pj_size_t i;
+    if (vfi->color_model == PJMEDIA_COLOR_MODEL_RGB) {
+        pj_memset(buf, 0, vafp.framebytes);
+    } else if (fmt_id == PJMEDIA_FORMAT_I420 ||
+               fmt_id == PJMEDIA_FORMAT_YV12 ||
+               fmt_id == PJMEDIA_FORMAT_I422)
+    {
+        pj_memset(buf, 16, vafp.plane_bytes[0]);
+        pj_memset((pj_uint8_t*)buf + vafp.plane_bytes[0], 0x80,
+                  vafp.plane_bytes[1] * 2);
+    } else if (fmt_id == PJMEDIA_FORMAT_NV12 ||
+               fmt_id == PJMEDIA_FORMAT_NV21)
+    {
+        pj_memset(buf, 16, vafp.plane_bytes[0]);
+        pj_memset((pj_uint8_t*)buf + vafp.plane_bytes[0], 0x80,
+                  vafp.plane_bytes[1]);
+    } else if (fmt_id == PJMEDIA_FORMAT_YUY2) {
+        pj_uint8_t *ptr = (pj_uint8_t *)buf;
+        pj_size_t i;
 
-    //     for (i = vafp.framebytes / 2; i > 0; i--) {
-    //         *(ptr++) = 0x10; *(ptr++) = 0x80;
-    //     }
-    // } else {
-    //     /* Don't know how to fill it black (for now) */
-    //     return PJ_ENOTSUP;
-    // }
-
+        for (i = vafp.framebytes / 2; i > 0; i--) {
+            *(ptr++) = 0x10; *(ptr++) = 0x80;
+        }
+    } else {
+        /* Don't know how to fill it black (for now) */
+        return PJ_ENOTSUP;
+    }
+#endif
     return PJ_SUCCESS;
 }
 

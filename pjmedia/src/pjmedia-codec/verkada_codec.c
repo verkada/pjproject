@@ -385,7 +385,7 @@ static void init_codec(AVCodec *c, pj_bool_t is_encoder,
         pjmedia_format_id raw_fmt[PJMEDIA_VID_CODEC_MAX_DEC_FMT_CNT]= {PJMEDIA_FORMAT_I420, PJMEDIA_FORMAT_NV12, PJMEDIA_FORMAT_I422};
         unsigned raw_fmt_cnt = 3;
         unsigned raw_fmt_cnt_should_be = 0;
-        const enum AVPixelFormat *p = c->pix_fmts;
+        // const enum AVPixelFormat *p = c->pix_fmts;
 
         // for(;(p && *p != -1) &&
         //      (raw_fmt_cnt < PJMEDIA_VID_CODEC_MAX_DEC_FMT_CNT);
@@ -1137,6 +1137,7 @@ static int read_whole_file(char *filename, pj_uint8_t *buffer, pj_size_t size) {
 }
 
 static filenamecounter = 0;
+static struct timeval prev_tv;
 
 static fill_buffer(pj_uint8_t *buffer, pj_size_t size) {
     FILE *file;
@@ -1147,12 +1148,28 @@ static fill_buffer(pj_uint8_t *buffer, pj_size_t size) {
     //const char baseName[] = "/mnt/internal/mmcblk0p21/videos/input.h264.";
     sprintf(filename, "%s%04d", baseName, filenamecounter);
     filenamecounter++;
-    if (filenamecounter > 15000) {
+    if (filenamecounter > 1800) {
         filenamecounter = 0;
     }
+    // add sleep of 40ms
+    usleep(400000);
+    // print the current timestamp save it, compare it with the previous one
+    // and print the difference
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    printf(" 4000 timestamp: %ld\n", tv.tv_sec * 1000000 + tv.tv_usec);
+    // now calculate the difference with prev_tv
+    if (prev_tv.tv_sec != 0) {
+        long diff = (tv.tv_sec * 1000000 + tv.tv_usec) - (prev_tv.tv_sec * 1000000 + prev_tv.tv_usec);
+        printf("diff: %ld\n", diff);
+    }
+    prev_tv = tv;
+    printf("filename: %s\n", filename);
     file = fopen(filename, "rb");
-        if (file == NULL) {
+    if (file == NULL) {
         printf("Failed to open the file.\n");
+        // print the error message
+        perror("fopen");
         return 1;
     }
 

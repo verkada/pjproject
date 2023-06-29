@@ -843,54 +843,55 @@ static pj_status_t create_vid_win(pjsua_vid_win_type type,
     }
 
     /* Create renderer video port, only if it's not a native preview */
-    // if (!w->is_native) {
-    //     status = pjmedia_vid_dev_default_param(w->pool, rend_id,
-    //                                            &vp_param.vidparam);
-    //     if (status != PJ_SUCCESS)
-    //         goto on_error;
+#ifndef PJMEDIA_VERKADA_INTERCOM
+    if (!w->is_native) {
+        status = pjmedia_vid_dev_default_param(w->pool, rend_id,
+                                               &vp_param.vidparam);
+        if (status != PJ_SUCCESS)
+            goto on_error;
 
-    //     vp_param.active = PJ_FALSE;
-    //     vp_param.vidparam.dir = PJMEDIA_DIR_RENDER;
-    //     vp_param.vidparam.fmt = *fmt;
-    //     vp_param.vidparam.disp_size = fmt->det.vid.size;
-    //     vp_param.vidparam.flags |= PJMEDIA_VID_DEV_CAP_OUTPUT_HIDE;
-    //     vp_param.vidparam.window_hide = !show;
-    //     vp_param.vidparam.flags |= PJMEDIA_VID_DEV_CAP_OUTPUT_WINDOW_FLAGS;
-    //     vp_param.vidparam.window_flags = wnd_flags;
-    //     if (wnd) {
-    //         vp_param.vidparam.flags |= PJMEDIA_VID_DEV_CAP_OUTPUT_WINDOW;
-    //         vp_param.vidparam.window = *wnd;
-    //     }
+        vp_param.active = PJ_FALSE;
+        vp_param.vidparam.dir = PJMEDIA_DIR_RENDER;
+        vp_param.vidparam.fmt = *fmt;
+        vp_param.vidparam.disp_size = fmt->det.vid.size;
+        vp_param.vidparam.flags |= PJMEDIA_VID_DEV_CAP_OUTPUT_HIDE;
+        vp_param.vidparam.window_hide = !show;
+        vp_param.vidparam.flags |= PJMEDIA_VID_DEV_CAP_OUTPUT_WINDOW_FLAGS;
+        vp_param.vidparam.window_flags = wnd_flags;
+        if (wnd) {
+            vp_param.vidparam.flags |= PJMEDIA_VID_DEV_CAP_OUTPUT_WINDOW;
+            vp_param.vidparam.window = *wnd;
+        }
 
-    //     status = pjmedia_vid_port_create(w->pool, &vp_param, &w->vp_rend);
-    //     if (status != PJ_SUCCESS)
-    //         goto on_error;
+        status = pjmedia_vid_port_create(w->pool, &vp_param, &w->vp_rend);
+        if (status != PJ_SUCCESS)
+            goto on_error;
 
-    //     /* Register renderer to the video conf */
-    //     status = pjsua_vid_conf_add_port(
-    //                             w->pool,
-    //                             pjmedia_vid_port_get_passive_port(w->vp_rend),
-    //                             NULL, &w->rend_slot);
-    //     if (status != PJ_SUCCESS)
-    //         goto on_error;
+        /* Register renderer to the video conf */
+        status = pjsua_vid_conf_add_port(
+                                w->pool,
+                                pjmedia_vid_port_get_passive_port(w->vp_rend),
+                                NULL, &w->rend_slot);
+        if (status != PJ_SUCCESS)
+            goto on_error;
 
-    //     /* For preview window, connect capturer & renderer (via conf) */
-    //     if (w->type == PJSUA_WND_TYPE_PREVIEW && show) {
-    //         status = pjsua_vid_conf_connect(w->cap_slot, w->rend_slot, NULL);
-    //         if (status != PJ_SUCCESS)
-    //             goto on_error;
-    //     }
+        /* For preview window, connect capturer & renderer (via conf) */
+        if (w->type == PJSUA_WND_TYPE_PREVIEW && show) {
+            status = pjsua_vid_conf_connect(w->cap_slot, w->rend_slot, NULL);
+            if (status != PJ_SUCCESS)
+                goto on_error;
+        }
 
-    //     PJ_LOG(4,(THIS_FILE,
-    //               "%s window id %d created for cap_dev=%d rend_dev=%d",
-    //               pjsua_vid_win_type_name(type), wid, cap_id, rend_id));
-    // } else {
-    //     PJ_LOG(4,(THIS_FILE,
-    //               "Preview window id %d created for cap_dev %d, "
-    //               "using built-in preview!",
-    //               wid, cap_id));
-    // }
-
+        PJ_LOG(4,(THIS_FILE,
+                  "%s window id %d created for cap_dev=%d rend_dev=%d",
+                  pjsua_vid_win_type_name(type), wid, cap_id, rend_id));
+    } else {
+        PJ_LOG(4,(THIS_FILE,
+                  "Preview window id %d created for cap_dev %d, "
+                  "using built-in preview!",
+                  wid, cap_id));
+    }
+#endif
 
     /* Done */
     *id = wid;
