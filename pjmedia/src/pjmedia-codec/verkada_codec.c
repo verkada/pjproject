@@ -1136,23 +1136,75 @@ static int read_whole_file(char *filename, pj_uint8_t *buffer, pj_size_t size) {
     return totalRead;    
 }
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int connect_to_server() {
+    int sockfd;
+    struct sockaddr_in serv_addr;
+
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("ERROR opening socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Initialize socket structure
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(20001);
+    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    // Connect to the server
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+        perror("ERROR connecting");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+
+static int fill_buffer_from_socket(int sockfd, unsigned char *buffer, size_t size) {
+    ssize_t n;
+
+    memset(buffer, 0, size);  // Clear the buffer
+
+    // Read data from the server into the buffer
+    n = read(sockfd, buffer, size - 1);
+    if (n < 0) {
+        perror("ERROR reading from socket");
+        // exit(EXIT_FAILURE);
+    }
+
+    printf("%s\n", buffer);
+    return n;
+}
+
 static filenamecounter = 0;
 static struct timeval prev_tv;
+static int socketfd = 0;
+char baseName[256];
 
 static fill_buffer(pj_uint8_t *buffer, pj_size_t size) {
     FILE *file;
     char filename[256];
     long fileSize;
     size_t bytesRead;
-    const char baseName[] = "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.";
-    //const char baseName[] = "/mnt/internal/mmcblk0p21/videos/input.h264.";
+
     sprintf(filename, "%s%04d", baseName, filenamecounter);
     filenamecounter++;
     if (filenamecounter > 1800) {
         filenamecounter = 0;
     }
     // add sleep of 40ms
-    usleep(400000);
+    usleep(40000);
     // print the current timestamp save it, compare it with the previous one
     // and print the difference
     struct timeval tv;
@@ -1207,6 +1259,13 @@ static fill_buffer(pj_uint8_t *buffer, pj_size_t size) {
     // frame->size = bytesRead;
 }
 
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 1024
+
+static int datasource = 0;
+
 static pj_status_t ffmpeg_codec_encode_begin(pjmedia_vid_codec *codec,
                                              const pjmedia_vid_encode_opt *opt,
                                              const pjmedia_frame *input,
@@ -1235,9 +1294,44 @@ static pj_status_t ffmpeg_codec_encode_begin(pjmedia_vid_codec *codec,
         // ff->enc_buf_is_keyframe = (whole_frm.bit_info & 
         //                            PJMEDIA_VID_FRM_KEYFRAME);
         // ff->enc_frame_len = (unsigned)whole_frm.size;
+
+        if (datasource == 0) {
+
+            char line[MAX_LINE_LENGTH];
+            FILE* file = fopen("/tmp/video_source", "r");
+
+            if(file == NULL) {
+                printf("Error opening file.\n");
+                return -1;
+            }
+
+            fgets(line, sizeof(line), file);
+            fclose(file);
+            line[strcspn(line, "\n")] = 0;
+            datasource = 1;
+            if(strcmp(line, "emmc") == 0) {
+                printf("Matched: emmc\n");
+                datasource = 1;
+                strcpy(baseName, "/mnt/data/videos/input.h264.");
+            }
+            else if(strcmp(line, "mac") == 0) {
+                printf("Matched: mac\n");
+                strcpy(baseName, "/Users/darshan.patel/ws/exp/q2/pjproject/videos/input.h264.");
+                 datasource = 1;
+            }
+            else if(strcmp(line, "socket") == 0) {
+                printf("Matched: socket\n");
+                datasource = 2;
+                socketfd = connect_to_server();
+            }
+        }
         ff->enc_processed = 0;
 
-        ff->enc_frame_len = fill_buffer(ff->enc_buf, ff->enc_buf_size);
+        if (datasource == 1) {
+            ff->enc_frame_len = fill_buffer(ff->enc_buf, ff->enc_buf_size);
+        } else {
+            ff->enc_frame_len = fill_buffer_from_socket(socketfd, ff->enc_buf, ff->enc_buf_size);
+        }
         status = ffmpeg_codec_encode_more(codec, out_size, output, has_more);
     // }
 
