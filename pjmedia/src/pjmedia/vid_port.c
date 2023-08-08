@@ -818,6 +818,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_port_start(pjmedia_vid_port *vp)
 
     PJ_ASSERT_RETURN(vp, PJ_EINVAL);
 
+#ifndef PJMEDIA_VERKADA_INTERCOM
     /* Initialize buffer with black color */
     status = pjmedia_video_format_fill_black(&vp->conv.conv_param.src,
                                              vp->frm_buf->buf,
@@ -826,7 +827,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_port_start(pjmedia_vid_port *vp)
         PJ_PERROR(4,(THIS_FILE, status,
                      "Warning: failed to init buffer with black"));
     }
-
+#endif
     status = pjmedia_vid_dev_stream_start(vp->strm);
     if (status != PJ_SUCCESS)
         goto on_error;
