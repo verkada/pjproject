@@ -762,6 +762,10 @@ pjmedia_endpt_create_video_sdp(pjmedia_endpt *endpt,
 
     /* Create and init basic SDP media */
     pjmedia_endpt_create_sdp_param_default(&param);
+    // Verkada: want to explicitly set the direction
+    // so that SIP framework doesn't start pulling video frames
+    // from the caller phone
+    param.dir = PJMEDIA_DIR_ENCODING;
     m = PJ_POOL_ZALLOC_T(pool, pjmedia_sdp_media);
     status = init_sdp_media(m, pool, &STR_VIDEO, si, options? options->dir:
                             param.dir);

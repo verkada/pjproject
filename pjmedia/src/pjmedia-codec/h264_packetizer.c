@@ -165,6 +165,22 @@ PJ_DEF(pj_status_t) pjmedia_h264_packetize(pjmedia_h264_packetizer *pktz,
     if (!nal_end)
         nal_end = p;
 
+
+    /* Drop SEI packets as verkada camera produces proprietary SEI info
+     * that is not supported by standard H264 decoder.
+     */
+    if (nal_octet) {
+        unsigned char nal_type = (*nal_octet & 0x1F);
+        if (nal_type == 6) { // SEI NAL unit
+            // Drop this NAL unit
+            *payload = NULL;
+            *payload_len = 0;
+            // Advance the position to the end of this NAL unit
+            *pos = (unsigned)(nal_end - buf);
+            return PJ_SUCCESS;
+        }
+    } 
+
     /* Validate MTU vs NAL length on single NAL unit packetization */
     if ((pktz->cfg.mode==PJMEDIA_H264_PACKETIZER_MODE_SINGLE_NAL) &&
         nal_end - nal_start > pktz->cfg.mtu)

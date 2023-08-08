@@ -386,6 +386,7 @@ static pj_status_t dshow_enum_devices(unsigned *dev_cnt,
 
 #endif /* PJ_WIN32 or PJ_WIN64 */
 
+#define MAX_DEV_NAME_LEN 80
 
 /* API: refresh the list of devices */
 static pj_status_t ffmpeg_factory_refresh(pjmedia_vid_dev_factory *f)
@@ -449,8 +450,8 @@ static pj_status_t ffmpeg_factory_refresh(pjmedia_vid_dev_factory *f)
                 continue;
 
             for(i = 0; i < ctx->nb_streams; i++) {
-                if (ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-                    codec = ctx->streams[i]->codec;
+                if (ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+                    codec = ctx->streams[i]->codecpar;
                     break;
                 }
             }
@@ -690,7 +691,8 @@ static pj_status_t ffmpeg_stream_get_frame(pjmedia_vid_dev_stream *s,
     frame->buf = strm->frame_buf;
     frame->size = p.size;
     pj_memcpy(frame->buf, p.data, p.size);
-    av_free_packet(&p);
+    // av_free_packet(&p);
+    av_packet_unref(&p);
 
     return PJ_SUCCESS;
 }

@@ -1116,7 +1116,7 @@ static void on_clock_tick(const pj_timestamp *now, void *user_data)
                                   src->idx, src->port->info.name.ptr));
                     src->got_frame = PJ_FALSE;
                 } else {
-                    src->got_frame = (frame.size == src->get_frm_size);
+                    src->got_frame = PJ_TRUE; //= (frame.size == src->get_frm_size);
 
                     /* There is a possibility that the source port's format has
                      * changed, but we haven't received the event yet.

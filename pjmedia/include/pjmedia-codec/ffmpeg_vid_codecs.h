@@ -46,6 +46,9 @@ PJ_DECL(pj_status_t) pjmedia_codec_ffmpeg_vid_init(pjmedia_vid_codec_mgr *mgr,
                                                    pj_pool_factory *pf);
 
 
+PJ_DECL(pj_status_t) pjmedia_codec_verkada_vid_init(pjmedia_vid_codec_mgr *mgr,
+                                                   pj_pool_factory *pf);
+
 /**
  * Unregister FFMPEG video codecs factory from the video codec manager and
  * deinitialize the codecs library.
