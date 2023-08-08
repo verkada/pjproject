@@ -2845,6 +2845,9 @@ pj_status_t pjsua_media_channel_create_sdp(pjsua_call_id call_id,
             break;
 #if defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0)
         case PJMEDIA_TYPE_VIDEO:
+#ifdef PJMEDIA_VERKADA_INTERCOM
+            param.dir = PJMEDIA_DIR_ENCODING;
+#endif
             status = pjmedia_endpt_create_video_sdp(pjsua_var.med_endpt, pool,
                                                     &tpinfo.sock_info,
                                                     &param, &m);
