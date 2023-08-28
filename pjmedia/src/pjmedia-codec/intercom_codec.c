@@ -47,7 +47,7 @@
     PJMEDIA_HAS_FFMPEG_VID_CODEC != 0 &&     \
     defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0)
 
-#define THIS_FILE "ffmpeg_vid_codecs.c"
+#define THIS_FILE "intercom_codec.c"
 
 #include "../pjmedia/ffmpeg_util.h"
 
@@ -839,6 +839,38 @@ static pj_status_t ffmpeg_packetize(pjmedia_vid_codec *codec,
     return PJ_ENOTSUP;
 }
 
+#include <sys/syscall.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#include <stdio.h>
+
+static void adjust_thread_priority()
+{
+    // int policy;
+    // struct sched_param param;
+
+    // pthread_getschedparam(pthread_self(), &policy, &param);
+    // PJ_LOG(3, (THIS_FILE, "Old thread policy=%d, priority=%d",
+    //           policy, param.sched_priority));
+
+    // param.sched_priority = 10;
+
+    // if(pthread_setschedparam(pthread_self(), policy, &param)) {
+    //     perror("pthread_setschedparam");
+    // } else {
+    //     PJ_LOG(3, (THIS_FILE, "New thread policy=%d, priority=%d",
+    //           policy, param.sched_priority));
+    // }
+    int ret;
+    ret = setpriority(PRIO_PROCESS, syscall(SYS_gettid), -10);
+    if (ret != 0) {
+        perror("setpriority");
+        PJ_LOG(3, (THIS_FILE, "Error setting new Nice value %d", ret));
+    } else {
+        PJ_LOG(3, (THIS_FILE, "Successfully set new Nice value"));
+    }
+}
+
 static pj_status_t ffmpeg_codec_encode_begin(pjmedia_vid_codec *codec,
                                              const pjmedia_vid_encode_opt *opt,
                                              const pjmedia_frame *input,
@@ -884,7 +916,9 @@ static pj_status_t ffmpeg_codec_encode_begin(pjmedia_vid_codec *codec,
             break;
         }
 
+        adjust_thread_priority();
         system("test_encode --stream 4 --force-idr");
+
     }
 
     status = ffmpeg_codec_encode_more(codec, out_size, output, has_more);
