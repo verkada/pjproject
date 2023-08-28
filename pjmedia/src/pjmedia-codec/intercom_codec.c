@@ -54,7 +54,7 @@
 /* AVCodec H264 default PT */
 #define AVC_H264_PT PJMEDIA_RTP_PT_H264_RSV3
 
-#define INTERCOM_SUBSYSTEM_VSTREAM_VIDEO_PORT 20002
+#define INTERCOM_SUBSYSTEM_VSTREAM_VIDEO_PORT 20001
 
 /* Prototypes for FFMPEG codecs factory */
 static pj_status_t ffmpeg_test_alloc(pjmedia_vid_codec_factory *factory,
@@ -917,7 +917,7 @@ static pj_status_t ffmpeg_codec_encode_begin(pjmedia_vid_codec *codec,
         }
 
         adjust_thread_priority();
-        system("test_encode --stream 4 --force-idr");
+        system("test_encode --stream 2 --force-idr");
 
     }
 
