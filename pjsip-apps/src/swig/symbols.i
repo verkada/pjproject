@@ -1028,3 +1028,9 @@ typedef enum pjsua_sip_siprec_use
     PJSUA_SIP_SIPREC_MANDATORY,
 } pjsua_sip_siprec_use;
 
+// Verkada: Creating enum so that we get a respective entry in pjsua2.go
+enum pjsua_reg_use_acc_proxy_const_
+{
+    PJSUA_REG_USE_OUTBOUND_PROXY = 1,
+    PJSUA_REG_USE_ACC_PROXY = 2
+};
