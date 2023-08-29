@@ -106,7 +106,7 @@ export PJMEDIA_AUDIODEV_LDFLAGS += $(PJMEDIA_LDLIB) \
 export PJMEDIA_VIDEODEV_SRCDIR = ../src/pjmedia-videodev
 export PJMEDIA_VIDEODEV_OBJS += videodev.o errno.o avi_dev.o ffmpeg_dev.o \
 				colorbar_dev.o v4l2_dev.o opengl_dev.o \
-				util.o
+				util.o intercom_dev.o
 export PJMEDIA_VIDEODEV_CFLAGS += $(_CFLAGS)
 export PJMEDIA_VIDEODEV_CXXFLAGS += $(_CXXFLAGS)
 export PJMEDIA_VIDEODEV_LDFLAGS += $(PJMEDIA_LDLIB) \
@@ -135,7 +135,7 @@ export PJSDP_LDFLAGS += $(PJMEDIA_LDLIB) \
 # Defines for building PJMEDIA-Codec library
 #
 export PJMEDIA_CODEC_SRCDIR = ../src/pjmedia-codec
-export PJMEDIA_CODEC_OBJS += audio_codecs.o ffmpeg_vid_codecs.o openh264.o \
+export PJMEDIA_CODEC_OBJS += audio_codecs.o ffmpeg_vid_codecs.o intercom_codec.o nalparse.o openh264.o \
 			h263_packetizer.o h264_packetizer.o vpx_packetizer.o \
 			$(OS_OBJS) $(M_OBJS) $(CC_OBJS) $(HOST_OBJS) \
 			ipp_codecs.o silk.o opus.o $(CODEC_OBJS) \
