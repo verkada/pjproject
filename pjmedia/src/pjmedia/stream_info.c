@@ -305,10 +305,10 @@ static pj_status_t get_audio_codec_info_param(pjmedia_stream_info *si,
 
     /* Get incomming payload type for telephone-events */
     si->rx_event_pt = -1;
-    for (i=0; i<local_m->attr_count; ++i) {
+    for (i=0; i<rem_m->attr_count; ++i) {
         pjmedia_sdp_rtpmap r;
 
-        attr = local_m->attr[i];
+        attr = rem_m->attr[i];
         if (pj_strcmp(&attr->name, &ID_RTPMAP) != 0)
             continue;
         if (pjmedia_sdp_attr_get_rtpmap(attr, &r) != PJ_SUCCESS)
