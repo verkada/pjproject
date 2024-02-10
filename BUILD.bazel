@@ -1,0 +1,53 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make")
+
+filegroup(
+    name = "allsrcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+
+configure_make(
+    name = "pjsip",
+    configure_in_place = True,
+    configure_options = [
+        "--disable-sdl",
+        "--disable-ffmpeg",
+        "--disable-v4l2",
+        "--disable-openh264",
+        "--disable-opus",
+        "--disable-libwebrtc",
+        "--disable-upnp",
+    ],
+    env = {
+        "LD": "",
+    },
+    install_prefix = "install",
+    lib_source = ":allsrcs",
+    out_static_libs = [
+        "libpjsua2-x86_64-unknown-linux-gnu.a",
+        "libpjsua-x86_64-unknown-linux-gnu.a",
+        "libpjsip-ua-x86_64-unknown-linux-gnu.a",
+        "libpjsip-simple-x86_64-unknown-linux-gnu.a",
+        "libpjsip-x86_64-unknown-linux-gnu.a",
+        "libpjmedia-codec-x86_64-unknown-linux-gnu.a",
+        "libpjmedia-x86_64-unknown-linux-gnu.a",
+        "libpjmedia-videodev-x86_64-unknown-linux-gnu.a",
+        "libpjmedia-audiodev-x86_64-unknown-linux-gnu.a",
+        "libpjnath-x86_64-unknown-linux-gnu.a",
+        "libpjlib-util-x86_64-unknown-linux-gnu.a",
+        "libsrtp-x86_64-unknown-linux-gnu.a",
+        "libresample-x86_64-unknown-linux-gnu.a",
+        "libg7221codec-x86_64-unknown-linux-gnu.a",
+        "libgsmcodec-x86_64-unknown-linux-gnu.a",
+        "libilbccodec-x86_64-unknown-linux-gnu.a",
+        "libpj-x86_64-unknown-linux-gnu.a",
+        "libspeex-x86_64-unknown-linux-gnu.a",
+        "libyuv-x86_64-unknown-linux-gnu.a",
+    ],
+    targets = [
+        " ",
+        "-B install",
+    ],
+    visibility = ["//visibility:public"],
+)
