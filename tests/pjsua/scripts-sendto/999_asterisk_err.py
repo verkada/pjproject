@@ -1,13 +1,12 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # http://lists.pjsip.org/pipermail/pjsip_lists.pjsip.org/2008-June/003426.html:
 #
 # Report in pjsip mailing list on 27/6/2008 that this message will
 # cause pjsip to respond with 500 and then second request will cause
 # segfault.
-complete_msg = \
-"""INVITE sip:5001@192.168.1.200:5060;transport=UDP SIP/2.0
+complete_msg = """INVITE sip:5001@192.168.1.200:5060;transport=UDP SIP/2.0
 Via: SIP/2.0/UDP 192.168.1.11:5060;branch=z9hG4bK74a60ee5;rport
 From: \"A user\" <sip:66660000@192.168.1.11>;tag=as2858a32c
 To: <sip:5001@192.168.1.200:5060;transport=UDP>
@@ -39,6 +38,6 @@ a=sendrecv
 """
 
 
-sendto_cfg = sip.SendtoCfg( "Asterisk 500", "--null-audio --auto-answer 200", 
-			    "", 200, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "Asterisk 500", "--null-audio --auto-answer 200", "", 200, complete_msg=complete_msg
+)

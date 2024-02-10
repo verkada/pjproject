@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-body = \
-"""
+body = """
 --12345
 Content-Type: application/sdp
 
@@ -30,8 +29,13 @@ extra_headers = "Content-Type: multipart/mixed; boundary=12345"
 include = ["v=0", "m=audio"]
 exclude = []
 
-sendto_cfg = sip.SendtoCfg( "Valid multipart/mixed body containing SDP", 
-			    pjsua_args=args, sdp="", resp_code=200, 
-			    extra_headers=extra_headers, body=body,
-			    resp_inc=include, resp_exc=exclude)
-
+sendto_cfg = sip.SendtoCfg(
+    "Valid multipart/mixed body containing SDP",
+    pjsua_args=args,
+    sdp="",
+    resp_code=200,
+    extra_headers=extra_headers,
+    body=body,
+    resp_inc=include,
+    resp_exc=exclude,
+)

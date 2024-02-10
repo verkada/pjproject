@@ -1,8 +1,9 @@
-import pjsua2 as pj
 import sys
 import time
 
-write=sys.stdout.write
+import pjsua2 as pj
+
+write = sys.stdout.write
 
 #
 # Basic data structure test, to make sure basic struct
@@ -42,8 +43,9 @@ def ua_data_test():
 
     write("  Dumping nameservers: " + "\r\n")
     for s in uc2.nameserver:
-        write(s  + "\r\n")
+        write(s + "\r\n")
     write("\r\n")
+
 
 #
 # Exception test
@@ -56,14 +58,18 @@ def ua_run_test_exception():
     try:
         ep.natDetectType()
     except pj.Error as e:
-        #t, e = sys.exc_info()[:2]
+        # t, e = sys.exc_info()[:2]
         got_exception = True
-        write("  Got exception: status=%u, reason=%s,\n  title=%s,\n  srcFile=%s, srcLine=%d" % \
-            (e.status, e.reason, e.title, e.srcFile, e.srcLine) + "\r\n")
+        write(
+            "  Got exception: status=%u, reason=%s,\n  title=%s,\n  srcFile=%s, srcLine=%d"
+            % (e.status, e.reason, e.title, e.srcFile, e.srcLine)
+            + "\r\n"
+        )
         assert e.status == 370050
         assert e.reason.find("PJNATH_ESTUNINSERVER") >= 0
         assert e.title == "pjsua_detect_nat_type()"
     assert got_exception
+
 
 #
 # Custom log writer
@@ -71,6 +77,7 @@ def ua_run_test_exception():
 class MyLogWriter(pj.LogWriter):
     def write(self, entry):
         write("This is Python:" + entry.msg + "\r\n")
+
 
 #
 # Testing log writer callback
@@ -88,6 +95,7 @@ def ua_run_log_test():
     ep.libInit(ep_cfg)
     ep.libDestroy()
 
+
 #
 # Simple create, init, start, and destroy sequence
 #
@@ -102,6 +110,7 @@ def ua_run_ua_test():
 
     write("************* Endpoint started ok, now shutting down... *************" + "\r\n")
     ep.libDestroy()
+
 
 #
 # Tone generator
@@ -127,7 +136,7 @@ def ua_tonegen_test():
     tones.append(tone)
 
     digit = pj.ToneDigit()
-    digit.digit = '0'
+    digit.digit = "0"
     digit.on_msec = 1000
     digit.off_msec = 1000
     digits = pj.ToneDigitVector()
@@ -158,6 +167,7 @@ def ua_tonegen_test():
 
     ep.libDestroy()
 
+
 #
 # main()
 #
@@ -168,5 +178,3 @@ if __name__ == "__main__":
     ua_run_ua_test()
     ua_tonegen_test()
     sys.exit(0)
-
-

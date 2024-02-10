@@ -1,11 +1,10 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Torture message from RFC 4475
 # 3.1.1.  Valid Messages
 # 3.1.1.1.  A Short Tortuous INVITE
-complete_msg = \
-"""INVITE sip:vivekg@chair-dnrc.example.com;unknownparam SIP/2.0
+complete_msg = """INVITE sip:vivekg@chair-dnrc.example.com;unknownparam SIP/2.0
 TO :
  sip:vivekg@chair-dnrc.example.com ;   tag    = 1918181833n
 from   : "J Rosenberg \\\\\\""       <sip:jdrosen@example.com>
@@ -45,7 +44,6 @@ a=rtpmap:31 LPC
 """
 
 
-sendto_cfg = sip.SendtoCfg( "RFC 4475 3.1.1.1", 
-			    "--null-audio --auto-answer 200", 
-			    "", 481, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "RFC 4475 3.1.1.1", "--null-audio --auto-answer 200", "", 481, complete_msg=complete_msg
+)

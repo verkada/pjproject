@@ -15,29 +15,32 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import sys
-if sys.version_info[0] >= 3: # Python 3
+
+if sys.version_info[0] >= 3:  # Python 3
     import tkinter as tk
-    from tkinter import ttk
-    from tkinter import messagebox as msgbox
+    from tkinter import messagebox as msgbox, ttk
 else:
     import Tkinter as tk
     import tkMessageBox as msgbox
     import ttk
 
 import random
-import pjsua2 as pj
+
 import application
 import endpoint as ep
+import pjsua2 as pj
+
 
 # Call class
 class Call(pj.Call):
     """
     High level Python Call object, derived from pjsua2's Call object.
     """
-    def __init__(self, acc, peer_uri='', chat=None, call_id = pj.PJSUA_INVALID_ID):
+
+    def __init__(self, acc, peer_uri="", chat=None, call_id=pj.PJSUA_INVALID_ID):
         pj.Call.__init__(self, acc, call_id)
         self.acc = acc
         self.peerUri = peer_uri
@@ -54,9 +57,10 @@ class Call(pj.Call):
     def onCallMediaState(self, prm):
         ci = self.getInfo()
         for mi in ci.media:
-            if mi.type == pj.PJMEDIA_TYPE_AUDIO and \
-              (mi.status == pj.PJSUA_CALL_MEDIA_ACTIVE or \
-               mi.status == pj.PJSUA_CALL_MEDIA_REMOTE_HOLD):
+            if mi.type == pj.PJMEDIA_TYPE_AUDIO and (
+                mi.status == pj.PJSUA_CALL_MEDIA_ACTIVE
+                or mi.status == pj.PJSUA_CALL_MEDIA_REMOTE_HOLD
+            ):
                 m = self.getMedia(mi.index)
                 am = pj.AudioMedia.typecastFromMedia(m)
                 # connect ports
@@ -74,32 +78,38 @@ class Call(pj.Call):
 
     def onInstantMessage(self, prm):
         # chat instance should have been initalized
-        if not self.chat: return
+        if not self.chat:
+            return
 
         self.chat.addMessage(self.peerUri, prm.msgBody)
         self.chat.showWindow()
 
     def onInstantMessageStatus(self, prm):
-        if prm.code/100 == 2: return
+        if prm.code / 100 == 2:
+            return
         # chat instance should have been initalized
-        if not self.chat: return
+        if not self.chat:
+            return
 
-        self.chat.addMessage(None, "Failed sending message to '%s' (%d): %s" % (self.peerUri, prm.code, prm.reason))
+        self.chat.addMessage(
+            None, "Failed sending message to '%s' (%d): %s" % (self.peerUri, prm.code, prm.reason)
+        )
 
     def onTypingIndication(self, prm):
         # chat instance should have been initalized
-        if not self.chat: return
+        if not self.chat:
+            return
 
         self.chat.setTypingIndication(self.peerUri, prm.isTyping)
 
     def onDtmfDigit(self, prm):
-        #msgbox.showinfo("pygui", 'Got DTMF:' + prm.digit)
+        # msgbox.showinfo("pygui", 'Got DTMF:' + prm.digit)
         pass
 
     def onCallMediaTransportState(self, prm):
-        #msgbox.showinfo("pygui", "Media transport state")
+        # msgbox.showinfo("pygui", "Media transport state")
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     application.main()

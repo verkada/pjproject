@@ -1,10 +1,9 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Video uses static payload type which will cause failure
 # when session.c looks-up the codec in codec manager
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=-
@@ -16,12 +15,18 @@ m=video 4000 RTP/AVP 54
 
 pjsua_args = "--null-audio --auto-answer 200"
 extra_headers = ""
-include = ["Content-Type: application/sdp",	# response must include SDP
-	   "m=audio [1-9]+[0-9]* RTP/AVP[\\s\\S]+m=video 0 RTP"
-	   ]
+include = [
+    "Content-Type: application/sdp",  # response must include SDP
+    "m=audio [1-9]+[0-9]* RTP/AVP[\\s\\S]+m=video 0 RTP",
+]
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("Mixed audio and video", pjsua_args, sdp, 200,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "Mixed audio and video",
+    pjsua_args,
+    sdp,
+    200,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

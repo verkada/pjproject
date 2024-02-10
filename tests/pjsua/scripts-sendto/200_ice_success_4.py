@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=pjmedia
@@ -21,13 +20,17 @@ a=candidate:YY 2 UDP 1234 127.0.0.2 4002 typ host
 """
 
 args = "--null-audio --use-ice --auto-answer 200 --max-calls 1 --ice-no-rtcp"
-include = ["a=ice-ufrag"]			# must have ICE
+include = ["a=ice-ufrag"]  # must have ICE
 exclude = [
-	   "ice-mismatch",		     	# must not mismatch
-	   "a=candidate:[0-9a-zA-Z]+ 2 UDP"	# must not have RTCP component
-	  ]
+    "ice-mismatch",  # must not mismatch
+    "a=candidate:[0-9a-zA-Z]+ 2 UDP",  # must not have RTCP component
+]
 
-sendto_cfg = sip.SendtoCfg( "pjsua with --ice-no-rtcp ignores RTCP things in the SDP", 
-			    pjsua_args=args, sdp=sdp, resp_code=200, 
-			    resp_inc=include, resp_exc=exclude)
-
+sendto_cfg = sip.SendtoCfg(
+    "pjsua with --ice-no-rtcp ignores RTCP things in the SDP",
+    pjsua_args=args,
+    sdp=sdp,
+    resp_code=200,
+    resp_inc=include,
+    resp_exc=exclude,
+)

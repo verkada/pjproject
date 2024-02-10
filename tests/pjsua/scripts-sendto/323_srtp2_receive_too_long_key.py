@@ -1,9 +1,8 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Too long key should be rejected
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=-
@@ -18,7 +17,12 @@ extra_headers = ""
 include = []
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("SRTP receive too long key", pjsua_args, sdp, 406,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "SRTP receive too long key",
+    pjsua_args,
+    sdp,
+    406,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

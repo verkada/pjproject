@@ -1,9 +1,8 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Handling of incoming tel: URI.
-complete_msg = \
-"""INVITE tel:+2065551212 SIP/2.0
+complete_msg = """INVITE tel:+2065551212 SIP/2.0
 Via: SIP/2.0/UDP $LOCAL_IP:$LOCAL_PORT;rport;x-route-tag="tgrp:cococisco1";branch=z9hG4bK61E05
 From: <tel:12345>$FROM_TAG
 To: <tel:+2065551212>
@@ -40,6 +39,6 @@ a=rtpmap:19 CN/8000
 a=ptime:20
 """
 
-sendto_cfg = sip.SendtoCfg( "tel: URI", "--null-audio --auto-answer 200", 
-			    "", 200, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "tel: URI", "--null-audio --auto-answer 200", "", 200, complete_msg=complete_msg
+)

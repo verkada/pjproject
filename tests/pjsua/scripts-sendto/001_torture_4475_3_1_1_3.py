@@ -1,11 +1,10 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Torture message from RFC 4475
 # 3.1.1.  Valid Messages
 # 3.1.1.3. Valid Use of the % Escaping Mechanism
-complete_msg = \
-"""INVITE sip:sips%3Auser%40example.com@example.net SIP/2.0
+complete_msg = """INVITE sip:sips%3Auser%40example.com@example.net SIP/2.0
 To: sip:%75se%72@example.com
 From: <sip:I%20have%20spaces@example.net>;tag=$FROM_TAG
 Max-Forwards: 87
@@ -28,7 +27,6 @@ a=rtpmap:31 LPC
 """
 
 
-sendto_cfg = sip.SendtoCfg( "RFC 4475 3.1.1.3", 
-			    "--null-audio --auto-answer 200", 
-			    "", 200, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "RFC 4475 3.1.1.3", "--null-audio --auto-answer 200", "", 200, complete_msg=complete_msg
+)

@@ -1,10 +1,9 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Ticket https://github.com/pjsip/pjproject/issues/718
 # RTC doesn't put rport in Via, and it is report to have caused segfault.
-complete_msg = \
-"""INVITE sip:localhost SIP/2.0
+complete_msg = """INVITE sip:localhost SIP/2.0
 Via: SIP/2.0/UDP $LOCAL_IP:$LOCAL_PORT;branch=z9hG4bK74a60ee5
 From: <sip:tester@localhost>;tag=as2858a32c
 To: <sip:pjsua@localhost>
@@ -32,6 +31,6 @@ a=sendrecv
 """
 
 
-sendto_cfg = sip.SendtoCfg( "RTC no rport", "--null-audio --auto-answer 200", 
-			    "", 200, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "RTC no rport", "--null-audio --auto-answer 200", "", 200, complete_msg=complete_msg
+)

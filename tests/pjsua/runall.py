@@ -1,9 +1,9 @@
 import os
-import sys
-import time
+import platform
 import re
 import shutil
-import platform
+import sys
+import time
 
 PYTHON = os.path.basename(sys.executable)
 
@@ -18,15 +18,15 @@ tests = []
 excluded_tests = [
     "svn",
     "pyc",
-    "scripts-call/150_srtp_2_1",                     # SRTP optional 'cannot' call SRTP mandatory
-    "scripts-call/150_srtp_2_3.py",                  # disabled because #1267 wontfix
-    "scripts-call/301_ice_public_a.py",              # Unreliable, proxy returns 408 sometimes
-    "scripts-call/301_ice_public_b.py",              # Doesn't work because OpenSER modifies SDP
-    "scripts-pres/200_publish.py",                   # Ok from cmdline, error from runall.py
-    "scripts-media-playrec/100_resample_lf_8_11.py", # related to clock-rate 11 kHz problem
-    "scripts-media-playrec/100_resample_lf_8_22.py", # related to clock-rate 22 kHz problem
-    "scripts-media-playrec/100_resample_lf_11",      # related to clock-rate 11 kHz problem
-    "pesq",                                          # temporarily disabling all pesq related test due to unreliability
+    "scripts-call/150_srtp_2_1",  # SRTP optional 'cannot' call SRTP mandatory
+    "scripts-call/150_srtp_2_3.py",  # disabled because #1267 wontfix
+    "scripts-call/301_ice_public_a.py",  # Unreliable, proxy returns 408 sometimes
+    "scripts-call/301_ice_public_b.py",  # Doesn't work because OpenSER modifies SDP
+    "scripts-pres/200_publish.py",  # Ok from cmdline, error from runall.py
+    "scripts-media-playrec/100_resample_lf_8_11.py",  # related to clock-rate 11 kHz problem
+    "scripts-media-playrec/100_resample_lf_8_22.py",  # related to clock-rate 22 kHz problem
+    "scripts-media-playrec/100_resample_lf_11",  # related to clock-rate 11 kHz problem
+    "pesq",  # temporarily disabling all pesq related test due to unreliability
     # TODO check all tests below for false negatives
     "call_305_ice_comp_1_2",
     "scripts-sendto/155_err_sdp_bad_syntax",
@@ -41,11 +41,11 @@ excluded_tests = [
     "uas-mwi",
     "uas-register-ip-change-port-only",
     "uas-register-ip-change",
-    "uas-timer-update"
+    "uas-timer-update",
 ]
 
 # Exclude scripts-sipp/uac-reinvite-bad-via-branch on MacOS due to unreliable result
-if platform.system()=='Darwin':
+if platform.system() == "Darwin":
     excluded_tests.append("scripts-sipp/uac-reinvite-bad-via-branch")
 
 
@@ -83,14 +83,19 @@ for f in os.listdir("scripts-sipp"):
         tests.append("mod_sipp.py scripts-sipp/" + f)
 
 
-resume_script=""
-shell_cmd=""
-with_log=True
+resume_script = ""
+shell_cmd = ""
+with_log = True
 
 # Parse arguments
 sys.argv.pop(0)
 while len(sys.argv):
-    if sys.argv[0]=='/h' or sys.argv[0]=='-h' or sys.argv[0]=='--help' or sys.argv[0]=='/help':
+    if (
+        sys.argv[0] == "/h"
+        or sys.argv[0] == "-h"
+        or sys.argv[0] == "--help"
+        or sys.argv[0] == "/help"
+    ):
         sys.argv.pop(0)
         print "Usage:"
         print "  runall.py [OPTIONS] [run.py-OPTIONS]"
@@ -114,33 +119,32 @@ while len(sys.argv):
         print ""
         print "  run.py-OPTIONS are applicable here"
         sys.exit(0)
-    elif sys.argv[0] == '-r' or sys.argv[0] == '--resume':
+    elif sys.argv[0] == "-r" or sys.argv[0] == "--resume":
         if len(sys.argv) > 1:
-            resume_script=sys.argv[1]
+            resume_script = sys.argv[1]
             sys.argv.pop(0)
             sys.argv.pop(0)
         else:
             sys.argv.pop(0)
             sys.stderr.write("Error: argument value required")
             sys.exit(1)
-    elif sys.argv[0] == '--list':
+    elif sys.argv[0] == "--list":
         sys.argv.pop(0)
         for t in tests:
-              print t
+            print t
         sys.exit(0)
-    elif sys.argv[0] == '--list-xml':
+    elif sys.argv[0] == "--list-xml":
         sys.argv.pop(0)
         for t in tests:
-            (mod,param) = t.split(None,2)
-            tname = mod[4:mod.find(".py")] + "_" + \
-            param[param.find("/")+1:param.rfind(".")]
+            (mod, param) = t.split(None, 2)
+            tname = mod[4 : mod.find(".py")] + "_" + param[param.find("/") + 1 : param.rfind(".")]
             c = ""
             if len(sys.argv):
                 c = " ".join(sys.argv) + " "
-            tcmd = PYTHON + ' run.py ' + c + t
+            tcmd = PYTHON + " run.py " + c + t
             print '\t\t<Test name="%s" cmd="%s" wdir="tests/pjsua" />' % (tname, tcmd)
         sys.exit(0)
-    elif sys.argv[0] == '-s' or sys.argv[0] == '--shell':
+    elif sys.argv[0] == "-s" or sys.argv[0] == "--shell":
         if len(sys.argv) > 1:
             shell_cmd = sys.argv[1]
             sys.argv.pop(0)
@@ -149,7 +153,7 @@ while len(sys.argv):
             sys.argv.pop(0)
             sys.stderr.write("Error: argument value required")
             sys.exit(1)
-    elif sys.argv[0] == '-d' or sys.argv[0] == '--disable':
+    elif sys.argv[0] == "-d" or sys.argv[0] == "--disable":
         if len(sys.argv) > 1:
             excluded_tests.append(sys.argv[1])
             sys.argv.pop(0)
@@ -157,10 +161,10 @@ while len(sys.argv):
         else:
             sys.argv.pop(0)
             sys.stderr.write("Error: argument value required")
-            sys.exit(1)        	
-    elif sys.argv[0] == '--no-log':
+            sys.exit(1)
+    elif sys.argv[0] == "--no-log":
         sys.argv.pop(0)
-        with_log=False
+        with_log = False
     else:
         # should be run.py options
         break
@@ -175,21 +179,21 @@ tests_cnt = 0
 
 # Filter-out excluded tests
 for pat in excluded_tests:
-    tests = [t for t in tests if t.find(pat)==-1]
+    tests = [t for t in tests if t.find(pat) == -1]
 
 # Now run the tests
 total_cnt = len(tests)
 for t in tests:
-    if resume_script!="" and t.find(resume_script)==-1:
-        print "Skipping " + t +".."
+    if resume_script != "" and t.find(resume_script) == -1:
+        print "Skipping " + t + ".."
         total_cnt = total_cnt - 1
         continue
-    resume_script=""
+    resume_script = ""
     cmdline = "python run.py " + argv_st + t
     if shell_cmd:
         cmdline = "%s '%s'" % (shell_cmd, cmdline)
     t0 = time.time()
-    msg = "Running %3d/%d: %s..." % (tests_cnt+1, total_cnt, cmdline)
+    msg = "Running %3d/%d: %s..." % (tests_cnt + 1, total_cnt, cmdline)
     sys.stdout.write(msg)
     sys.stdout.flush()
     if with_log:
@@ -207,7 +211,7 @@ for t in tests:
         print " failed!! [" + str(dur) + "s]"
         if with_log:
             lines = open(logname, "r").readlines()
-            print ''.join(lines)
+            print "".join(lines)
             print "Log file: '" + logname + "'."
         fails_cnt += 1
     else:
@@ -218,6 +222,6 @@ for t in tests:
 if fails_cnt == 0:
     print "All " + str(tests_cnt) + " tests completed successfully"
 else:
-    print str(tests_cnt) + " tests completed, " +  str(fails_cnt) + " test(s) failed"
+    print str(tests_cnt) + " tests completed, " + str(fails_cnt) + " test(s) failed"
 
 sys.exit(fails_cnt)

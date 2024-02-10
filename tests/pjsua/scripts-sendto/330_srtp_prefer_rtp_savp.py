@@ -1,10 +1,9 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # When SRTP is enabled in pjsua, it should prefer to use
 # RTP/SAVP media line if there are multiple m=audio lines
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=-
@@ -18,12 +17,18 @@ a=crypto:1 aes_cm_128_hmac_sha1_80 inline:WnD7c1ksDGs+dIefCEo8omPg4uO8DYIinNGL5y
 
 pjsua_args = "--null-audio --auto-answer 200 --use-srtp 1 --srtp-secure 0"
 extra_headers = ""
-include = ["Content-Type: application/sdp",	# response must include SDP
-	   "m=audio 0 RTP/AVP[\\s\\S]+m=audio [1-9]+[0-9]* RTP/SAVP[\\s\\S]+a=crypto"
-	   ]
+include = [
+    "Content-Type: application/sdp",  # response must include SDP
+    "m=audio 0 RTP/AVP[\\s\\S]+m=audio [1-9]+[0-9]* RTP/SAVP[\\s\\S]+a=crypto",
+]
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("Prefer RTP/SAVP", pjsua_args, sdp, 200,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "Prefer RTP/SAVP",
+    pjsua_args,
+    sdp,
+    200,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

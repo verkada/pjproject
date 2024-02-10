@@ -1,11 +1,10 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Answer with codec G722.1 should choose the same bitrate
 # which in this test is 24000
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 3428650655 3428650655 IN IP4 192.168.1.9
 s=pjmedia
@@ -23,12 +22,18 @@ a=fmtp:101 0-15
 
 pjsua_args = "--null-audio --auto-answer 200 --add-codec G7221"
 extra_headers = ""
-include = ["a=rtpmap:[\d]+ G7221/16000",  # response must choose G722.1
-	   "fmtp:[\d]+ bitrate=24000"	  # response must choose the same bitrate
-	  ]
+include = [
+    "a=rtpmap:[\d]+ G7221/16000",  # response must choose G722.1
+    "fmtp:[\d]+ bitrate=24000",  # response must choose the same bitrate
+]
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("Answer with G722.1 should choose bitrate 24000", pjsua_args, sdp, 200,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "Answer with G722.1 should choose bitrate 24000",
+    pjsua_args,
+    sdp,
+    200,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=pjmedia
@@ -17,10 +16,14 @@ a=fmtp:101 0-15
 
 pjsua_args = "--null-audio --auto-answer 200"
 extra_headers = ""
-include = [ "Warning: " ]	# better have Warning header
+include = ["Warning: "]  # better have Warning header
 exclude = []
-sendto_cfg = sip.SendtoCfg("Bad SDP address type", pjsua_args, sdp, 400, 
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-			   
-
+sendto_cfg = sip.SendtoCfg(
+    "Bad SDP address type",
+    pjsua_args,
+    sdp,
+    400,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

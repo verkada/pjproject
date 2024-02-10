@@ -16,15 +16,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import sys
-import pjsua as pj
 import threading
+
+import pjsua as pj
 
 
 def log_cb(level, str, len):
     print str,
+
 
 class MyAccountCallback(pj.AccountCallback):
     sem = None
@@ -41,10 +43,11 @@ class MyAccountCallback(pj.AccountCallback):
             if self.account.info().reg_status >= 200:
                 self.sem.release()
 
+
 lib = pj.Lib()
 
 try:
-    lib.init(log_cfg = pj.LogConfig(level=4, callback=log_cb))
+    lib.init(log_cfg=pj.LogConfig(level=4, callback=log_cb))
     lib.create_transport(pj.TransportType.UDP, pj.TransportConfig(5080))
     lib.start()
 
@@ -55,8 +58,7 @@ try:
     acc_cb.wait()
 
     print "\n"
-    print "Registration complete, status=", acc.info().reg_status, \
-          "(" + acc.info().reg_reason + ")"
+    print "Registration complete, status=", acc.info().reg_status, "(" + acc.info().reg_reason + ")"
     print "\nPress ENTER to quit"
     sys.stdin.readline()
 
@@ -66,4 +68,3 @@ try:
 except pj.Error, e:
     print "Exception: " + str(e)
     lib.destroy()
-

@@ -18,7 +18,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import ccdash
 import os
 import platform
 import re
@@ -26,24 +25,28 @@ import subprocess
 import sys
 import time
 
+import ccdash
+
+
 class Operation:
     """\
     The Operation class describes the individual ccdash operation to be 
     performed.
 
     """
+
     # Types:
-    UPDATE = "update"           # Update operation
-    CONFIGURE = "configure"     # Configure operation
-    BUILD = "build"             # Build operation
-    TEST = "test"               # Unit test operation
+    UPDATE = "update"  # Update operation
+    CONFIGURE = "configure"  # Configure operation
+    BUILD = "build"  # Build operation
+    TEST = "test"  # Unit test operation
 
     def __init__(self, type, cmdline, name="", wdir=""):
         self.type = type
         self.cmdline = cmdline
         self.name = name
         self.wdir = wdir
-        if self.type==self.TEST and not self.name:
+        if self.type == self.TEST and not self.name:
             raise "name required for tests"
 
     def encode(self, base_dir):
@@ -68,17 +71,14 @@ update_ops = [Operation(Operation.UPDATE, "")]
 #
 # The standard library tests (e.g. pjlib-test, pjsip-test, etc.)
 #
-std_test_ops= [
-    Operation(Operation.TEST, "./pjlib-test$SUFFIX", name="pjlib test",
-              wdir="pjlib/bin"),
-    Operation(Operation.TEST, "./pjlib-util-test$SUFFIX", 
-              name="pjlib-util test", wdir="pjlib-util/bin"),
-    Operation(Operation.TEST, "./pjnath-test$SUFFIX", name="pjnath test",
-              wdir="pjnath/bin"),
-    Operation(Operation.TEST, "./pjmedia-test$SUFFIX", name="pjmedia test",
-              wdir="pjmedia/bin"),
-    Operation(Operation.TEST, "./pjsip-test$SUFFIX", name="pjsip test",
-              wdir="pjsip/bin")
+std_test_ops = [
+    Operation(Operation.TEST, "./pjlib-test$SUFFIX", name="pjlib test", wdir="pjlib/bin"),
+    Operation(
+        Operation.TEST, "./pjlib-util-test$SUFFIX", name="pjlib-util test", wdir="pjlib-util/bin"
+    ),
+    Operation(Operation.TEST, "./pjnath-test$SUFFIX", name="pjnath test", wdir="pjnath/bin"),
+    Operation(Operation.TEST, "./pjmedia-test$SUFFIX", name="pjmedia test", wdir="pjmedia/bin"),
+    Operation(Operation.TEST, "./pjsip-test$SUFFIX", name="pjsip test", wdir="pjsip/bin"),
 ]
 
 #
@@ -96,22 +96,26 @@ def build_pjsua_test_ops(pjsua_exe=""):
     f = open("list", "r")
     for e in f:
         e = e.rstrip("\r\n ")
-        (mod,param) = e.split(None,2)
-        name = mod[4:mod.find(".py")] + "_" + \
-               param[param.find("/")+1:param.find(".py")]
-        ops.append(Operation(Operation.TEST, "python run.py" + exe + " " + \
-                             e, name=name, wdir="tests/pjsua"))
+        (mod, param) = e.split(None, 2)
+        name = mod[4 : mod.find(".py")] + "_" + param[param.find("/") + 1 : param.find(".py")]
+        ops.append(
+            Operation(
+                Operation.TEST, "python run.py" + exe + " " + e, name=name, wdir="tests/pjsua"
+            )
+        )
     f.close()
-    os.remove("list") 
+    os.remove("list")
     os.chdir(cwd)
     return ops
+
 
 #
 # Get gcc version
 #
 def gcc_version(gcc):
-    proc = subprocess.Popen(gcc + " -v", stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, shell=True)
+    proc = subprocess.Popen(
+        gcc + " -v", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+    )
     ver = ""
     while True:
         s = proc.stdout.readline()
@@ -123,35 +127,35 @@ def gcc_version(gcc):
     proc.wait()
     return "gcc-" + ver
 
+
 #
 # Get Visual Studio version
 #
 def vs_get_version():
-    proc = subprocess.Popen("cl", stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+    proc = subprocess.Popen("cl", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
         s = proc.stdout.readline()
-        if s=="":
+        if s == "":
             break
         pos = s.find("Version")
         if pos > 0:
             proc.wait()
-            s = s[pos+8:]
+            s = s[pos + 8 :]
             ver = s.split(None, 1)[0]
             major = ver[0:2]
-            if major=="12":
+            if major == "12":
                 return "vs6"
-            elif major=="13":
+            elif major == "13":
                 return "vs2003"
-            elif major=="14":
+            elif major == "14":
                 return "vs2005"
-            elif major=="15":
+            elif major == "15":
                 return "vs2008"
             else:
                 return "vs-" + major
     proc.wait()
     return "vs-unknown"
-    
+
 
 #
 # Test config
@@ -164,21 +168,23 @@ class BaseConfig:
         self.group = group
         self.options = options
 
+
 #
 # Base class for test configurator
 #
 class TestBuilder:
-    def __init__(self, config, build_config_name="",
-                 user_mak="", config_site="", exclude=[], not_exclude=[]):
-        self.config = config                        # BaseConfig instance
+    def __init__(
+        self, config, build_config_name="", user_mak="", config_site="", exclude=[], not_exclude=[]
+    ):
+        self.config = config  # BaseConfig instance
         self.build_config_name = build_config_name  # Optional build suffix
-        self.user_mak = user_mak                    # To be put in user.mak
-        self.config_site = config_site              # To be put in config_s..
-        self.saved_user_mak = ""                    # To restore user.mak
-        self.saved_config_site = ""                 # To restore config_s..
-        self.exclude = exclude                      # List of exclude pattern
-        self.not_exclude = not_exclude              # List of include pattern
-        self.ccdash_args = []                       # ccdash cmd line
+        self.user_mak = user_mak  # To be put in user.mak
+        self.config_site = config_site  # To be put in config_s..
+        self.saved_user_mak = ""  # To restore user.mak
+        self.saved_config_site = ""  # To restore config_s..
+        self.exclude = exclude  # List of exclude pattern
+        self.not_exclude = not_exclude  # List of include pattern
+        self.ccdash_args = []  # ccdash cmd line
 
     def stamp(self):
         return time.strftime("%Y%m%d-%H%M", time.localtime())
@@ -198,13 +204,12 @@ class TestBuilder:
         name = self.config.base_dir + "/pjlib/include/pj/config_site.h"
         if os.access(name, os.F_OK):
             f = open(name, "r")
-            self.saved_config_site= f.read()
+            self.saved_config_site = f.read()
             f.close()
         if True:
             f = open(name, "wt")
             f.write(self.config_site)
             f.close()
-
 
     def post_action(self):
         # Restore user.mak
@@ -223,10 +228,10 @@ class TestBuilder:
         pass
 
     def execute(self):
-        if len(self.ccdash_args)==0:
+        if len(self.ccdash_args) == 0:
             self.build_tests()
         self.pre_action()
-	mandatory_op = ["update", "configure", "build"]
+        mandatory_op = ["update", "configure", "build"]
         counter = 0
         for a in self.ccdash_args:
             # Check if this test is in exclusion list
@@ -243,7 +248,7 @@ class TestBuilder:
                         included = True
                         break
             if excluded and not included:
-                if len(fullcmd)>60:
+                if len(fullcmd) > 60:
                     fullcmd = fullcmd[0:60] + ".."
                 print "Skipping '%s'" % (fullcmd)
                 continue
@@ -251,7 +256,7 @@ class TestBuilder:
             b = ["ccdash.py"]
             b.extend(a)
             a = b
-            #print a
+            # print a
             try:
                 rc = ccdash.main(a)
             except Exception, e:
@@ -261,10 +266,10 @@ class TestBuilder:
             except:
                 print "**** Error: ccdash got unknown exception ****"
                 rc = -1
-                
-	    if rc!=0 and a[1] in mandatory_op:
-		print "Stopping because of error.."
-		break
+
+            if rc != 0 and a[1] in mandatory_op:
+                print "Stopping because of error.."
+                break
             counter = counter + 1
         self.post_action()
 
@@ -277,8 +282,17 @@ class GNUTestBuilder(TestBuilder):
     This class creates list of tests suitable for GNU targets.
 
     """
-    def __init__(self, config, build_config_name="", user_mak="", \
-                 config_site="", cross_compile="", exclude=[], not_exclude=[]):
+
+    def __init__(
+        self,
+        config,
+        build_config_name="",
+        user_mak="",
+        config_site="",
+        cross_compile="",
+        exclude=[],
+        not_exclude=[],
+    ):
         """\
         Parameters:
         config              - BaseConfig instance
@@ -295,39 +309,48 @@ class GNUTestBuilder(TestBuilder):
                               match the excluded pattern.
 
         """
-        TestBuilder.__init__(self, config, build_config_name=build_config_name,
-                             user_mak=user_mak, config_site=config_site,
-                             exclude=exclude, not_exclude=not_exclude)
+        TestBuilder.__init__(
+            self,
+            config,
+            build_config_name=build_config_name,
+            user_mak=user_mak,
+            config_site=config_site,
+            exclude=exclude,
+            not_exclude=not_exclude,
+        )
         self.cross_compile = cross_compile
-        if self.cross_compile and self.cross_compile[-1] != '-':
+        if self.cross_compile and self.cross_compile[-1] != "-":
             self.cross_compile.append("-")
 
     def build_tests(self):
         if self.cross_compile:
             suffix = "-" + self.cross_compile[0:-1]
-            build_name =  self.cross_compile + \
-                          gcc_version(self.cross_compile + "gcc")
+            build_name = self.cross_compile + gcc_version(self.cross_compile + "gcc")
         else:
-            proc = subprocess.Popen("sh "+self.config.base_dir+"/config.guess",
-                                    shell=True, stdout=subprocess.PIPE)
+            proc = subprocess.Popen(
+                "sh " + self.config.base_dir + "/config.guess", shell=True, stdout=subprocess.PIPE
+            )
             plat = proc.stdout.readline().rstrip(" \r\n")
-            build_name =  plat + "-"+gcc_version(self.cross_compile + "gcc")
+            build_name = plat + "-" + gcc_version(self.cross_compile + "gcc")
             suffix = "-" + plat
 
         if self.build_config_name:
             build_name = build_name + "-" + self.build_config_name
         cmds = []
         cmds.extend(update_ops)
-	cmds.append(Operation(Operation.CONFIGURE, "sh ./configure"))
-	if sys.platform=="win32":
-	    # Don't build python module on Mingw
-	    cmds.append(Operation(Operation.BUILD, 
-			    "sh -c 'make distclean && make dep && make'"))
-	else:
-	    cmds.append(Operation(Operation.BUILD, 
-			    "sh -c 'make distclean && make dep && make" + \
-			    " && cd pjsip-apps/src/python && " + \
-			    "python setup.py clean build'"))
+        cmds.append(Operation(Operation.CONFIGURE, "sh ./configure"))
+        if sys.platform == "win32":
+            # Don't build python module on Mingw
+            cmds.append(Operation(Operation.BUILD, "sh -c 'make distclean && make dep && make'"))
+        else:
+            cmds.append(
+                Operation(
+                    Operation.BUILD,
+                    "sh -c 'make distclean && make dep && make"
+                    + " && cd pjsip-apps/src/python && "
+                    + "python setup.py clean build'",
+                )
+            )
 
         cmds.extend(std_test_ops)
         cmds.extend(build_pjsua_test_ops())
@@ -335,13 +358,23 @@ class GNUTestBuilder(TestBuilder):
         for c in cmds:
             c.cmdline = c.cmdline.replace("$SUFFIX", suffix)
             args = c.encode(self.config.base_dir)
-            args.extend(["-U", self.config.url, 
-                         "-S", self.config.site, 
-                         "-T", self.stamp(), 
-                         "-B", build_name, 
-                         "-G", self.config.group])
+            args.extend(
+                [
+                    "-U",
+                    self.config.url,
+                    "-S",
+                    self.config.site,
+                    "-T",
+                    self.stamp(),
+                    "-B",
+                    build_name,
+                    "-G",
+                    self.config.group,
+                ]
+            )
             args.extend(self.config.options)
             self.ccdash_args.append(args)
+
 
 #
 # MSVC test configurator
@@ -353,8 +386,16 @@ class MSVCTestBuilder(TestBuilder):
     vcvars32.bat) prior to running this class.
     
     """
-    def __init__(self, config, target="Release|Win32", build_config_name="", 
-                 config_site="", exclude=[], not_exclude=[]):
+
+    def __init__(
+        self,
+        config,
+        target="Release|Win32",
+        build_config_name="",
+        config_site="",
+        exclude=[],
+        not_exclude=[],
+    ):
         """\
         Parameters:
         config              - BaseConfig instance
@@ -370,28 +411,38 @@ class MSVCTestBuilder(TestBuilder):
                               match the excluded pattern.
 
         """
-        TestBuilder.__init__(self, config, build_config_name=build_config_name,
-                             config_site=config_site, exclude=exclude, 
-                             not_exclude=not_exclude)
+        TestBuilder.__init__(
+            self,
+            config,
+            build_config_name=build_config_name,
+            config_site=config_site,
+            exclude=exclude,
+            not_exclude=not_exclude,
+        )
         self.target = target.lower()
 
     def build_tests(self):
-       
-        (vsbuild,sys) = self.target.split("|",2)
-        
+
+        (vsbuild, sys) = self.target.split("|", 2)
+
         build_name = sys + "-" + vs_get_version() + "-" + vsbuild
 
         if self.build_config_name:
             build_name = build_name + "-" + self.build_config_name
 
-        vccmd = "vcbuild.exe /nologo /nohtmllog /nocolor /rebuild " + \
-                "pjproject-vs8.sln " + " \"" + self.target + "\""
-        
+        vccmd = (
+            "vcbuild.exe /nologo /nohtmllog /nocolor /rebuild "
+            + "pjproject-vs8.sln "
+            + ' "'
+            + self.target
+            + '"'
+        )
+
         suffix = "-i386-win32-vc8-" + vsbuild
         pjsua = "pjsua_vc8"
-        if vsbuild=="debug":
+        if vsbuild == "debug":
             pjsua = pjsua + "d"
-        
+
         cmds = []
         cmds.extend(update_ops)
         cmds.append(Operation(Operation.CONFIGURE, "CMD /C echo Nothing to do"))
@@ -403,11 +454,20 @@ class MSVCTestBuilder(TestBuilder):
         for c in cmds:
             c.cmdline = c.cmdline.replace("$SUFFIX", suffix)
             args = c.encode(self.config.base_dir)
-            args.extend(["-U", self.config.url, 
-                         "-S", self.config.site, 
-                         "-T", self.stamp(), 
-                         "-B", build_name, 
-                         "-G", self.config.group])
+            args.extend(
+                [
+                    "-U",
+                    self.config.url,
+                    "-S",
+                    self.config.site,
+                    "-T",
+                    self.stamp(),
+                    "-B",
+                    build_name,
+                    "-G",
+                    self.config.group,
+                ]
+            )
             args.extend(self.config.options)
             self.ccdash_args.append(args)
 
@@ -422,8 +482,16 @@ class SymbianTestBuilder(TestBuilder):
     that involves setting the EPOCROOT variable and current device).
     
     """
-    def __init__(self, config, target="gcce urel", build_config_name="", 
-                 config_site="", exclude=[], not_exclude=[]):
+
+    def __init__(
+        self,
+        config,
+        target="gcce urel",
+        build_config_name="",
+        config_site="",
+        exclude=[],
+        not_exclude=[],
+    ):
         """\
         Parameters:
         config              - BaseConfig instance
@@ -438,13 +506,18 @@ class SymbianTestBuilder(TestBuilder):
                               match the excluded pattern.
 
         """
-        TestBuilder.__init__(self, config, build_config_name=build_config_name,
-                             config_site=config_site, exclude=exclude, 
-                             not_exclude=not_exclude)
+        TestBuilder.__init__(
+            self,
+            config,
+            build_config_name=build_config_name,
+            config_site=config_site,
+            exclude=exclude,
+            not_exclude=not_exclude,
+        )
         self.target = target.lower()
-        
+
     def build_tests(self):
-       
+
         # Check that EPOCROOT is set
         if not "EPOCROOT" in os.environ:
             print "Error: EPOCROOT environment variable is not set"
@@ -457,13 +530,14 @@ class SymbianTestBuilder(TestBuilder):
         sdk1 = epocroot.split("\\")[-2]
 
         # Check that correct device is set
-        proc = subprocess.Popen("devices", stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, shell=True)
+        proc = subprocess.Popen(
+            "devices", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+        )
         sdk2 = ""
         while True:
             line = proc.stdout.readline()
             if line.find("- default") > 0:
-                sdk2 = line.split(":",1)[0]
+                sdk2 = line.split(":", 1)[0]
                 break
         proc.wait()
 
@@ -473,14 +547,13 @@ class SymbianTestBuilder(TestBuilder):
             print "EPOCROOT SDK =", sdk1
             sys.exit(1)
 
-        build_name = sdk2.replace("_", "-") + "-" + \
-                     self.target.replace(" ", "-")
+        build_name = sdk2.replace("_", "-") + "-" + self.target.replace(" ", "-")
 
         if self.build_config_name:
             build_name = build_name + "-" + self.build_config_name
 
-        cmdline = "cmd /C \"cd build.symbian && bldmake bldfiles && abld build %s\"" % (self.target)
-        
+        cmdline = 'cmd /C "cd build.symbian && bldmake bldfiles && abld build %s"' % (self.target)
+
         cmds = []
         cmds.extend(update_ops)
         cmds.append(Operation(Operation.CONFIGURE, "CMD /C echo Nothing to do"))
@@ -491,11 +564,19 @@ class SymbianTestBuilder(TestBuilder):
         for c in cmds:
             c.cmdline = c.cmdline.replace("$SUFFIX", suffix)
             args = c.encode(self.config.base_dir)
-            args.extend(["-U", self.config.url, 
-                         "-S", self.config.site, 
-                         "-T", self.stamp(), 
-                         "-B", build_name, 
-                         "-G", self.config.group])
+            args.extend(
+                [
+                    "-U",
+                    self.config.url,
+                    "-S",
+                    self.config.site,
+                    "-T",
+                    self.stamp(),
+                    "-B",
+                    build_name,
+                    "-G",
+                    self.config.group,
+                ]
+            )
             args.extend(self.config.options)
             self.ccdash_args.append(args)
-

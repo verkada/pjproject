@@ -17,9 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-import builder
 import os
 import sys
+
+import builder
+
 
 # Each configurator must export this function
 def create_builder(args):
@@ -39,44 +41,43 @@ Arguments:
     cfg_site = "cfg_site"
     target = "Release|Win32"
     in_option = ""
-    
+
     for arg in args:
-        if in_option=="-t":
+        if in_option == "-t":
             target = arg
             in_option = ""
-        elif arg=="--target" or arg=="-t":
+        elif arg == "--target" or arg == "-t":
             in_option = "-t"
-        elif arg=="-h" or arg=="--help":
+        elif arg == "-h" or arg == "--help":
             print usage
             sys.exit(0)
-        elif arg[0]=="-":
+        elif arg[0] == "-":
             print usage
             sys.exit(1)
         else:
             cfg_site = arg
-        
-    if os.access(cfg_site+".py", os.F_OK) == False:
+
+    if os.access(cfg_site + ".py", os.F_OK) == False:
         print "Error: file '%s.py' doesn't exist." % (cfg_site)
         sys.exit(1)
 
     cfg_site = __import__(cfg_site)
-    test_cfg = builder.BaseConfig(cfg_site.BASE_DIR, \
-                                  cfg_site.URL, \
-                                  cfg_site.SITE_NAME, \
-                                  cfg_site.GROUP, \
-                                  cfg_site.OPTIONS)
+    test_cfg = builder.BaseConfig(
+        cfg_site.BASE_DIR, cfg_site.URL, cfg_site.SITE_NAME, cfg_site.GROUP, cfg_site.OPTIONS
+    )
 
     config_site = "#define PJ_TODO(x)\n" + cfg_site.CONFIG_SITE
     user_mak = cfg_site.USER_MAK
 
     builders = [
-        builder.MSVCTestBuilder(test_cfg, 
-                                target=target,
-                                build_config_name="default",
-                                config_site=config_site,
-                                exclude=cfg_site.EXCLUDE,
-                                not_exclude=cfg_site.NOT_EXCLUDE)
-        ]
+        builder.MSVCTestBuilder(
+            test_cfg,
+            target=target,
+            build_config_name="default",
+            config_site=config_site,
+            exclude=cfg_site.EXCLUDE,
+            not_exclude=cfg_site.NOT_EXCLUDE,
+        )
+    ]
 
     return builders
-

@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=pjmedia
@@ -15,5 +14,4 @@ a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-15
 """
 
-sendto_cfg = sip.SendtoCfg( "simple call", "--null-audio --auto-answer 200", sdp, 200)
-
+sendto_cfg = sip.SendtoCfg("simple call", "--null-audio --auto-answer 200", sdp, 200)

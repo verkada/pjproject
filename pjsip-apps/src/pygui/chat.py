@@ -15,43 +15,46 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import sys
-if sys.version_info[0] >= 3: # Python 3
+
+if sys.version_info[0] >= 3:  # Python 3
     import tkinter as tk
     from tkinter import ttk
 else:
     import Tkinter as tk
     import ttk
 
+import re
+
 import buddy
 import call
 import chatgui as gui
 import endpoint as ep
 import pjsua2 as pj
-import re
 
-SipUriRegex = re.compile('(sip|sips):([^:;>\@]*)@?([^:;>]*):?([^:;>]*)')
+SipUriRegex = re.compile("(sip|sips):([^:;>\@]*)@?([^:;>]*):?([^:;>]*)")
 ConfIdx = 1
-write=sys.stdout.write
+write = sys.stdout.write
 
 # Simple SIP uri parser, input URI must have been validated
 def ParseSipUri(sip_uri_str):
     m = SipUriRegex.search(sip_uri_str)
     if not m:
-        assert(0)
+        assert 0
         return None
 
     scheme = m.group(1)
     user = m.group(2)
     host = m.group(3)
     port = m.group(4)
-    if host == '':
+    if host == "":
         host = user
-        user = ''
+        user = ""
 
     return SipUri(scheme.lower(), user, host.lower(), port)
+
 
 class SipUri:
     def __init__(self, scheme, user, host, port):
@@ -61,23 +64,30 @@ class SipUri:
         self.port = port
 
     def __cmp__(self, sip_uri):
-        if self.scheme == sip_uri.scheme and self.user == sip_uri.user and self.host == sip_uri.host:
+        if (
+            self.scheme == sip_uri.scheme
+            and self.user == sip_uri.user
+            and self.host == sip_uri.host
+        ):
             # don't check port, at least for now
             return 0
         return -1
 
     def __str__(self):
-        s = self.scheme + ':'
-        if self.user: s += self.user + '@'
+        s = self.scheme + ":"
+        if self.user:
+            s += self.user + "@"
         s += self.host
-        if self.port: s+= ':' + self.port
+        if self.port:
+            s += ":" + self.port
         return s
+
 
 class Chat(gui.ChatObserver):
     def __init__(self, app, acc, uri, call_inst=None):
         self._app = app
         self._acc = acc
-        self.title = ''
+        self.title = ""
 
         global ConfIdx
         self.confIdx = ConfIdx
@@ -85,9 +95,9 @@ class Chat(gui.ChatObserver):
 
         # each participant call/buddy instances are stored in call list
         # and buddy list with same index as in particpant list
-        self._participantList = []	# list of SipUri
-        self._callList = []		# list of Call
-        self._buddyList = []		# list of Buddy
+        self._participantList = []  # list of SipUri
+        self._callList = []  # list of Call
+        self._buddyList = []  # list of Buddy
 
         self._gui = gui.ChatFrame(self)
         self.addParticipant(uri, call_inst)
@@ -96,14 +106,17 @@ class Chat(gui.ChatObserver):
         if self.isPrivate():
             self.title = str(self._participantList[0])
         else:
-            self.title = 'Conference #%d (%d participants)' % (self.confIdx, len(self._participantList))
+            self.title = "Conference #%d (%d participants)" % (
+                self.confIdx,
+                len(self._participantList),
+            )
         self._gui.title(self.title)
         self._app.updateWindowMenu()
 
-    def _getCallFromUriStr(self, uri_str, op = ''):
+    def _getCallFromUriStr(self, uri_str, op=""):
         uri = ParseSipUri(uri_str)
         if uri not in self._participantList:
-            write("=== "+ op +" cannot find participant with URI '" + uri_str + "'\r\n")
+            write("=== " + op + " cannot find participant with URI '" + uri_str + "'\r\n")
             return None
         idx = self._participantList.index(uri)
         if idx < len(self._callList):
@@ -113,24 +126,26 @@ class Chat(gui.ChatObserver):
     def _getActiveMediaIdx(self, thecall):
         ci = thecall.getInfo()
         for mi in ci.media:
-            if mi.type == pj.PJMEDIA_TYPE_AUDIO and \
-              (mi.status != pj.PJSUA_CALL_MEDIA_NONE and \
-               mi.status != pj.PJSUA_CALL_MEDIA_ERROR):
+            if mi.type == pj.PJMEDIA_TYPE_AUDIO and (
+                mi.status != pj.PJSUA_CALL_MEDIA_NONE and mi.status != pj.PJSUA_CALL_MEDIA_ERROR
+            ):
                 return mi.index
         return -1
 
     def _getAudioMediaFromUriStr(self, uri_str):
         c = self._getCallFromUriStr(uri_str)
-        if not c: return None
+        if not c:
+            return None
 
         idx = self._getActiveMediaIdx(c)
-        if idx < 0: return None
+        if idx < 0:
+            return None
 
         m = c.getMedia(idx)
         am = pj.AudioMedia.typecastFromMedia(m)
         return am
 
-    def _sendTypingIndication(self, is_typing, sender_uri_str=''):
+    def _sendTypingIndication(self, is_typing, sender_uri_str=""):
         sender_uri = ParseSipUri(sender_uri_str) if sender_uri_str else None
         type_ind_param = pj.SendTypingIndicationParam()
         type_ind_param.isTyping = is_typing
@@ -145,14 +160,14 @@ class Chat(gui.ChatObserver):
                 target = self._callList[idx]
             else:
                 target = self._buddyList[idx]
-            assert(target)
+            assert target
 
             try:
                 target.sendTypingIndication(type_ind_param)
             except:
                 pass
 
-    def _sendInstantMessage(self, msg, sender_uri_str=''):
+    def _sendInstantMessage(self, msg, sender_uri_str=""):
         sender_uri = ParseSipUri(sender_uri_str) if sender_uri_str else None
         send_im_param = pj.SendInstantMessageParam()
         send_im_param.content = str(msg)
@@ -167,7 +182,7 @@ class Chat(gui.ChatObserver):
                 target = self._callList[idx]
             else:
                 target = self._buddyList[idx]
-            assert(target)
+            assert target
 
             try:
                 target.sendInstantMessage(send_im_param)
@@ -190,16 +205,17 @@ class Chat(gui.ChatObserver):
             call_inst.chat = self
             call_inst.peerUri = bud.cfg.uri
         except:
-            assert(0) # idx must be found!
+            assert 0  # idx must be found!
 
-    def showWindow(self, show_text_chat = False):
+    def showWindow(self, show_text_chat=False):
         self._gui.bringToFront()
         if show_text_chat:
             self._gui.textShowHide(True)
 
     def addParticipant(self, uri, call_inst=None):
         # avoid duplication
-        if self.isUriParticipant(uri): return
+        if self.isUriParticipant(uri):
+            return
 
         uri_str = str(uri)
 
@@ -229,7 +245,7 @@ class Chat(gui.ChatObserver):
 
     def kickParticipant(self, uri):
         if (not uri) or (uri not in self._participantList):
-            assert(0)
+            assert 0
             return
 
         idx = self._participantList.index(uri)
@@ -246,7 +262,7 @@ class Chat(gui.ChatObserver):
     def addMessage(self, from_uri_str, msg):
         if from_uri_str:
             # print message on GUI
-            msg = from_uri_str + ': ' + msg
+            msg = from_uri_str + ": " + msg
             self._gui.textAddMessage(msg)
             # now relay to all participants
             self._sendInstantMessage(msg, from_uri_str)
@@ -294,9 +310,10 @@ class Chat(gui.ChatObserver):
             if c:
                 c.hangup(pj.CallOpParam())
 
-    def updateCallState(self, thecall, info = None):
+    def updateCallState(self, thecall, info=None):
         # info is optional here, just to avoid calling getInfo() twice (in the caller and here)
-        if not info: info = thecall.getInfo()
+        if not info:
+            info = thecall.getInfo()
 
         if info.state < pj.PJSIP_INV_STATE_CONFIRMED:
             self._gui.audioUpdateState(thecall.peerUri, gui.AudioState.INITIALIZING)
@@ -304,12 +321,12 @@ class Chat(gui.ChatObserver):
             self._gui.audioUpdateState(thecall.peerUri, gui.AudioState.CONNECTED)
             if not self.isPrivate():
                 # inform peer about conference participants
-                conf_welcome_str  = '\n---\n'
-                conf_welcome_str += 'Welcome to the conference, participants:\n'
-                conf_welcome_str += '%s (host)\n' % (self._acc.cfg.idUri)
+                conf_welcome_str = "\n---\n"
+                conf_welcome_str += "Welcome to the conference, participants:\n"
+                conf_welcome_str += "%s (host)\n" % (self._acc.cfg.idUri)
                 for p in self._participantList:
-                    conf_welcome_str += '%s\n' % (str(p))
-                conf_welcome_str += '---\n'
+                    conf_welcome_str += "%s\n" % (str(p))
+                conf_welcome_str += "---\n"
                 send_im_param = pj.SendInstantMessageParam()
                 send_im_param.content = conf_welcome_str
                 try:
@@ -323,7 +340,7 @@ class Chat(gui.ChatObserver):
                 self._sendInstantMessage(msg, thecall.peerUri)
 
         elif info.state == pj.PJSIP_INV_STATE_DISCONNECTED:
-            if info.lastStatusCode/100 != 2:
+            if info.lastStatusCode / 100 != 2:
                 self._gui.audioUpdateState(thecall.peerUri, gui.AudioState.FAILED)
             else:
                 self._gui.audioUpdateState(thecall.peerUri, gui.AudioState.DISCONNECTED)
@@ -331,11 +348,14 @@ class Chat(gui.ChatObserver):
             # reset entry in the callList
             try:
                 idx = self._callList.index(thecall)
-                if idx >= 0: self._callList[idx] = None
+                if idx >= 0:
+                    self._callList[idx] = None
             except:
                 pass
 
-            self.addMessage(None, "Call to '%s' disconnected: %s" % (thecall.peerUri, info.lastReason))
+            self.addMessage(
+                None, "Call to '%s' disconnected: %s" % (thecall.peerUri, info.lastReason)
+            )
 
             # kick the disconnected participant, but the last (avoid zombie chat)
             if not self.isPrivate():
@@ -346,25 +366,26 @@ class Chat(gui.ChatObserver):
                 self.addMessage(None, msg)
                 self._sendInstantMessage(msg, thecall.peerUri)
 
-    def updateCallMediaState(self, thecall, info = None):
+    def updateCallMediaState(self, thecall, info=None):
         # info is optional here, just to avoid calling getInfo() twice (in the caller and here)
-        if not info: info = thecall.getInfo()
+        if not info:
+            info = thecall.getInfo()
 
         med_idx = self._getActiveMediaIdx(thecall)
-        if (med_idx < 0):
-            self._gui.audioSetStatsText(thecall.peerUri, 'No active media')
+        if med_idx < 0:
+            self._gui.audioSetStatsText(thecall.peerUri, "No active media")
             return
 
         si = thecall.getStreamInfo(med_idx)
-        dir_str = ''
+        dir_str = ""
         if si.dir == 0:
-            dir_str = 'inactive'
+            dir_str = "inactive"
         else:
             if si.dir & pj.PJMEDIA_DIR_ENCODING:
-                dir_str += 'send '
+                dir_str += "send "
             if si.dir & pj.PJMEDIA_DIR_DECODING:
-                dir_str += 'receive '
-        stats_str  = "Direction   : %s\n" % (dir_str)
+                dir_str += "receive "
+        stats_str = "Direction   : %s\n" % (dir_str)
         stats_str += "Audio codec : %s (%sHz)" % (si.codecName, si.codecClockRate)
         self._gui.audioSetStatsText(thecall.peerUri, stats_str)
         m = pj.AudioMedia.typecastFromMedia(thecall.getMedia(med_idx))
@@ -379,7 +400,6 @@ class Chat(gui.ChatObserver):
             mm = pj.AudioMedia.typecastFromMedia(c.getMedia(med_idx))
             m.startTransmit(mm)
             mm.startTransmit(m)
-
 
     # ** callbacks from GUI (ChatObserver implementation) **
 
@@ -396,19 +416,22 @@ class Chat(gui.ChatObserver):
     # Audio
     def onHangup(self, peer_uri_str):
         c = self._getCallFromUriStr(peer_uri_str, "onHangup()")
-        if not c: return
+        if not c:
+            return
         call_param = pj.CallOpParam()
         c.hangup(call_param)
 
     def onHold(self, peer_uri_str):
         c = self._getCallFromUriStr(peer_uri_str, "onHold()")
-        if not c: return
+        if not c:
+            return
         call_param = pj.CallOpParam()
         c.setHold(call_param)
 
     def onUnhold(self, peer_uri_str):
         c = self._getCallFromUriStr(peer_uri_str, "onUnhold()")
-        if not c: return
+        if not c:
+            return
 
         call_param = pj.CallOpParam()
         call_param.opt.audioCount = 1
@@ -418,7 +441,8 @@ class Chat(gui.ChatObserver):
 
     def onRxMute(self, peer_uri_str, mute):
         am = self._getAudioMediaFromUriStr(peer_uri_str)
-        if not am: return
+        if not am:
+            return
         if mute:
             am.stopTransmit(ep.Endpoint.instance.audDevManager().getPlaybackDevMedia())
             self.addMessage(None, "Muted audio from '%s'" % (peer_uri_str))
@@ -428,14 +452,16 @@ class Chat(gui.ChatObserver):
 
     def onRxVol(self, peer_uri_str, vol_pct):
         am = self._getAudioMediaFromUriStr(peer_uri_str)
-        if not am: return
+        if not am:
+            return
         # pjsua volume range = 0:mute, 1:no adjustment, 2:100% louder
-        am.adjustRxLevel(vol_pct/50.0)
+        am.adjustRxLevel(vol_pct / 50.0)
         self.addMessage(None, "Adjusted volume level audio from '%s'" % (peer_uri_str))
 
     def onTxMute(self, peer_uri_str, mute):
         am = self._getAudioMediaFromUriStr(peer_uri_str)
-        if not am: return
+        if not am:
+            return
         if mute:
             ep.Endpoint.instance.audDevManager().getCaptureDevMedia().stopTransmit(am)
             self.addMessage(None, "Muted audio to '%s'" % (peer_uri_str))
@@ -463,7 +489,8 @@ class Chat(gui.ChatObserver):
     def onCloseWindow(self):
         self.stopCall()
         # will remove entry from list eventually destroy this chat?
-        if self in self._acc.chatList: self._acc.chatList.remove(self)
+        if self in self._acc.chatList:
+            self._acc.chatList.remove(self)
         self._app.updateWindowMenu()
         # destroy GUI
         self._gui.destroy()
@@ -473,9 +500,10 @@ class AddParticipantDlg(tk.Toplevel):
     """
     List of buddies
     """
+
     def __init__(self, parent, app, bud_list):
         tk.Toplevel.__init__(self, parent)
-        self.title('Add participants..')
+        self.title("Add participants..")
         self.transient(parent)
         self.parent = parent
         self._app = app
@@ -496,9 +524,9 @@ class AddParticipantDlg(tk.Toplevel):
         # buddy list
         list_frame = ttk.Frame(self)
         list_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=20, pady=20)
-        #scrl = ttk.Scrollbar(self, orient=tk.VERTICAL, command=list_frame.yview)
-        #list_frame.config(yscrollcommand=scrl.set)
-        #scrl.pack(side=tk.RIGHT, fill=tk.Y)
+        # scrl = ttk.Scrollbar(self, orient=tk.VERTICAL, command=list_frame.yview)
+        # list_frame.config(yscrollcommand=scrl.set)
+        # scrl.pack(side=tk.RIGHT, fill=tk.Y)
 
         # draw buddy list
         self.buddies = []
@@ -508,15 +536,17 @@ class AddParticipantDlg(tk.Toplevel):
                 self.buddies.append((1, bud))
 
         self.bud_var = []
-        for idx,(flag,bud) in enumerate(self.buddies):
+        for idx, (flag, bud) in enumerate(self.buddies):
             self.bud_var.append(tk.IntVar())
-            if flag==0:
+            if flag == 0:
                 s = ttk.Separator(list_frame, orient=tk.HORIZONTAL)
                 s.pack(fill=tk.X)
                 l = tk.Label(list_frame, anchor=tk.W, text="Account '%s':" % (bud))
                 l.pack(fill=tk.X)
             else:
-                c = tk.Checkbutton(list_frame, anchor=tk.W, text=bud.cfg.uri, variable=self.bud_var[idx])
+                c = tk.Checkbutton(
+                    list_frame, anchor=tk.W, text=bud.cfg.uri, variable=self.bud_var[idx]
+                )
                 c.pack(fill=tk.X)
         s = ttk.Separator(list_frame, orient=tk.HORIZONTAL)
         s.pack(fill=tk.X)
@@ -525,15 +555,16 @@ class AddParticipantDlg(tk.Toplevel):
         tail_frame = ttk.Frame(self)
         tail_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)
 
-        btnOk = ttk.Button(tail_frame, text='Ok', default=tk.ACTIVE, command=self.onOk)
+        btnOk = ttk.Button(tail_frame, text="Ok", default=tk.ACTIVE, command=self.onOk)
         btnOk.pack(side=tk.LEFT, padx=20, pady=10)
-        btnCancel = ttk.Button(tail_frame, text='Cancel', command=self.onCancel)
+        btnCancel = ttk.Button(tail_frame, text="Cancel", command=self.onCancel)
         btnCancel.pack(side=tk.RIGHT, padx=20, pady=10)
 
     def onOk(self):
         self.buddyList[:] = []
-        for idx,(flag,bud) in enumerate(self.buddies):
-            if not flag: continue
+        for idx, (flag, bud) in enumerate(self.buddies):
+            if not flag:
+                continue
             if self.bud_var[idx].get() and not (bud in self.buddyList):
                 self.buddyList.append(bud)
 

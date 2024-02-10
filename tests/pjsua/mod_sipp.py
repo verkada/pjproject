@@ -1,4 +1,3 @@
-
 ## Automatic test module for SIPp.
 ##
 ## This module will need a test driver for each SIPp scenario:
@@ -19,18 +18,19 @@
 ##   - $PJSUA_URI[N]            : SIP URI of PJSUA instance #N
 
 import ctypes
-import time
 import imp
-import sys
 import os
 import re
 import subprocess
-from inc_cfg import *
+import sys
+import time
+
 import inc_const
+from inc_cfg import *
 
 # flags that test is running in Unix
 G_INUNIX = False
-if sys.platform.lower().find("win32")!=-1 or sys.platform.lower().find("microsoft")!=-1:
+if sys.platform.lower().find("win32") != -1 or sys.platform.lower().find("microsoft") != -1:
     G_INUNIX = False
 else:
     G_INUNIX = True
@@ -39,16 +39,16 @@ else:
 FDEVNULL = None
 
 # SIPp executable path and param
-#SIPP_PATH = '"C:\\devs\\bin\\Sipp_3.2\\sipp.exe"'
-SIPP_PATH = 'sipp'
-SIPP_PORT    = 50070
+# SIPP_PATH = '"C:\\devs\\bin\\Sipp_3.2\\sipp.exe"'
+SIPP_PATH = "sipp"
+SIPP_PORT = 50070
 SIPP_PARAM = "-m 1 -i 127.0.0.1 -p " + str(SIPP_PORT)
 SIPP_TIMEOUT = 60
 # On BG mode, SIPp doesn't require special terminal
 # On non-BG mode, on win, it needs env var: "TERMINFO=c:\cygwin\usr\share\terminfo"
 # TODO: on unix with BG mode, waitpid() always fails, need to be fixed
 SIPP_BG_MODE = False
-#SIPP_BG_MODE = not G_INUNIX
+# SIPP_BG_MODE = not G_INUNIX
 
 # Will be updated based on the test driver file (a .py file whose the same name as SIPp XML file)
 PJSUA_INST_PARAM = []
@@ -60,9 +60,9 @@ PJSUA_EXPECTS = []
 PJSUA_DEF_PARAM = "--null-audio --max-calls=1 --no-tcp --id=sip:a@localhost --username=a --realm=*"
 
 # Get SIPp scenario (XML file)
-SIPP_SCEN_XML  = ""
-if ARGS[1].endswith('.xml'):
-    SIPP_SCEN_XML  = ARGS[1]
+SIPP_SCEN_XML = ""
+if ARGS[1].endswith(".xml"):
+    SIPP_SCEN_XML = ARGS[1]
 else:
     exit(-99)
 
@@ -71,25 +71,27 @@ else:
 def resolve_pjsua_port(mo):
     return str(PJSUA_INST_PARAM[int(mo.group(1))].sip_port)
 
+
 def resolve_pjsua_uri(mo):
     return PJSUA_INST_PARAM[int(mo.group(1))].uri[1:-1]
 
+
 def resolve_driver_macros(st):
     st = re.sub("\$SIPP_PORT", str(SIPP_PORT), st)
-    st = re.sub("\$SIPP_URI", "sip:sipp@127.0.0.1:"+str(SIPP_PORT), st)
+    st = re.sub("\$SIPP_URI", "sip:sipp@127.0.0.1:" + str(SIPP_PORT), st)
     st = re.sub("\$PJSUA_PORT\[(\d+)\]", resolve_pjsua_port, st)
     st = re.sub("\$PJSUA_URI\[(\d+)\]", resolve_pjsua_uri, st)
     return st
 
 
 # Init test driver
-if os.access(SIPP_SCEN_XML[:-4]+".py", os.R_OK):
+if os.access(SIPP_SCEN_XML[:-4] + ".py", os.R_OK):
     # Load test driver file (the corresponding .py file), if any
-    cfg_file = imp.load_source("cfg_file", SIPP_SCEN_XML[:-4]+".py")
+    cfg_file = imp.load_source("cfg_file", SIPP_SCEN_XML[:-4] + ".py")
     for ua_idx, ua_param in enumerate(cfg_file.PJSUA):
         ua_param = resolve_driver_macros(ua_param)
-        PJSUA_INST_PARAM.append(InstanceParam("pjsua"+str(ua_idx), ua_param))
-    if DEFAULT_TELNET and hasattr(cfg_file, 'PJSUA_CLI_EXPECTS'):
+        PJSUA_INST_PARAM.append(InstanceParam("pjsua" + str(ua_idx), ua_param))
+    if DEFAULT_TELNET and hasattr(cfg_file, "PJSUA_CLI_EXPECTS"):
         PJSUA_EXPECTS = cfg_file.PJSUA_CLI_EXPECTS
     else:
         PJSUA_EXPECTS = cfg_file.PJSUA_EXPECTS
@@ -100,7 +102,7 @@ else:
         ua_param = PJSUA_DEF_PARAM + " sip:127.0.0.1:" + str(SIPP_PORT)
     else:
         # auto answer when SIPp is as UAC
-        ua_param = PJSUA_DEF_PARAM + " --auto-answer=200" 
+        ua_param = PJSUA_DEF_PARAM + " --auto-answer=200"
     PJSUA_INST_PARAM.append(InstanceParam("pjsua", ua_param))
 
 
@@ -113,7 +115,15 @@ def start_sipp():
     if SIPP_BG_MODE:
         sipp_param = sipp_param + " -bg"
     if SIPP_TIMEOUT:
-        sipp_param = sipp_param + " -timeout "+str(SIPP_TIMEOUT)+"s -timeout_error" + " -deadcall_wait "+str(SIPP_TIMEOUT)+"s"
+        sipp_param = (
+            sipp_param
+            + " -timeout "
+            + str(SIPP_TIMEOUT)
+            + "s -timeout_error"
+            + " -deadcall_wait "
+            + str(SIPP_TIMEOUT)
+            + "s"
+        )
 
     # add target param
     sipp_param = sipp_param + " 127.0.0.1:" + str(PJSUA_INST_PARAM[0].sip_port)
@@ -122,12 +132,19 @@ def start_sipp():
     fullcmd = os.path.normpath(SIPP_PATH) + " " + sipp_param
     print "Running SIPP: " + fullcmd
     if SIPP_BG_MODE:
-        sipp_proc = subprocess.Popen(fullcmd, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=G_INUNIX, universal_newlines=False)
+        sipp_proc = subprocess.Popen(
+            fullcmd,
+            bufsize=0,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            shell=G_INUNIX,
+            universal_newlines=False,
+        )
     else:
         # redirect output to NULL
         global FDEVNULL
-        #FDEVNULL  = open(os.devnull, 'w')
-        FDEVNULL  = open("logs/sipp_output.tmp", 'w')
+        # FDEVNULL  = open(os.devnull, 'w')
+        FDEVNULL = open("logs/sipp_output.tmp", "w")
         sipp_proc = subprocess.Popen(fullcmd, shell=G_INUNIX, stdout=FDEVNULL, stderr=FDEVNULL)
 
     if not SIPP_BG_MODE:
@@ -151,10 +168,12 @@ def start_sipp():
 
         if pid != 0:
             # Win specific: get process handle from PID, as on win32, os.waitpid() takes process handle instead of pid
-            if (sys.platform == "win32"):
+            if sys.platform == "win32":
                 SYNCHRONIZE = 0x00100000
                 PROCESS_QUERY_INFORMATION = 0x0400
-                hnd = ctypes.windll.kernel32.OpenProcess(SYNCHRONIZE | PROCESS_QUERY_INFORMATION, False, pid)
+                hnd = ctypes.windll.kernel32.OpenProcess(
+                    SYNCHRONIZE | PROCESS_QUERY_INFORMATION, False, pid
+                )
                 pid = hnd
 
         return pid
@@ -176,17 +195,17 @@ def wait_sipp(sipp):
                 wait_cnt = wait_cnt + 1
                 [pid_, ret_code] = os.waitpid(sipp, 0)
                 if sipp == pid_:
-                    #print "SIPP returned ", ret_code
+                    # print "SIPP returned ", ret_code
                     ret_code = ret_code >> 8
 
                     # Win specific: Close process handle
-                    if (sys.platform == "win32"):
+                    if sys.platform == "win32":
                         ctypes.windll.kernel32.CloseHandle(sipp)
-                    
+
                     return ret_code
             except os.error:
                 if wait_cnt <= 5:
-                    print "Retry ("+str(wait_cnt)+") waiting SIPp.."
+                    print "Retry (" + str(wait_cnt) + ") waiting SIPp.."
                 else:
                     return -99
 
@@ -204,22 +223,22 @@ def exec_pjsua_expects(t, sipp):
         ua_idx = expect[0]
         expect_st = expect[1]
         send_cmd = resolve_driver_macros(expect[2])
-        timeout = expect[3] if len(expect)>=4 else 0
+        timeout = expect[3] if len(expect) >= 4 else 0
         # Handle exception in pjsua flow, to avoid zombie SIPp process
         try:
             if expect_st != "":
                 if timeout > 0:
-                    ua[ua_idx].expect(expect_st, raise_on_error = True, timeout = timeout)
+                    ua[ua_idx].expect(expect_st, raise_on_error=True, timeout=timeout)
                 else:
-                    ua[ua_idx].expect(expect_st, raise_on_error = True)
+                    ua[ua_idx].expect(expect_st, raise_on_error=True)
             if send_cmd != "":
                 ua[ua_idx].send(send_cmd)
         except TestError, e:
             ua_err_st = e.desc
-            break;
+            break
         except:
             ua_err_st = "Unknown error"
-            break;
+            break
 
     # Need to poll here for handling these cases:
     # - If there is no PJSUA EXPECT scenario, we must keep polling the stdout,
@@ -232,7 +251,7 @@ def exec_pjsua_expects(t, sipp):
     # terminated.
     # Update: now pjsua stdout is polled continuously by a dedicated thread,
     #         so the poll is no longer needed
-    #for ua_idx in range(len(ua)):
+    # for ua_idx in range(len(ua)):
     #        ua[ua_idx].expect(inc_const.STDOUT_REFRESH, raise_on_error = False)
 
     return ua_err_st
@@ -278,6 +297,4 @@ def TEST_FUNC(t):
 
 
 # Here where it all comes together
-test = TestParam(SIPP_SCEN_XML[:-4],
-                 PJSUA_INST_PARAM,
-                 TEST_FUNC)
+test = TestParam(SIPP_SCEN_XML[:-4], PJSUA_INST_PARAM, TEST_FUNC)

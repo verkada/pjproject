@@ -15,47 +15,49 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import sys
-if sys.version_info[0] >= 3: # Python 3
+
+if sys.version_info[0] >= 3:  # Python 3
     import tkinter as tk
-    from tkinter import ttk
-    from tkinter import messagebox as msgbox
+    from tkinter import messagebox as msgbox, ttk
 else:
     import Tkinter as tk
     import tkMessageBox as msgbox
     import ttk
 
-import pjsua2 as pj
-import log
-import accountsetting
-import account
-import buddy
-import endpoint
-import settings
-
 import os
 import traceback
 
+import account
+import accountsetting
+import buddy
+import endpoint
+import log
+import pjsua2 as pj
+import settings
+
 # You may try to enable pjsua worker thread by setting USE_THREADS below to True *and*
-# recreate the swig module with adding -threads option to swig (uncomment USE_THREADS 
+# recreate the swig module with adding -threads option to swig (uncomment USE_THREADS
 # in swig/python/Makefile). In my experiment this would crash Python as reported in:
 # http://lists.pjsip.org/pipermail/pjsip_lists.pjsip.org/2014-March/017223.html
 USE_THREADS = False
 
-write=sys.stdout.write
+write = sys.stdout.write
+
 
 class Application(ttk.Frame):
     """
     The Application main frame.
     """
+
     def __init__(self):
         global USE_THREADS
-        ttk.Frame.__init__(self, name='application', width=300, height=500)
-        self.pack(expand='yes', fill='both')
-        self.master.title('pjsua2 Demo')
-        self.master.geometry('500x500+100+100')
+        ttk.Frame.__init__(self, name="application", width=300, height=500)
+        self.pack(expand="yes", fill="both")
+        self.master.title("pjsua2 Demo")
+        self.master.geometry("500x500+100+100")
 
         # Logger
         self.logger = log.Logger()
@@ -92,7 +94,7 @@ class Application(ttk.Frame):
         self.appConfig.epConfig.logConfig.level = 5
         self.appConfig.epConfig.logConfig.consoleLevel = 5
 
-    def saveConfig(self, filename='pygui.js'):
+    def saveConfig(self, filename="pygui.js"):
         # Save disabled accounts since they are not listed in self.accList
         disabled_accs = [ac for ac in self.appConfig.accounts if not ac.enabled]
         self.appConfig.accounts = []
@@ -111,7 +113,7 @@ class Application(ttk.Frame):
         # Save
         self.appConfig.saveFile(filename)
 
-    def start(self, cfg_file='pygui.js'):
+    def start(self, cfg_file="pygui.js"):
         global USE_THREADS
         # Load config
         if cfg_file and os.path.exists(cfg_file):
@@ -130,9 +132,9 @@ class Application(ttk.Frame):
         self.appConfig.epConfig.logConfig.consoleLevel = 5
 
         # Initialize library
-        self.appConfig.epConfig.uaConfig.userAgent = "pygui-" + self.ep.libVersion().full;
+        self.appConfig.epConfig.uaConfig.userAgent = "pygui-" + self.ep.libVersion().full
         self.ep.libInit(self.appConfig.epConfig)
-        self.master.title('pjsua2 Demo version ' + self.ep.libVersion().full)
+        self.master.title("pjsua2 Demo version " + self.ep.libVersion().full)
 
         # Create transports
         if self.appConfig.udp.enabled:
@@ -159,7 +161,7 @@ class Application(ttk.Frame):
 
     def updateAccount(self, acc):
         if acc.deleting:
-            return	# ignore
+            return  # ignore
         iid = str(acc.randId)
         text = acc.cfg.idUri
         status = acc.statusText()
@@ -168,10 +170,10 @@ class Application(ttk.Frame):
         if self.tv.exists(iid):
             self.tv.item(iid, text=text, values=values)
         else:
-            self.tv.insert('', 'end',  iid, open=True, text=text, values=values)
+            self.tv.insert("", "end", iid, open=True, text=text, values=values)
 
     def updateBuddy(self, bud):
-        iid = 'buddy' + str(bud.randId)
+        iid = "buddy" + str(bud.randId)
         text = bud.cfg.uri
         status = bud.statusText()
 
@@ -179,7 +181,7 @@ class Application(ttk.Frame):
         if self.tv.exists(iid):
             self.tv.item(iid, text=text, values=values)
         else:
-            self.tv.insert(str(bud.account.randId), 'end',  iid, open=True, text=text, values=values)
+            self.tv.insert(str(bud.account.randId), "end", iid, open=True, text=text, values=values)
 
     def _createAcc(self, acc_cfg):
         acc = account.Account(self)
@@ -202,8 +204,8 @@ class Application(ttk.Frame):
         self._createAppMenu()
 
         # Main pane, a Treeview
-        self.tv = ttk.Treeview(self, columns=('Status'), show='tree')
-        self.tv.pack(side='top', fill='both', expand='yes', padx=5, pady=5)
+        self.tv = ttk.Treeview(self, columns=("Status"), show="tree")
+        self.tv.pack(side="top", fill="both", expand="yes", padx=5, pady=5)
 
         self._createContextMenu()
 
@@ -220,7 +222,11 @@ class Application(ttk.Frame):
         file_menu = tk.Menu(self.menubar, tearoff=False)
         self.menubar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Add account..", command=self._onMenuAddAccount)
-        file_menu.add_checkbutton(label="Show/hide log window", command=self._onMenuShowHideLogWindow, variable=self.showLogWindow)
+        file_menu.add_checkbutton(
+            label="Show/hide log window",
+            command=self._onMenuShowHideLogWindow,
+            variable=self.showLogWindow,
+        )
         file_menu.add_separator()
         file_menu.add_command(label="Settings...", command=self._onMenuSettings)
         file_menu.add_command(label="Save Settings", command=self._onMenuSaveSettings)
@@ -253,12 +259,22 @@ class Application(ttk.Frame):
         # Create Account context menu
         self.accMenu = tk.Menu(top, tearoff=False)
         # Labels, must match with _onAccContextMenu()
-        labels = ['Unregister', 'Reregister', 'Add buddy...', '-',
-              'Online', 'Invisible', 'Away', 'Busy', '-',
-              'Settings...', '-',
-              'Delete...']
+        labels = [
+            "Unregister",
+            "Reregister",
+            "Add buddy...",
+            "-",
+            "Online",
+            "Invisible",
+            "Away",
+            "Busy",
+            "-",
+            "Settings...",
+            "-",
+            "Delete...",
+        ]
         for label in labels:
-            if label=='-':
+            if label == "-":
                 self.accMenu.add_separator()
             else:
                 cmd = lambda arg=label: self._onAccContextMenu(arg)
@@ -267,24 +283,31 @@ class Application(ttk.Frame):
         # Create Buddy context menu
         # Labels, must match with _onBuddyContextMenu()
         self.buddyMenu = tk.Menu(top, tearoff=False)
-        labels = ['Audio call', 'Send instant message', '-',
-              'Subscribe', 'Unsubscribe', '-',
-              'Settings...', '-',
-              'Delete...']
+        labels = [
+            "Audio call",
+            "Send instant message",
+            "-",
+            "Subscribe",
+            "Unsubscribe",
+            "-",
+            "Settings...",
+            "-",
+            "Delete...",
+        ]
 
         for label in labels:
-            if label=='-':
+            if label == "-":
                 self.buddyMenu.add_separator()
             else:
                 cmd = lambda arg=label: self._onBuddyContextMenu(arg)
                 self.buddyMenu.add_command(label=label, command=cmd)
 
-        if (top.tk.call('tk', 'windowingsystem')=='aqua'):
-            self.tv.bind('<2>', self._onTvRightClick)
-            self.tv.bind('<Control-1>', self._onTvRightClick)
+        if top.tk.call("tk", "windowingsystem") == "aqua":
+            self.tv.bind("<2>", self._onTvRightClick)
+            self.tv.bind("<Control-1>", self._onTvRightClick)
         else:
-            self.tv.bind('<3>', self._onTvRightClick)
-        self.tv.bind('<Double-Button-1>', self._onTvDoubleClick)
+            self.tv.bind("<3>", self._onTvRightClick)
+        self.tv.bind("<Double-Button-1>", self._onTvDoubleClick)
 
     def _getSelectedAccount(self):
         items = self.tv.selection()
@@ -294,7 +317,7 @@ class Application(ttk.Frame):
             iid = int(items[0])
         except:
             return None
-        accs = [acc for acc in self.accList if acc.randId==iid]
+        accs = [acc for acc in self.accList if acc.randId == iid]
         if not accs:
             return None
         return accs[0]
@@ -309,11 +332,11 @@ class Application(ttk.Frame):
         except:
             return None
 
-        accs = [acc for acc in self.accList if acc.randId==iid_parent]
+        accs = [acc for acc in self.accList if acc.randId == iid_parent]
         if not accs:
             return None
 
-        buds = [b for b in accs[0].buddyList if b.randId==iid]
+        buds = [b for b in accs[0].buddyList if b.randId == iid]
         if not buds:
             return None
 
@@ -321,9 +344,9 @@ class Application(ttk.Frame):
 
     def _onTvRightClick(self, event):
         iid = self.tv.identify_row(event.y)
-        #iid = self.tv.identify('item', event.x, event.y)
+        # iid = self.tv.identify('item', event.x, event.y)
         if iid:
-            self.tv.selection_set( (iid,) )
+            self.tv.selection_set((iid,))
             acc = self._getSelectedAccount()
             if acc:
                 self.accMenu.post(event.x_root, event.y_root)
@@ -334,7 +357,7 @@ class Application(ttk.Frame):
     def _onTvDoubleClick(self, event):
         iid = self.tv.identify_row(event.y)
         if iid:
-            self.tv.selection_set( (iid,) )
+            self.tv.selection_set((iid,))
             acc = self._getSelectedAccount()
             if acc:
                 self.cfgChanged = False
@@ -355,47 +378,47 @@ class Application(ttk.Frame):
         if not acc:
             return
 
-        if label=='Unregister':
+        if label == "Unregister":
             acc.setRegistration(False)
-        elif label=='Reregister':
+        elif label == "Reregister":
             acc.setRegistration(True)
-        elif label=='Online':
+        elif label == "Online":
             ps = pj.PresenceStatus()
             ps.status = pj.PJSUA_BUDDY_STATUS_ONLINE
             acc.setOnlineStatus(ps)
-        elif label=='Invisible':
+        elif label == "Invisible":
             ps = pj.PresenceStatus()
             ps.status = pj.PJSUA_BUDDY_STATUS_OFFLINE
             acc.setOnlineStatus(ps)
-        elif label=='Away':
+        elif label == "Away":
             ps = pj.PresenceStatus()
             ps.status = pj.PJSUA_BUDDY_STATUS_ONLINE
             ps.activity = pj.PJRPID_ACTIVITY_AWAY
             ps.note = "Away"
             acc.setOnlineStatus(ps)
-        elif label=='Busy':
+        elif label == "Busy":
             ps = pj.PresenceStatus()
             ps.status = pj.PJSUA_BUDDY_STATUS_ONLINE
             ps.activity = pj.PJRPID_ACTIVITY_BUSY
             ps.note = "Busy"
             acc.setOnlineStatus(ps)
-        elif label=='Settings...':
+        elif label == "Settings...":
             self.cfgChanged = False
             dlg = accountsetting.Dialog(self.master, acc.cfg)
             if dlg.doModal():
                 self.updateAccount(acc)
                 acc.modify(acc.cfg)
-        elif label=='Delete...':
+        elif label == "Delete...":
             msg = "Do you really want to delete account '%s'?" % acc.cfg.idUri
-            if msgbox.askquestion('Delete account?', msg, default=msgbox.NO) != u'yes':
+            if msgbox.askquestion("Delete account?", msg, default=msgbox.NO) != u"yes":
                 return
             iid = str(acc.randId)
             self.accList.remove(acc)
             acc.setRegistration(False)
             acc.deleting = True
             del acc
-            self.tv.delete( (iid,) )
-        elif label=='Add buddy...':
+            self.tv.delete((iid,))
+        elif label == "Add buddy...":
             cfg = pj.BuddyConfig()
             dlg = buddy.SettingDialog(self.master, cfg)
             if dlg.doModal():
@@ -409,22 +432,24 @@ class Application(ttk.Frame):
             return
         acc = bud.account
 
-        if label=='Audio call':
+        if label == "Audio call":
             chat = acc.findChat(bud.cfg.uri)
-            if not chat: chat = acc.newChat(bud.cfg.uri)
+            if not chat:
+                chat = acc.newChat(bud.cfg.uri)
             chat.showWindow()
             chat.startCall()
-        elif label=='Send instant message':
+        elif label == "Send instant message":
             chat = acc.findChat(bud.cfg.uri)
-            if not chat: chat = acc.newChat(bud.cfg.uri)
+            if not chat:
+                chat = acc.newChat(bud.cfg.uri)
             chat.showWindow(True)
-        elif label=='Subscribe':
+        elif label == "Subscribe":
             bud.subscribePresence(True)
-        elif label=='Unsubscribe':
+        elif label == "Unsubscribe":
             bud.subscribePresence(False)
-        elif label=='Settings...':
+        elif label == "Settings...":
             subs = bud.cfg.subscribe
-            uri  = bud.cfg.uri
+            uri = bud.cfg.uri
             dlg = buddy.SettingDialog(self.master, bud.cfg)
             if dlg.doModal():
                 self.updateBuddy(bud)
@@ -432,23 +457,23 @@ class Application(ttk.Frame):
                 if uri != bud.cfg.uri:
                     cfg = bud.cfg
                     # del old
-                    iid = 'buddy' + str(bud.randId)
+                    iid = "buddy" + str(bud.randId)
                     acc.buddyList.remove(bud)
                     del bud
-                    self.tv.delete( (iid,) )
+                    self.tv.delete((iid,))
                     # add new
                     self._createBuddy(acc, cfg)
                 # presence subscribe setting updated
                 elif subs != bud.cfg.subscribe:
                     bud.subscribePresence(bud.cfg.subscribe)
-        elif label=='Delete...':
+        elif label == "Delete...":
             msg = "Do you really want to delete buddy '%s'?" % bud.cfg.uri
-            if msgbox.askquestion('Delete buddy?', msg, default=msgbox.NO) != u'yes':
+            if msgbox.askquestion("Delete buddy?", msg, default=msgbox.NO) != u"yes":
                 return
-            iid = 'buddy' + str(bud.randId)
+            iid = "buddy" + str(bud.randId)
             acc.buddyList.remove(bud)
             del bud
-            self.tv.delete( (iid,) )
+            self.tv.delete((iid,))
         else:
             assert not ("Unknown menu " + label)
 
@@ -481,7 +506,9 @@ class Application(ttk.Frame):
     def _onMenuSettings(self):
         dlg = settings.Dialog(self, self.appConfig)
         if dlg.doModal():
-            msgbox.showinfo(self.master.title(), 'You need to restart for new settings to take effect')
+            msgbox.showinfo(
+                self.master.title(), "You need to restart for new settings to take effect"
+            )
 
     def _onMenuSaveSettings(self):
         self.saveConfig()
@@ -490,17 +517,19 @@ class Application(ttk.Frame):
         self._onClose()
 
     def _onMenuAbout(self):
-        msgbox.showinfo(self.master.title(), 'About')
+        msgbox.showinfo(self.master.title(), "About")
 
 
 class ExceptionCatcher:
     """Custom Tk exception catcher, mainly to display more information
        from pj.Error exception
     """
+
     def __init__(self, func, subst, widget):
         self.func = func
         self.subst = subst
         self.widget = widget
+
     def __call__(self, *args):
         try:
             if self.subst:
@@ -511,19 +540,21 @@ class ExceptionCatcher:
             write("  ," + error.info() + "\r\n")
             write("Traceback:\r\n")
             write(traceback.print_stack())
-            log.writeLog2(1, 'Exception: ' + error.info() + '\n')
+            log.writeLog2(1, "Exception: " + error.info() + "\n")
         except Exception as error:
             write("Exception:\r\n")
-            write("  ," +  str(error) + "\r\n")
+            write("  ," + str(error) + "\r\n")
             write("Traceback:\r\n")
             write(traceback.print_stack())
-            log.writeLog2(1, 'Exception: ' + str(error) + '\n')
+            log.writeLog2(1, "Exception: " + str(error) + "\n")
+
 
 def main():
-    #tk.CallWrapper = ExceptionCatcher
+    # tk.CallWrapper = ExceptionCatcher
     app = Application()
     app.start()
     app.mainloop()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

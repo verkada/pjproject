@@ -22,7 +22,7 @@
 
 import sys
 
-if len(sys.argv)==1:
+if len(sys.argv) == 1:
     print "Usage: main.py cfg_file [cfg_site]"
     print "Example:"
     print "  main.py cfg_gnu"

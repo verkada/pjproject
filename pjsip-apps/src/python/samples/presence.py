@@ -15,17 +15,20 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import sys
+
 import pjsua as pj
 
 LOG_LEVEL = 3
 pending_pres = None
 pending_uri = None
 
+
 def log_cb(level, str, len):
     print str,
+
 
 class MyAccountCallback(pj.AccountCallback):
     def __init__(self, account=None):
@@ -36,7 +39,7 @@ class MyAccountCallback(pj.AccountCallback):
         # Allow buddy to subscribe to our presence
         if buddy:
             return (200, None)
-        print 'Incoming SUBSCRIBE request from', from_uri
+        print "Incoming SUBSCRIBE request from", from_uri
         print 'Press "A" to accept and add, "R" to reject the request'
         pending_pres = pres
         pending_uri = from_uri
@@ -52,7 +55,7 @@ class MyBuddyCallback(pj.BuddyCallback):
         print self.buddy.info().online_text
 
     def on_pager(self, mime_type, body):
-        print "Instant message from", self.buddy.info().uri, 
+        print "Instant message from", self.buddy.info().uri,
         print "(", mime_type, "):"
         print body
 
@@ -73,36 +76,33 @@ lib = pj.Lib()
 try:
     # Init library with default config and some customized
     # logging config.
-    lib.init(log_cfg = pj.LogConfig(level=LOG_LEVEL, callback=log_cb))
+    lib.init(log_cfg=pj.LogConfig(level=LOG_LEVEL, callback=log_cb))
 
     # Create UDP transport which listens to any available port
-    transport = lib.create_transport(pj.TransportType.UDP, 
-                                     pj.TransportConfig(0))
-    print "\nListening on", transport.info().host, 
+    transport = lib.create_transport(pj.TransportType.UDP, pj.TransportConfig(0))
+    print "\nListening on", transport.info().host,
     print "port", transport.info().port, "\n"
-    
+
     # Start the library
     lib.start()
 
     # Create local account
     acc = lib.create_account_for_transport(transport, cb=MyAccountCallback())
     acc.set_basic_status(True)
-    
-    my_sip_uri = "sip:" + transport.info().host + \
-                 ":" + str(transport.info().port)
+
+    my_sip_uri = "sip:" + transport.info().host + ":" + str(transport.info().port)
 
     buddy = None
 
     # Menu loop
     while True:
         print "My SIP URI is", my_sip_uri
-        print "Menu:  a=add buddy, d=delete buddy, t=toggle", \
-              " online status, i=send IM, q=quit"
+        print "Menu:  a=add buddy, d=delete buddy, t=toggle", " online status, i=send IM, q=quit"
 
         input = sys.stdin.readline().rstrip("\r\n")
         if input == "a":
             # Add buddy
-            print "Enter buddy URI: ", 
+            print "Enter buddy URI: ",
             input = sys.stdin.readline().rstrip("\r\n")
             if input == "":
                 continue
@@ -120,20 +120,20 @@ try:
 
             buddy.send_typing_ind(True)
 
-            print "Type the message: ", 
+            print "Type the message: ",
             input = sys.stdin.readline().rstrip("\r\n")
             if input == "":
                 buddy.send_typing_ind(False)
                 continue
-            
+
             buddy.send_pager(input)
-        
+
         elif input == "d":
             if buddy:
                 buddy.delete()
                 buddy = None
             else:
-                print 'No buddy was added'
+                print "No buddy was added"
 
         elif input == "A":
             if pending_pres:
@@ -147,8 +147,7 @@ try:
 
         elif input == "R":
             if pending_pres:
-                acc.pres_notify(pending_pres, pj.SubscriptionState.TERMINATED,
-                                "rejected")
+                acc.pres_notify(pending_pres, pj.SubscriptionState.TERMINATED, "rejected")
                 pending_pres = None
                 pending_uri = None
             else:
@@ -161,8 +160,7 @@ try:
     acc.delete()
     acc = None
     if pending_pres:
-        acc.pres_notify(pending_pres, pj.SubscriptionState.TERMINATED,
-                        "rejected")
+        acc.pres_notify(pending_pres, pj.SubscriptionState.TERMINATED, "rejected")
     transport = None
     lib.destroy()
     lib = None
@@ -171,4 +169,3 @@ except pj.Error, e:
     print "Exception: " + str(e)
     lib.destroy()
     lib = None
-

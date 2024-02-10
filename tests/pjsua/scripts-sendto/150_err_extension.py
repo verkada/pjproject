@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=pjmedia
@@ -19,8 +18,12 @@ pjsua_args = "--null-audio --auto-answer 200"
 extra_headers = "Require: xxx-my-extension\n"
 include = ["Unsupported: xxx-my-extension"]
 exclude = []
-sendto_cfg = sip.SendtoCfg("Bad extension", pjsua_args, sdp, 420, 
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-			   
-
+sendto_cfg = sip.SendtoCfg(
+    "Bad extension",
+    pjsua_args,
+    sdp,
+    420,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

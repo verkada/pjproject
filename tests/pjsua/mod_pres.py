@@ -1,6 +1,7 @@
-import time
 import imp
 import sys
+import time
+
 import inc_const as const
 from inc_cfg import *
 
@@ -53,7 +54,7 @@ def test_func(t):
     u2.expect("Subscription state changed NULL --> SENT")
     # sometime it is NULL->SENT->ACCEPTED->ACTIVE
     # some othertime NULL->SENT->ACTIVE
-    #u2.expect("Presence subscription.*is ACCEPTED")
+    # u2.expect("Presence subscription.*is ACCEPTED")
     u2.expect("Presence subscription.*is ACTIVE")
     if not u1.inst_param.have_publish:
         # Process incoming SUBSCRIBE in U1
@@ -68,14 +69,14 @@ def test_func(t):
     u2.sync_stdout()
 
     # Set current account in both U1 and U2
-    if acc1!="-1":
+    if acc1 != "-1":
         if u1.use_telnet:
             u1.send("acc prev " + acc1)
         else:
             u1.send(">")
             u1.send(acc1)
         u1.expect("Current account changed")
-    if acc2!="-1":
+    if acc2 != "-1":
         if u2.use_telnet:
             u2.send("acc prev " + acc2)
         else:
@@ -94,7 +95,7 @@ def test_func(t):
         u2.send("t")
     u1.expect(uri2 + ".*status.*Offline")
     u2.expect("offline")
-    
+
     # Synchronize stdout
     u1.sync_stdout()
     u2.sync_stdout()
@@ -119,7 +120,7 @@ def test_func(t):
         u2.send("3")
     u1.expect(uri2 + ".*status.*On the phone")
     u2.expect("On the phone")
-    
+
     # Synchronize stdout
     u1.sync_stdout()
     u2.sync_stdout()
@@ -138,9 +139,9 @@ def test_func(t):
         u1.send(uri2)
         u2.expect(" is typing")
         u1.send(im_text)
-    u1.expect(im_text+".*delivered successfully")
-    u2.expect("MESSAGE from.*"+im_text)
-    
+    u1.expect(im_text + ".*delivered successfully")
+    u2.expect("MESSAGE from.*" + im_text)
+
     # Synchronize stdout
     u1.sync_stdout()
     u2.sync_stdout()
@@ -149,4 +150,3 @@ def test_func(t):
 # Here where it all comes together
 test = cfg_file.test_param
 test.test_func = test_func
-

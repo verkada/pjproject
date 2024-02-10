@@ -1,10 +1,9 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-# No SIP URI in Contact header 
+# No SIP URI in Contact header
 #
-complete_msg = \
-"""INVITE sip:localhost SIP/2.0
+complete_msg = """INVITE sip:localhost SIP/2.0
 Via: SIP/2.0/UDP 192.168.0.14:5060;rport;branch=z9hG4bKPj9db9
 Max-Forwards: 70
 From: <sip:192.168.0.14>;tag=08cd5bfc2d8a4fddb1f5e59c6961d298
@@ -19,7 +18,6 @@ Content-Length: 0
 """
 
 
-sendto_cfg = sip.SendtoCfg( "No SIP URI in Contact", 
-			    "--null-audio --auto-answer 200", 
-			    "", 500, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "No SIP URI in Contact", "--null-audio --auto-answer 200", "", 500, complete_msg=complete_msg
+)

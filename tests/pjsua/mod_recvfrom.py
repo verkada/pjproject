@@ -1,8 +1,9 @@
 import imp
-import sys
-import inc_sip as sip
-import inc_const as const
 import re
+import sys
+
+import inc_const as const
+import inc_sip as sip
 from inc_cfg import *
 
 # Read configuration
@@ -11,11 +12,12 @@ cfg_file = imp.load_source("cfg_file", ARGS[1])
 # Default server port (should we randomize?)
 srv_port = 50070
 
+
 def test_func(test):
     pjsua = test.process[0]
-    dlg = sip.Dialog("127.0.0.1", pjsua.inst_param.sip_port, 
-             local_port=srv_port, 
-             tcp=cfg_file.recvfrom_cfg.tcp)
+    dlg = sip.Dialog(
+        "127.0.0.1", pjsua.inst_param.sip_port, local_port=srv_port, tcp=cfg_file.recvfrom_cfg.tcp
+    )
 
     config = pjsua.get_config(cfg_file.recvfrom_cfg.pj_config)
     print "Config : " + config
@@ -38,7 +40,7 @@ def test_func(test):
         for c in t.cmds:
             if c[0] and c[0] != "":
                 pjsua.send(c[0])
-            if len(c)>1 and c[1] and c[1] != "":
+            if len(c) > 1 and c[1] and c[1] != "":
                 pjsua.expect(c[1])
         # Wait for request
         if t.check_cseq:
@@ -48,7 +50,7 @@ def test_func(test):
             call_id = last_call_id
             while cseq <= last_cseq and method == last_method and call_id == last_call_id:
                 request, src_addr = dlg.wait_msg_from(30)
-                if request==None or request=="":
+                if request == None or request == "":
                     raise TestError("Timeout waiting for request")
                 method = request.split(" ", 1)[0]
                 cseq_hval = sip.get_header(request, "CSeq")
@@ -59,12 +61,12 @@ def test_func(test):
             last_method = method
         else:
             request, src_addr = dlg.wait_msg_from(30)
-            if request==None or request=="":
+            if request == None or request == "":
                 raise TestError("Timeout waiting for request")
 
         # Check for include patterns
         for pat in t.include:
-            if re.search(pat, request, re.M | re.I)==None:
+            if re.search(pat, request, re.M | re.I) == None:
                 if t.title:
                     tname = " in " + t.title + " transaction"
                 else:
@@ -72,14 +74,14 @@ def test_func(test):
                 raise TestError("Pattern " + pat + " not found" + tname)
         # Check for exclude patterns
         for pat in t.exclude:
-            if re.search(pat, request, re.M | re.I)!=None:
+            if re.search(pat, request, re.M | re.I) != None:
                 if t.title:
                     tname = " in " + t.title + " transaction"
                 else:
                     tname = ""
                 raise TestError("Excluded pattern " + pat + " found" + tname)
         # Create response
-        if t.resp_code!=0:
+        if t.resp_code != 0:
             response = dlg.create_response(request, t.resp_code, "Status reason")
             # Add headers to response
             for h in t.resp_hdr:
@@ -96,11 +98,11 @@ def test_func(test):
         # Sync
         pjsua.sync_stdout()
 
+
 # Replace "$PORT" with server port in pjsua args
-cfg_file.recvfrom_cfg.inst_param.arg = cfg_file.recvfrom_cfg.inst_param.arg.replace("$PORT", str(srv_port))
+cfg_file.recvfrom_cfg.inst_param.arg = cfg_file.recvfrom_cfg.inst_param.arg.replace(
+    "$PORT", str(srv_port)
+)
 
 # Here where it all comes together
-test = TestParam(cfg_file.recvfrom_cfg.name, 
-                 [cfg_file.recvfrom_cfg.inst_param], 
-                 test_func)
-
+test = TestParam(cfg_file.recvfrom_cfg.name, [cfg_file.recvfrom_cfg.inst_param], test_func)

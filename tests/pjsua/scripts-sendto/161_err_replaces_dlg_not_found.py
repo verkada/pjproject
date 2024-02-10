@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=pjmedia
@@ -16,7 +15,12 @@ extra_headers = "Replaces: abcd;from_tag=1\r\n"
 include = []
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("Replaced dialog not found", pjsua_args, sdp, 481,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "Replaced dialog not found",
+    pjsua_args,
+    sdp,
+    481,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

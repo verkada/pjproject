@@ -1,4 +1,3 @@
-
 # Quality test of media calls.
 # - UA1 calls UA2
 # - UA1 plays a file until finished to be streamed to UA2
@@ -9,29 +8,29 @@
 # - naming: xxxxxx.CLOCK_RATE.wav, e.g: test1.8.wav
 # - clock-rate of those files can only be 8khz or 16khz
 
-import time
 import imp
 import os
-import sys
 import re
-import subprocess
-import wave
 import shutil
-import inc_const as const
+import subprocess
+import sys
+import time
+import wave
 
+import inc_const as const
 from inc_cfg import *
 
 # Load configuration
 cfg_file = imp.load_source("cfg_file", ARGS[1])
 
 # PESQ configs
-PESQ = "tools/pesq"				# PESQ executable path
-PESQ_DEFAULT_THRESHOLD = 3.4	# Default minimum acceptable PESQ MOS value
+PESQ = "tools/pesq"  # PESQ executable path
+PESQ_DEFAULT_THRESHOLD = 3.4  # Default minimum acceptable PESQ MOS value
 
 # PESQ params
-pesq_sample_rate_opt = ""		# Sample rate option for PESQ
-input_filename    = ""			# Input/Reference filename
-output_filename = ""			# Output/Degraded filename
+pesq_sample_rate_opt = ""  # Sample rate option for PESQ
+input_filename = ""  # Input/Reference filename
+output_filename = ""  # Output/Degraded filename
 
 
 # Test body function
@@ -60,25 +59,33 @@ def test_func(t):
 
     # Get clock rate of the output
     mo_clock_rate = re.compile("\.(\d+)\.wav").search(output_filename)
-    if (mo_clock_rate==None):
+    if mo_clock_rate == None:
         raise TestError("Cannot compare input & output, incorrect output filename format")
     clock_rate = mo_clock_rate.group(1)
-    
+
     # Get channel count of the output
     channel_count = 1
     if re.search("--stereo", ua2.inst_param.arg) != None:
         channel_count = 2
-    
+
     # Get matched input file from output file
     # (PESQ evaluates only files whose same clock rate & channel count)
     if channel_count == 2:
         if re.search("\.\d+\.\d+\.wav", input_filename) != None:
-            input_filename = re.sub("\.\d+\.\d+\.wav", "." + str(channel_count) + "."+clock_rate+".wav", input_filename)
+            input_filename = re.sub(
+                "\.\d+\.\d+\.wav",
+                "." + str(channel_count) + "." + clock_rate + ".wav",
+                input_filename,
+            )
         else:
-            input_filename = re.sub("\.\d+\.wav", "." + str(channel_count) + "."+clock_rate+".wav", input_filename)
+            input_filename = re.sub(
+                "\.\d+\.wav", "." + str(channel_count) + "." + clock_rate + ".wav", input_filename
+            )
 
     if (clock_rate != "8") & (clock_rate != "16"):
-        raise TestError("PESQ only works on clock rate 8kHz or 16kHz, clock rate used = "+clock_rate+ "kHz")
+        raise TestError(
+            "PESQ only works on clock rate 8kHz or 16kHz, clock rate used = " + clock_rate + "kHz"
+        )
 
     # Get conference clock rate of UA2 for PESQ sample rate option
     pesq_sample_rate_opt = "+" + clock_rate + "000"
@@ -130,25 +137,35 @@ def post_func(t):
     endpt = t.process[0]
 
     # Execute PESQ
-    fullcmd = os.path.normpath(PESQ) + " " + pesq_sample_rate_opt + " " + input_filename + " " + output_filename
+    fullcmd = (
+        os.path.normpath(PESQ)
+        + " "
+        + pesq_sample_rate_opt
+        + " "
+        + input_filename
+        + " "
+        + output_filename
+    )
     endpt.trace("Popen " + fullcmd)
-    pesq_proc = subprocess.Popen(fullcmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-    pesq_out  = pesq_proc.communicate()
+    pesq_proc = subprocess.Popen(
+        fullcmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True
+    )
+    pesq_out = pesq_proc.communicate()
 
     # Parse ouput
     mo_pesq_out = re.compile("Prediction[^=]+=\s+([\-\d\.]+)\s*").search(pesq_out[0])
-    if (mo_pesq_out == None):
+    if mo_pesq_out == None:
         raise TestError("Failed to fetch PESQ result")
 
     # Get threshold
-    if (cfg_file.pesq_threshold != None) | (cfg_file.pesq_threshold > -0.5 ):
+    if (cfg_file.pesq_threshold != None) | (cfg_file.pesq_threshold > -0.5):
         threshold = cfg_file.pesq_threshold
     else:
         threshold = PESQ_DEFAULT_THRESHOLD
 
     # Evaluate the PESQ MOS value
     pesq_res = mo_pesq_out.group(1)
-    if (float(pesq_res) >= threshold):
+    if float(pesq_res) >= threshold:
         endpt.trace("Success, PESQ result = " + pesq_res + " (target=" + str(threshold) + ").")
     else:
         endpt.trace("Failed, PESQ result = " + pesq_res + " (target=" + str(threshold) + ").")
@@ -163,11 +180,16 @@ def post_func(t):
         except:
             print "Couldn't copy output WAV, please check if 'logs' directory exists."
 
-        raise TestError("WAV seems to be degraded badly, PESQ = "+ pesq_res + " (target=" + str(threshold) + ").")
+        raise TestError(
+            "WAV seems to be degraded badly, PESQ = "
+            + pesq_res
+            + " (target="
+            + str(threshold)
+            + ")."
+        )
 
 
 # Here where it all comes together
 test = cfg_file.test_param
 test.test_func = test_func
 test.post_func = post_func
-

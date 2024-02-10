@@ -1,10 +1,9 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Answer for codec AMR should contain fmtp octet-align=1
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 3428650655 3428650655 IN IP4 192.168.1.9
 s=pjmedia
@@ -22,10 +21,15 @@ a=fmtp:101 0-15
 
 pjsua_args = "--null-audio --auto-answer 200 --add-codec AMR"
 extra_headers = ""
-include = ["octet-align=1"]	# response must include 'octet-align=1'
+include = ["octet-align=1"]  # response must include 'octet-align=1'
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("AMR negotiation should response with fmtp 'octet-align=1'", pjsua_args, sdp, 200,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "AMR negotiation should response with fmtp 'octet-align=1'",
+    pjsua_args,
+    sdp,
+    200,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

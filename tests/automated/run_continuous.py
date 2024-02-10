@@ -1,8 +1,9 @@
 #!/usr/bin/python
+import datetime
 import os
 import sys
 import time
-import datetime
+
 import ccdash
 
 INTERVAL = 300
@@ -11,24 +12,25 @@ ONCE = False
 SUFFIX = ""
 FORCE = False
 
+
 def run_scenarios(scenarios, group):
-	# Run each scenario
-	rc = 0
-	for scenario in scenarios:
-		argv = []
-		argv.append("ccdash.py")
-		argv.append("scenario")
-		argv.append(scenario)
-		argv.append("--group")
-		argv.append(group)
-		thisrc = ccdash.main(argv)
-		if rc==0 and thisrc:
-			rc = thisrc
-	return rc
+    # Run each scenario
+    rc = 0
+    for scenario in scenarios:
+        argv = []
+        argv.append("ccdash.py")
+        argv.append("scenario")
+        argv.append(scenario)
+        argv.append("--group")
+        argv.append(group)
+        thisrc = ccdash.main(argv)
+        if rc == 0 and thisrc:
+            rc = thisrc
+    return rc
 
 
 def usage():
-	print """Periodically monitor working directory for Continuous and Nightly builds
+    print """Periodically monitor working directory for Continuous and Nightly builds
 
 Usage:
   run_continuous.py [options] scenario1.xml [scenario2.xml ...]
@@ -51,90 +53,105 @@ options:
 
   --force	Force running the test even when nothing has changed.
 """
-	sys.exit(1)
+    sys.exit(1)
+
 
 if __name__ == "__main__":
-	if len(sys.argv)<=1 or sys.argv[1]=="-h" or sys.argv[1]=="--h" or sys.argv[1]=="--help" or sys.argv[1]=="/h":
-		usage()
+    if (
+        len(sys.argv) <= 1
+        or sys.argv[1] == "-h"
+        or sys.argv[1] == "--h"
+        or sys.argv[1] == "--help"
+        or sys.argv[1] == "/h"
+    ):
+        usage()
 
-	# Splice list
-	scenarios = []
-	i = 1
-	while i < len(sys.argv):
-		if sys.argv[i]=="--delay":
-			i = i + 1
-			if i >= len(sys.argv):
-				print "Error: missing argument"
-				sys.exit(1)
-			DELAY = float(sys.argv[i]) * 60
-			print "Delay is set to %f minute(s)" % (DELAY / 60)
-		elif sys.argv[i]=="--suffix":
-			i = i + 1
-			if i >= len(sys.argv):
-				print "Error: missing argument"
-				sys.exit(1)
-			SUFFIX = sys.argv[i]
-			print "Suffix is set to %s" % (SUFFIX)
-		elif sys.argv[i]=="--once":
-			ONCE = True
-		elif sys.argv[i]=="--force":
-			FORCE = True
-		else:
-			# Check if scenario exists
-			scenario = sys.argv[i]
-			if not os.path.exists(scenario):
-				print "Error: file " + scenario + " does not exist"
-				sys.exit(1)
-			scenarios.append(scenario)
-			print "Scenario %s added" % (scenario)
-		i = i + 1
+    # Splice list
+    scenarios = []
+    i = 1
+    while i < len(sys.argv):
+        if sys.argv[i] == "--delay":
+            i = i + 1
+            if i >= len(sys.argv):
+                print "Error: missing argument"
+                sys.exit(1)
+            DELAY = float(sys.argv[i]) * 60
+            print "Delay is set to %f minute(s)" % (DELAY / 60)
+        elif sys.argv[i] == "--suffix":
+            i = i + 1
+            if i >= len(sys.argv):
+                print "Error: missing argument"
+                sys.exit(1)
+            SUFFIX = sys.argv[i]
+            print "Suffix is set to %s" % (SUFFIX)
+        elif sys.argv[i] == "--once":
+            ONCE = True
+        elif sys.argv[i] == "--force":
+            FORCE = True
+        else:
+            # Check if scenario exists
+            scenario = sys.argv[i]
+            if not os.path.exists(scenario):
+                print "Error: file " + scenario + " does not exist"
+                sys.exit(1)
+            scenarios.append(scenario)
+            print "Scenario %s added" % (scenario)
+        i = i + 1
 
-	if len(scenarios) < 1:
-		print "Error: scenario is required"
-		sys.exit(1)
+    if len(scenarios) < 1:
+        print "Error: scenario is required"
+        sys.exit(1)
 
-	# Current date
-	utc = time.gmtime(None)
-	day = utc.tm_mday
+    # Current date
+    utc = time.gmtime(None)
+    day = utc.tm_mday
 
-	# Loop foreva
-	while True:
-		argv = []
+    # Loop foreva
+    while True:
+        argv = []
 
-		# Anything changed recently?
-		argv.append("ccdash.py")
-		argv.append("status")
-		argv.append("-w")
-		argv.append("../..")
-		rc = ccdash.main(argv)
+        # Anything changed recently?
+        argv.append("ccdash.py")
+        argv.append("status")
+        argv.append("-w")
+        argv.append("../..")
+        rc = ccdash.main(argv)
 
-		utc = time.gmtime(None)
+        utc = time.gmtime(None)
 
-		if utc.tm_mday != day or rc != 0 or FORCE:
-			group = ""
-			if utc.tm_mday != day:
-				day = utc.tm_mday
-				group = "Nightly" + SUFFIX
-			elif rc != 0:
-				group = "Continuous" + SUFFIX
-			else:
-				group = "Experimental" + SUFFIX
-			if DELAY > 0:
-				print "Will run %s after %f s.." % (group, DELAY)
-				time.sleep(DELAY)
-			rc = run_scenarios(scenarios, group)
-			msg = str(datetime.datetime.now()) + \
-				  ": done running " + group + \
-				  "tests, will check again in " + str(INTERVAL) + "s.."
-			if ONCE:
-				sys.exit(0)
-		else:
-			# Nothing changed
-			msg = str(datetime.datetime.now()) + \
-				  ": No update, will check again in " + str(INTERVAL) + "s.."
-			if ONCE:
-				sys.exit(1)
+        if utc.tm_mday != day or rc != 0 or FORCE:
+            group = ""
+            if utc.tm_mday != day:
+                day = utc.tm_mday
+                group = "Nightly" + SUFFIX
+            elif rc != 0:
+                group = "Continuous" + SUFFIX
+            else:
+                group = "Experimental" + SUFFIX
+            if DELAY > 0:
+                print "Will run %s after %f s.." % (group, DELAY)
+                time.sleep(DELAY)
+            rc = run_scenarios(scenarios, group)
+            msg = (
+                str(datetime.datetime.now())
+                + ": done running "
+                + group
+                + "tests, will check again in "
+                + str(INTERVAL)
+                + "s.."
+            )
+            if ONCE:
+                sys.exit(0)
+        else:
+            # Nothing changed
+            msg = (
+                str(datetime.datetime.now())
+                + ": No update, will check again in "
+                + str(INTERVAL)
+                + "s.."
+            )
+            if ONCE:
+                sys.exit(1)
 
-		print msg
-		time.sleep(INTERVAL)
-
+        print msg
+        time.sleep(INTERVAL)

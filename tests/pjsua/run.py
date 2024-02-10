@@ -1,26 +1,25 @@
-import sys
-import imp
-import re
-import os
-import subprocess
-import random
-import telnetlib
-import time
-import threading
-import traceback
 import getopt
+import imp
+import os
+import random
+import re
+import subprocess
+import sys
+import telnetlib
+import threading
+import time
+import traceback
 
 import inc_cfg as inc
 import inc_const as const
 
 # Vars
-G_EXE = ""        # pjsua executable path
-G_INUNIX = False    # flags that test is running in Unix
+G_EXE = ""  # pjsua executable path
+G_INUNIX = False  # flags that test is running in Unix
 
 
 # Usage string
-usage = \
-"""
+usage = """
 run.py - Automated test driver
 
 Usage:
@@ -61,33 +60,34 @@ inc.ARGS = args
 
 # Get the pjsua executable name
 if G_EXE == "":
-    if sys.platform.find("win32")!=-1:
+    if sys.platform.find("win32") != -1:
         EXE_DIR = "../../pjsip-apps/bin/"
-        EXECUTABLES = [ "pjsua_vc6d.exe",
-                "pjsua_vc6.exe",
-                "pjsua-i386-Win32-vc8-Debug.exe",
-                "pjsua-i386-Win32-vc8-Debug-Dynamic.exe",
-                "pjsua-i386-Win32-vc8-Debug-Static.exe",
-                "pjsua-i386-Win32-vc8-Release.exe",
-                "pjsua-i386-Win32-vc8-Release-Dynamic.exe",
-                "pjsua-i386-Win32-vc8-Release-Static.exe",
-                "pjsua-i386-Win32-vc14-Debug.exe",
-                "pjsua-i386-Win32-vc14-Debug-Dynamic.exe",
-                "pjsua-i386-Win32-vc14-Debug-Static.exe",
-                "pjsua-i386-Win32-vc14-Release.exe",
-                "pjsua-i386-Win32-vc14-Release-Dynamic.exe",
-                "pjsua-i386-Win32-vc14-Release-Static.exe"                
-                ]
+        EXECUTABLES = [
+            "pjsua_vc6d.exe",
+            "pjsua_vc6.exe",
+            "pjsua-i386-Win32-vc8-Debug.exe",
+            "pjsua-i386-Win32-vc8-Debug-Dynamic.exe",
+            "pjsua-i386-Win32-vc8-Debug-Static.exe",
+            "pjsua-i386-Win32-vc8-Release.exe",
+            "pjsua-i386-Win32-vc8-Release-Dynamic.exe",
+            "pjsua-i386-Win32-vc8-Release-Static.exe",
+            "pjsua-i386-Win32-vc14-Debug.exe",
+            "pjsua-i386-Win32-vc14-Debug-Dynamic.exe",
+            "pjsua-i386-Win32-vc14-Debug-Static.exe",
+            "pjsua-i386-Win32-vc14-Release.exe",
+            "pjsua-i386-Win32-vc14-Release-Dynamic.exe",
+            "pjsua-i386-Win32-vc14-Release-Static.exe",
+        ]
         e_ts = 0
         for e in EXECUTABLES:
             e = EXE_DIR + e
             if os.access(e, os.F_OK):
                 st = os.stat(e)
-                if e_ts==0 or e_ts<st.st_mtime:
+                if e_ts == 0 or e_ts < st.st_mtime:
                     G_EXE = e
                     e_ts = st.st_mtime
 
-        if G_EXE=="":
+        if G_EXE == "":
             print "Unable to find valid pjsua. Please build pjsip first"
             sys.exit(1)
 
@@ -98,16 +98,16 @@ if G_EXE == "":
             line = f.readline()
             if not line:
                 break
-            if line.find("TARGET_NAME")!=-1:
+            if line.find("TARGET_NAME") != -1:
                 print line
-                G_EXE="../../pjsip-apps/bin/pjsua-" + line.split(":= ")[1]
+                G_EXE = "../../pjsip-apps/bin/pjsua-" + line.split(":= ")[1]
                 break
-        if G_EXE=="":
+        if G_EXE == "":
             print "Unable to find ../../../build.mak. Please build pjsip first"
             sys.exit(1)
         G_INUNIX = True
 else:
-    if sys.platform.lower().find("win32")!=-1 or sys.platform.lower().find("microsoft")!=-1:
+    if sys.platform.lower().find("win32") != -1 or sys.platform.lower().find("microsoft") != -1:
         G_INUNIX = False
     else:
         G_INUNIX = True
@@ -131,6 +131,7 @@ class Expect(threading.Thread):
     output = ""
     lock = threading.Lock()
     running = False
+
     def __init__(self, inst_param):
         threading.Thread.__init__(self)
         self.inst_param = inst_param
@@ -139,19 +140,26 @@ class Expect(threading.Thread):
         self.trace_enabled = inst_param.trace_enabled
         self.use_telnet = inst_param.telnet_enabled
         self.telnet = None
-        
+
     def run(self):
         if self.use_telnet:
-            fullcmd = G_EXE + " " + self.inst_param.arg + " --use-cli --no-cli-console --cli-telnet-port=%d" % (self.inst_param.telnet_port)
+            fullcmd = (
+                G_EXE
+                + " "
+                + self.inst_param.arg
+                + " --use-cli --no-cli-console --cli-telnet-port=%d" % (self.inst_param.telnet_port)
+            )
             self.trace("Popen " + fullcmd)
             self.proc = subprocess.Popen(fullcmd, shell=G_INUNIX)
-            
+
             # start telnet-ing to pjsua, raise exception if telnet fails after 5s
             t0 = time.time()
             while self.proc.poll() is None and self.telnet is None:
                 try:
                     time.sleep(0.01)
-                    self.telnet = telnetlib.Telnet('127.0.0.1', port=self.inst_param.telnet_port, timeout=60)
+                    self.telnet = telnetlib.Telnet(
+                        "127.0.0.1", port=self.inst_param.telnet_port, timeout=60
+                    )
                 except Exception as e:
                     t1 = time.time()
                     dur = int(t1 - t0)
@@ -160,11 +168,11 @@ class Expect(threading.Thread):
 
             self.running = True
             while self.proc.poll() is None:
-                line = self.telnet.read_until('\n', 60)
+                line = self.telnet.read_until("\n", 60)
                 if line == "" or const.DESTROYED in line:
-                    break;
-                    
-                #Print the line if echo is ON
+                    break
+
+                # Print the line if echo is ON
                 if self.echo:
                     print self.name + ": " + line.rstrip()
 
@@ -173,18 +181,31 @@ class Expect(threading.Thread):
                 self.lock.release()
             self.running = False
         else:
-            fullcmd = G_EXE + " " + self.inst_param.arg + " --stdout-refresh=5 --stdout-refresh-text=" + const.STDOUT_REFRESH
+            fullcmd = (
+                G_EXE
+                + " "
+                + self.inst_param.arg
+                + " --stdout-refresh=5 --stdout-refresh-text="
+                + const.STDOUT_REFRESH
+            )
             if not self.inst_param.enable_buffer:
                 fullcmd = fullcmd + " --stdout-no-buf"
             self.trace("Popen " + fullcmd)
-            self.proc = subprocess.Popen(fullcmd, shell=G_INUNIX, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=False)
+            self.proc = subprocess.Popen(
+                fullcmd,
+                shell=G_INUNIX,
+                bufsize=0,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                universal_newlines=False,
+            )
             self.running = True
             while self.proc.poll() is None:
                 line = self.proc.stdout.readline()
                 if line == "":
-                    break;
-                    
-                #Print the line if echo is ON
+                    break
+
+                # Print the line if echo is ON
                 if self.echo:
                     print self.name + ": " + line.rstrip()
 
@@ -196,14 +217,14 @@ class Expect(threading.Thread):
     def send(self, cmd):
         self.trace("send " + cmd)
         if self.use_telnet:
-            self.telnet.write(cmd + '\r\n')
+            self.telnet.write(cmd + "\r\n")
         else:
             self.proc.stdin.writelines(cmd + "\n")
             self.proc.stdin.flush()
-        
+
     def expect(self, pattern, raise_on_error=True, title="", timeout=15):
         # no prompt for telnet
-        if self.use_telnet and pattern==const.PROMPT:
+        if self.use_telnet and pattern == const.PROMPT:
             return
 
         self.trace("expect " + pattern)
@@ -213,22 +234,22 @@ class Expect(threading.Thread):
         while found_at < 0:
             self.lock.acquire()
             lines = self.output.splitlines()
-            
+
             for i, line in enumerate(lines):
                 # Search for expected text
                 if r.search(line) != None:
                     found_at = i
                     break
-                
+
                 # Trap assertion error
                 if raise_on_error:
                     if self.ra.search(line) != None:
                         self.lock.release()
                         raise inc.TestError(self.name + ": " + line)
 
-            self.output = '\n'.join(lines[found_at+1:])+"\n" if found_at >= 0 else ""
+            self.output = "\n".join(lines[found_at + 1 :]) + "\n" if found_at >= 0 else ""
             self.lock.release()
-            
+
             if found_at >= 0:
                 return line
 
@@ -242,21 +263,28 @@ class Expect(threading.Thread):
                 if dur > timeout:
                     self.trace("Timed-out!")
                     if raise_on_error:
-                        raise inc.TestError(self.name + " " + title + ": Timeout expecting pattern: \"" + pattern + "\"")
+                        raise inc.TestError(
+                            self.name
+                            + " "
+                            + title
+                            + ': Timeout expecting pattern: "'
+                            + pattern
+                            + '"'
+                        )
                     break
                 else:
                     time.sleep(0.01)
         return None
-                            
+
     def get_config(self, key_config):
         self.send("dd")
-        line = self.expect(key_config);
+        line = self.expect(key_config)
         return line
 
     def sync_stdout(self):
         if not self.use_telnet:
             self.trace("sync_stdout")
-            cmd = "echo 1" + str(random.randint(1000,9999))
+            cmd = "echo 1" + str(random.randint(1000, 9999))
             self.send(cmd)
             self.expect(cmd)
 
@@ -270,14 +298,22 @@ class Expect(threading.Thread):
     def trace(self, s):
         if self.trace_enabled:
             now = time.time()
-            fmt = self.name + ": " + "================== " + s + " ==================" + " [at t=%(time)03d]"
-            print fmt % {'time':int(now - self.t0)}
+            fmt = (
+                self.name
+                + ": "
+                + "================== "
+                + s
+                + " =================="
+                + " [at t=%(time)03d]"
+            )
+            print fmt % {"time": int(now - self.t0)}
+
 
 #########################
 # Error handling
-def handle_error(errmsg, t, close_processes = True):
+def handle_error(errmsg, t, close_processes=True):
     print "====== Caught error: " + errmsg + " ======"
-    if (close_processes):
+    if close_processes:
         time.sleep(1)
         for p in t.process:
             # Protect against 'Broken pipe' exception
@@ -309,10 +345,10 @@ def handle_error(errmsg, t, close_processes = True):
 
 
 #########################
-# MAIN    
+# MAIN
 
 # Import the test script
-script = imp.load_source("script", inc.ARGS[0])  
+script = imp.load_source("script", inc.ARGS[0])
 
 # Init random seed
 random.seed()
@@ -381,8 +417,8 @@ for p in script.test.process:
         # Wait until registration completes
         if p.inst_param.have_reg:
             p.send("rr")
-            p.expect(p.inst_param.uri+".*registration success")
-         # Synchronize stdout
+            p.expect(p.inst_param.uri + ".*registration success")
+        # Synchronize stdout
         if not p.use_telnet:
             p.send("")
             p.expect(const.PROMPT)
@@ -407,8 +443,8 @@ for p in script.test.process:
     # won't fail
     if p.inst_param.have_reg:
         p.send("ru")
-        p.expect(p.inst_param.uri+".*unregistration success")
-    
+        p.expect(p.inst_param.uri + ".*unregistration success")
+
     if p.use_telnet:
         p.send("shutdown")
     else:
@@ -430,4 +466,3 @@ if script.test.post_func != None:
 # Done
 print "Test " + script.test.title + " completed successfully"
 sys.exit(0)
-

@@ -1,11 +1,10 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Torture message from RFC 4475
 # 3.1.1.  Valid Messages
 # 3.1.1.4. Escaped Nulls in URIs
-complete_msg = \
-"""REGISTER sip:example.com SIP/2.0
+complete_msg = """REGISTER sip:example.com SIP/2.0
 To: sip:null-%00-null@example.com
 From: sip:null-%00-null@example.com;tag=839923423
 Max-Forwards: 70
@@ -18,7 +17,6 @@ L:0
 """
 
 
-sendto_cfg = sip.SendtoCfg( "RFC 4475 3.1.1.4", 
-			    "--null-audio --auto-answer 200", 
-			    "", 200, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "RFC 4475 3.1.1.4", "--null-audio --auto-answer 200", "", 200, complete_msg=complete_msg
+)

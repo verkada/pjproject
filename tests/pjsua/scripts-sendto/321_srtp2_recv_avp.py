@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=tester
@@ -21,7 +20,11 @@ args = "--null-audio --auto-answer 200 --max-calls 1 --use-srtp 2 --srtp-secure 
 include = []
 exclude = []
 
-sendto_cfg = sip.SendtoCfg( "Callee has SRTP mandatory and receive RTP/AVP with crypto, should reject the call", 
-			    pjsua_args=args, sdp=sdp, resp_code=488, 
-			    resp_inc=include, resp_exc=exclude)
-
+sendto_cfg = sip.SendtoCfg(
+    "Callee has SRTP mandatory and receive RTP/AVP with crypto, should reject the call",
+    pjsua_args=args,
+    sdp=sdp,
+    resp_code=488,
+    resp_inc=include,
+    resp_exc=exclude,
+)

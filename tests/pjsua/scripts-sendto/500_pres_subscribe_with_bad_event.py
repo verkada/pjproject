@@ -1,12 +1,11 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
 # Ticket https://github.com/pjsip/pjproject/issues/623, based on
 # http://lists.pjsip.org/pipermail/pjsip_lists.pjsip.org/2008-September/004709.html:
 #
 # Assertion when receiving SUBSCRIBE with non-presence Event.
-complete_msg = \
-"""SUBSCRIBE sip:localhost;transport=UDP SIP/2.0
+complete_msg = """SUBSCRIBE sip:localhost;transport=UDP SIP/2.0
 Call-ID: f20e8783e764cae325dba17be4b8fe19@10.0.2.15
 CSeq: 1 SUBSCRIBE
 From: <sip:localhost>;tag=1710895
@@ -21,7 +20,6 @@ Content-Length: 0
 """
 
 
-sendto_cfg = sip.SendtoCfg( "Incoming SUBSCRIBE with non presence", 
-			    "--null-audio", 
-			    "", 489, complete_msg=complete_msg)
-
+sendto_cfg = sip.SendtoCfg(
+    "Incoming SUBSCRIBE with non presence", "--null-audio", "", 489, complete_msg=complete_msg
+)

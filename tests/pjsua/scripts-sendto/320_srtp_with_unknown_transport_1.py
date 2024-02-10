@@ -1,8 +1,7 @@
-import inc_sip as sip
 import inc_sdp as sdp
+import inc_sip as sip
 
-sdp = \
-"""
+sdp = """
 v=0
 o=- 0 0 IN IP4 127.0.0.1
 s=-
@@ -15,12 +14,18 @@ m=audio 4000 UNKNOWN 0
 
 pjsua_args = "--null-audio --auto-answer 200 --use-srtp 1 --srtp-secure 0"
 extra_headers = ""
-include = ["Content-Type: application/sdp",	# response must include SDP
-	   "m=audio [1-9]+[0-9]* RTP/AVP[\\s\\S]+a=crypto[\\s\\S]+m=audio 0 UNKNOWN"
-	   ]
+include = [
+    "Content-Type: application/sdp",  # response must include SDP
+    "m=audio [1-9]+[0-9]* RTP/AVP[\\s\\S]+a=crypto[\\s\\S]+m=audio 0 UNKNOWN",
+]
 exclude = []
 
-sendto_cfg = sip.SendtoCfg("SRTP audio and unknown media", pjsua_args, sdp, 200,
-			   extra_headers=extra_headers,
-			   resp_inc=include, resp_exc=exclude) 
-
+sendto_cfg = sip.SendtoCfg(
+    "SRTP audio and unknown media",
+    pjsua_args,
+    sdp,
+    200,
+    extra_headers=extra_headers,
+    resp_inc=include,
+    resp_exc=exclude,
+)

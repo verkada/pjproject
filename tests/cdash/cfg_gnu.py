@@ -17,9 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-import builder
 import os
 import sys
+
+import builder
+
 
 # Each configurator must export this function
 def create_builder(args):
@@ -37,37 +39,38 @@ Arguments:
     #   site configuration module. If not specified, "cfg_site" is implied
 
     cfg_site = "cfg_site"
-    
+
     for arg in args:
-        if arg=="-h" or arg=="--help":
+        if arg == "-h" or arg == "--help":
             print usage
             sys.exit(0)
-        elif arg[0]=="-":
+        elif arg[0] == "-":
             print usage
             sys.exit(1)
         else:
             cfg_site = arg
-        
-    if os.access(cfg_site+".py", os.F_OK) == False:
+
+    if os.access(cfg_site + ".py", os.F_OK) == False:
         print "Error: file '%s.py' doesn't exist." % (cfg_site)
         sys.exit(1)
 
     cfg_site = __import__(cfg_site)
-    test_cfg = builder.BaseConfig(cfg_site.BASE_DIR, \
-                                  cfg_site.URL, \
-                                  cfg_site.SITE_NAME, \
-                                  cfg_site.GROUP, \
-                                  cfg_site.OPTIONS)
+    test_cfg = builder.BaseConfig(
+        cfg_site.BASE_DIR, cfg_site.URL, cfg_site.SITE_NAME, cfg_site.GROUP, cfg_site.OPTIONS
+    )
 
     config_site = "#define PJ_TODO(x)\n" + cfg_site.CONFIG_SITE
     user_mak = "export CFLAGS+=-Wall\n" + cfg_site.USER_MAK
 
     builders = [
-        builder.GNUTestBuilder(test_cfg, build_config_name="default",
-                               user_mak=user_mak,
-                               config_site=config_site,
-                               exclude=cfg_site.EXCLUDE,
-                               not_exclude=cfg_site.NOT_EXCLUDE)
-        ]
+        builder.GNUTestBuilder(
+            test_cfg,
+            build_config_name="default",
+            user_mak=user_mak,
+            config_site=config_site,
+            exclude=cfg_site.EXCLUDE,
+            not_exclude=cfg_site.NOT_EXCLUDE,
+        )
+    ]
 
     return builders
