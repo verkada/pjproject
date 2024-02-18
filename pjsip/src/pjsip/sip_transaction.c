@@ -1280,7 +1280,7 @@ static void tsx_set_state( pjsip_transaction *tsx,
     /* New state must be greater than previous state */
     pj_assert(state >= tsx->state);
 
-    PJ_LOG(5, (tsx->obj_name, "State changed from %s to %s, event=%s",
+    PJ_LOG(3, (tsx->obj_name, "State changed from %s to %s, event=%s",
                state_str[tsx->state], state_str[state], 
                pjsip_event_str(event_src_type)));
     pj_log_push_indent();
@@ -1335,7 +1335,7 @@ static void tsx_set_state( pjsip_transaction *tsx,
         {
             pj_grp_lock_release(tsx->grp_lock);
         }
-
+        PJ_LOG(3, (tsx->obj_name, "Informing TU about state change"));
         (*tsx->tsx_user->on_tsx_state)(tsx, &e);
 
         if (event_src_type == PJSIP_EVENT_TIMER &&
@@ -1847,7 +1847,7 @@ PJ_DEF(pj_status_t) pjsip_tsx_send_msg( pjsip_transaction *tsx,
 
     PJ_ASSERT_RETURN(tdata != NULL, PJ_EINVALIDOP);
 
-    PJ_LOG(5,(tsx->obj_name, "Sending %s in state %s",
+    PJ_LOG(3,(tsx->obj_name, "Sending %s in state %s",
                              pjsip_tx_data_get_info(tdata),
                              state_str[tsx->state]));
     pj_log_push_indent();
@@ -2325,10 +2325,14 @@ static pj_status_t tsx_send_msg( pjsip_transaction *tsx,
 
     /* Begin resolving destination etc to send the message. */
     if (tdata->msg->type == PJSIP_REQUEST_MSG) {
-
+        PJ_LOG(3,(tsx->obj_name, "Calling  pjsip_endpt_send_request_stateless %s",
+                  pjsip_tx_data_get_info(tdata)));
         tsx->transport_flag |= TSX_HAS_PENDING_TRANSPORT;
         status = pjsip_endpt_send_request_stateless(tsx->endpt, tdata, tsx,
                                                     &send_msg_callback);
+
+        PJ_LOG(3,(tsx->obj_name, "Completed  pjsip_endpt_send_request_stateless %s",
+                  pjsip_tx_data_get_info(tdata)));
         if (status == PJ_EPENDING)
             status = PJ_SUCCESS;
         if (status != PJ_SUCCESS) {
@@ -2562,9 +2566,13 @@ static pj_status_t tsx_on_state_null( pjsip_transaction *tsx,
             tsx->last_tx = tdata;
             pjsip_tx_data_add_ref(tdata);
         }
-
+        PJ_LOG(3,(tsx->obj_name, "Starting to send message %s", 
+                  pjsip_tx_data_get_info(tdata)));
         /* Send the message. */
         status = tsx_send_msg( tsx, tdata);
+
+        PJ_LOG(3,(tsx->obj_name, "Message sent %s", 
+                  pjsip_tx_data_get_info(tdata)));
         if (status != PJ_SUCCESS) {
             return status;
         }
@@ -2591,6 +2599,8 @@ static pj_status_t tsx_on_state_null( pjsip_transaction *tsx,
             }
         }
 
+        PJ_LOG(3,(tsx->obj_name, "calling tsx_set_state %s", 
+                  pjsip_tx_data_get_info(tdata)));
         /* Move state. */
         tsx_set_state( tsx, PJSIP_TSX_STATE_CALLING, 
                        PJSIP_EVENT_TX_MSG, tdata, 0);

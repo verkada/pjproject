@@ -756,6 +756,8 @@ static void mod_inv_on_tsx_state(pjsip_transaction *tsx, pjsip_event *e)
         }
     }
 
+    PJ_LOG(2,(inv->obj_name, "TSX state changed to %d", tsx->state));
+
     /* Call on_tsx_state. CANCEL request is a special case and has been
      * reported earlier in inv_respond_incoming_cancel()
      */
@@ -3434,7 +3436,7 @@ PJ_DEF(pj_status_t) pjsip_inv_send_msg( pjsip_inv_session *inv,
 
     pj_log_push_indent();
 
-    PJ_LOG(5,(inv->obj_name, "Sending %s", 
+    PJ_LOG(3,(inv->obj_name, "Sending %s", 
               pjsip_tx_data_get_info(tdata)));
 
     if (tdata->msg->type == PJSIP_REQUEST_MSG) {

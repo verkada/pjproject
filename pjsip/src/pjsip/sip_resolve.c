@@ -201,6 +201,8 @@ PJ_DEF(void) pjsip_resolve( pjsip_resolver_t *resolver,
     pjsip_transport_type_e type = target->type;
     int af = pj_AF_UNSPEC();
 
+    PJ_LOG(3,(THIS_FILE, 
+                " Func %s line %d Enter", __FUNCTION__, __LINE__));
     /* If an external implementation has been provided use it instead */
     if (resolver->ext_res) {
         (*resolver->ext_res->resolve)(resolver, pool, target, token, cb);
@@ -359,7 +361,7 @@ PJ_DEF(void) pjsip_resolve( pjsip_resolver_t *resolver,
             }
             pj_sockaddr_set_port(&svr_addr.entry[i].addr, srv_port);
 
-            PJ_LOG(5,(THIS_FILE, 
+            PJ_LOG(3,(THIS_FILE, 
                       "Target '%.*s:%d' type=%s resolved to "
                       "'%s' type=%s (%s)",
                       (int)target->addr.host.slen,
@@ -378,9 +380,12 @@ PJ_DEF(void) pjsip_resolve( pjsip_resolver_t *resolver,
                                 pj_sockaddr_get_len(&svr_addr.entry[i].addr);
         }
 
+        PJ_LOG(3,(THIS_FILE, 
+                  " Func %s line %d Calling user callback", __FUNCTION__, __LINE__));
         /* Call the callback. */
         (*cb)(status, token, &svr_addr);
-
+        PJ_LOG(3,(THIS_FILE, 
+                  " Func %s line %d Exit", __FUNCTION__, __LINE__));
         /* Done. */
         return;
     }
@@ -439,7 +444,7 @@ PJ_DEF(void) pjsip_resolve( pjsip_resolver_t *resolver,
     }
 
     /* Start the asynchronous query */
-    PJ_LOG(5, (query->objname, 
+    PJ_LOG(3, (query->objname, 
                "Starting async DNS %s query: target=%.*s%.*s, transport=%s, "
                "port=%d",
                pj_dns_get_type_name(query->query_type),

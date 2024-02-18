@@ -1295,7 +1295,7 @@ PJ_DEF(pj_status_t) pjsip_dlg_send_request( pjsip_dialog *dlg,
                      PJSIP_ENOTREQUESTMSG);
 
     pj_log_push_indent();
-    PJ_LOG(5,(dlg->obj_name, "Sending %s",
+    PJ_LOG(3,(dlg->obj_name, "Sending %s",
               pjsip_tx_data_get_info(tdata)));
 
     /* Lock and increment session */
@@ -2127,7 +2127,7 @@ void pjsip_dlg_on_tsx_state( pjsip_dialog *dlg,
 {
     unsigned i;
 
-    PJ_LOG(5,(dlg->obj_name, "Transaction %s state changed to %s",
+    PJ_LOG(3,(dlg->obj_name, "Transaction %s state changed to %s",
               tsx->obj_name, pjsip_tsx_state_str(tsx->state)));
     pj_log_push_indent();
 

@@ -1106,6 +1106,8 @@ static void stateless_send_transport_cb( void *token,
     PJ_UNUSED_ARG(tdata);
     pj_assert(tdata == stateless_data->tdata);
 
+    PJ_LOG(3,(THIS_FILE,
+                  " Func %s Enter line %d", __FUNCTION__, __LINE__));
     for (;;) {
         pj_status_t status;
         pj_bool_t cont;
@@ -1271,7 +1273,8 @@ static void stateless_send_transport_cb( void *token,
         }
 
         pjsip_tx_data_invalidate_msg(tdata);
-
+        PJ_LOG(3,(THIS_FILE, 
+                  "Calling pjsip_transport_send Func %s line %d", __FUNCTION__, __LINE__));
         /* Send message using this transport. */
         status = pjsip_transport_send( stateless_data->cur_transport,
                                        tdata,
@@ -1279,6 +1282,9 @@ static void stateless_send_transport_cb( void *token,
                                        cur_addr_len,
                                        stateless_data,
                                        &stateless_send_transport_cb);
+
+        PJ_LOG(3,(THIS_FILE, 
+                  "Completed pjsip_transport_send Func %s line %d", __FUNCTION__, __LINE__));
         if (status == PJ_SUCCESS) {
             /* Recursively call this function. */
             sent = tdata->buf.cur - tdata->buf.start;
@@ -1294,7 +1300,8 @@ static void stateless_send_transport_cb( void *token,
             return;
         }
     }
-
+    PJ_LOG(3,(THIS_FILE, 
+                  " Func %s Exit line %d", __FUNCTION__, __LINE__));
 }
 
 /* Resolver callback for sending stateless request. */
@@ -1396,6 +1403,8 @@ PJ_DEF(pj_status_t) pjsip_endpt_send_request_stateless(pjsip_endpoint *endpt,
 
     PJ_ASSERT_RETURN(endpt && tdata, PJ_EINVAL);
 
+    PJ_LOG(3,(THIS_FILE, "Sending stateless request %s",
+                     pjsip_tx_data_get_info(tdata)));
     /* Get destination name to contact. */
     status = pjsip_process_route_set(tdata, &dest_info);
     if (status != PJ_SUCCESS)
@@ -1420,11 +1429,14 @@ PJ_DEF(pj_status_t) pjsip_endpt_send_request_stateless(pjsip_endpoint *endpt,
             pj_strdup(tdata->pool, &tdata->dest_info.name,
                       &dest_info.addr.host);
         }
-
+        PJ_LOG(3,(THIS_FILE, "%s: resolving target",
+                             pjsip_tx_data_get_info(tdata)));
         pjsip_endpt_resolve( endpt, tdata->pool, &dest_info, stateless_data,
                              &stateless_send_resolver_callback);
+        PJ_LOG(3,(THIS_FILE, "%s: target resolved",
+                             pjsip_tx_data_get_info(tdata)));
     } else {
-        PJ_LOG(5,(THIS_FILE, "%s: skipping target resolution because "
+        PJ_LOG(3,(THIS_FILE, "%s: skipping target resolution because "
                              "address is already set",
                              pjsip_tx_data_get_info(tdata)));
         stateless_send_resolver_callback(PJ_SUCCESS, stateless_data,

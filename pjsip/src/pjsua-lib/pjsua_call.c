@@ -846,7 +846,7 @@ PJ_DEF(pj_status_t) pjsua_call_make_call(pjsua_acc_id acc_id,
     /* Check arguments */
     PJ_ASSERT_RETURN(dest_uri, PJ_EINVAL);
 
-    PJ_LOG(4,(THIS_FILE, "Making call with acc #%d to %.*s", acc_id,
+    PJ_LOG(3,(THIS_FILE, "Making call with acc #%d to %.*s", acc_id,
               (int)dest_uri->slen, dest_uri->ptr));
 
     pj_log_push_indent();
