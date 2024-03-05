@@ -985,6 +985,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
               (pjsua_var.is_mswitch ? "Switch" : "Conf"),
               source, sink));
 
+    PJ_LOG(2,(THIS_FILE, "source %d, sink %d", source, sink))  
     PJ_ASSERT_RETURN(source >= 0 && sink >= 0, PJ_EINVAL);
 
     pj_log_push_indent();

@@ -849,6 +849,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_port_info( pjmedia_conf *conf,
     struct conf_port *conf_port;
     const pjmedia_audio_format_detail *afd;
 
+    PJ_LOG(2,(THIS_FILE, "conf %d, slot %d, conf->max_ports %d", conf, slot, conf->max_ports))
     /* Check arguments */
     PJ_ASSERT_RETURN(conf && slot<conf->max_ports, PJ_EINVAL);
 
