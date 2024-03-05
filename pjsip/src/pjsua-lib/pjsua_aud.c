@@ -972,11 +972,11 @@ PJ_DEF(pj_status_t) pjsua_conf_connect( pjsua_conf_port_id source,
 }
 
 
-#define STATUS_CHECK(status) \
-    do { \
-        PJ_LOG(2, (__FILE__, __LINE__, "status = %d", status)); \
-    } \
-    while (0)
+// #define STATUS_CHECK(status) \
+//     do { \
+//         PJ_LOG(2, (__FILE__, __LINE__, "status = %d", status)); \
+//     } \
+//     while (0)
 
 /*
  * Establish unidirectional media flow from souce to sink, with signal
@@ -1021,11 +1021,11 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
         peer_id = (source!=0)? source : sink;
         status = pjmedia_conf_get_port_info(pjsua_var.mconf, peer_id,
                                             &peer_info);
-        STATUS_CHECK(status);
+        PJ_LOG(2, (THIS_FILE, "location 1 status = %d", status));
         pj_assert(status == PJ_SUCCESS);
 
         status = pjmedia_conf_get_port_info(pjsua_var.mconf, 0, &port0_info);
-        STATUS_CHECK(status);
+        PJ_LOG(2, (THIS_FILE, "location 2 status = %d", status));
         pj_assert(status == PJ_SUCCESS);
 
         /* Check if sound device is instantiated. */
@@ -1061,7 +1061,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
                                           peer_info.samples_per_frame,
                                           peer_info.bits_per_sample,
                                           PJ_FALSE);
-                STATUS_CHECK(status);
+                PJ_LOG(2, (THIS_FILE, "location 3 status = %d", status));
                 if (status != PJ_SUCCESS) {
                     pjsua_perror(THIS_FILE, "Error opening sound device",
                                  status);
@@ -1086,7 +1086,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
                 /* Null-audio */
                 status = pjsua_set_snd_dev(pjsua_var.cap_dev,
                                            pjsua_var.play_dev);
-                STATUS_CHECK(status);
+                PJ_LOG(2, (THIS_FILE, "location 4 status = %d", status));
                 if (status != PJ_SUCCESS) {
                     pjsua_perror(THIS_FILE, "Error opening sound device",
                                  status);
@@ -1111,7 +1111,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
             !pjsua_var.no_snd)
         {
             status = pjsua_set_snd_dev(pjsua_var.cap_dev, pjsua_var.play_dev);
-            STATUS_CHECK(status);
+            PJ_LOG(2, (THIS_FILE, "location 5 status = %d", status));
             if (status != PJ_SUCCESS) {
                 pjsua_perror(THIS_FILE, "Error opening sound device", status);
                 goto on_return;
