@@ -970,7 +970,14 @@ PJ_DEF(pj_status_t) pjsua_conf_connect( pjsua_conf_port_id source,
     pjsua_conf_connect_param_default(&prm);
     return pjsua_conf_connect2(source, sink, &prm);
 }
-                                        
+
+
+#define STATUS_CHECK(status) \
+    do { \
+        PJ_LOG(2, __FILE__, __LINE__, "status = %d", status); \
+    } \
+    while (0)
+
 /*
  * Establish unidirectional media flow from souce to sink, with signal
  * level adjustment.
@@ -985,7 +992,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
               (pjsua_var.is_mswitch ? "Switch" : "Conf"),
               source, sink));
 
-    PJ_LOG(2,(THIS_FILE, "source %d, sink %d", source, sink))  
+    PJ_LOG(2,(THIS_FILE, "source %d, sink %d", source, sink));
     PJ_ASSERT_RETURN(source >= 0 && sink >= 0, PJ_EINVAL);
 
     pj_log_push_indent();
@@ -1014,9 +1021,11 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
         peer_id = (source!=0)? source : sink;
         status = pjmedia_conf_get_port_info(pjsua_var.mconf, peer_id,
                                             &peer_info);
+        STATUS_CHECK(status);
         pj_assert(status == PJ_SUCCESS);
 
         status = pjmedia_conf_get_port_info(pjsua_var.mconf, 0, &port0_info);
+        STATUS_CHECK(status);
         pj_assert(status == PJ_SUCCESS);
 
         /* Check if sound device is instantiated. */
@@ -1052,6 +1061,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
                                           peer_info.samples_per_frame,
                                           peer_info.bits_per_sample,
                                           PJ_FALSE);
+                STATUS_CHECK(status);
                 if (status != PJ_SUCCESS) {
                     pjsua_perror(THIS_FILE, "Error opening sound device",
                                  status);
@@ -1066,6 +1076,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
 
                 param.options = 0;
                 status = open_snd_dev(&param);
+                STATUS_CHECK(status);
                 if (status != PJ_SUCCESS) {
                     pjsua_perror(THIS_FILE, "Error opening sound device",
                                  status);
@@ -1075,6 +1086,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
                 /* Null-audio */
                 status = pjsua_set_snd_dev(pjsua_var.cap_dev,
                                            pjsua_var.play_dev);
+                STATUS_CHECK(status);
                 if (status != PJ_SUCCESS) {
                     pjsua_perror(THIS_FILE, "Error opening sound device",
                                  status);
@@ -1099,6 +1111,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
             !pjsua_var.no_snd)
         {
             status = pjsua_set_snd_dev(pjsua_var.cap_dev, pjsua_var.play_dev);
+            STATUS_CHECK(status);
             if (status != PJ_SUCCESS) {
                 pjsua_perror(THIS_FILE, "Error opening sound device", status);
                 goto on_return;
@@ -1124,6 +1137,7 @@ on_return:
             pj_memcpy(&cc_param, prm, sizeof(cc_param));
         status = pjmedia_conf_connect_port(pjsua_var.mconf, source, sink, 
                                            (int)((cc_param.level-1) * 128));
+        STATUS_CHECK(status);
     }
 
     pj_log_pop_indent();
