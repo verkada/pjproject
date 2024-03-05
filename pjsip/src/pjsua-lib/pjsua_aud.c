@@ -974,7 +974,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect( pjsua_conf_port_id source,
 
 #define STATUS_CHECK(status) \
     do { \
-        PJ_LOG(2, "file: %s, line: %s, status %d", __FILE__, __LINE__, status); \
+        PJ_LOG(2, (__FILE__, __LINE__, "status = %d", status)); \
     } \
     while (0)
 
