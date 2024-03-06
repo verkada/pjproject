@@ -518,10 +518,17 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     unsigned i;
 
     /* Check arguments */
+    if conf == NULL {
+        PJ_LOG(2, (THIS_FILE, "conf nil", status));
+    } else {
+        PJ_LOG(2, (THIS_FILE, "conf connect src_slot %d, max ports %d, sink slot %d", src_slot, conf->max_ports, sink_slot));
+    }
+    
     PJ_ASSERT_RETURN(conf && src_slot<conf->max_ports && 
                      sink_slot<conf->max_ports, PJ_EINVAL);
 
     /* For now, level MUST be zero. */
+    PJ_LOG(2, (THIS_FILE, "level %d", level));
     PJ_ASSERT_RETURN(level == 0, PJ_EINVAL);
 
     pj_mutex_lock(conf->mutex);
@@ -529,6 +536,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     /* Ports must be valid. */
     src_port = conf->ports[src_slot];
     dst_port = conf->ports[sink_slot];
+    PJ_LOG(2, (THIS_FILE, "src_port %d, dst_port %d", src_port, dst_port));
     if (!src_port || !dst_port) {
         pj_mutex_unlock(conf->mutex);
         return PJ_EINVAL;
@@ -849,7 +857,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_port_info( pjmedia_conf *conf,
     struct conf_port *conf_port;
     const pjmedia_audio_format_detail *afd;
 
-    PJ_LOG(2,(THIS_FILE, "conf %d, slot %d, conf->max_ports %d", conf, slot, conf->max_ports))
+    //PJ_LOG(2,(THIS_FILE, "conf %d, slot %d, conf->max_ports %d", conf, slot, conf->max_ports))
     /* Check arguments */
     PJ_ASSERT_RETURN(conf && slot<conf->max_ports, PJ_EINVAL);
 
