@@ -981,6 +981,11 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     pj_bool_t start_sound = PJ_FALSE;
     unsigned i;
 
+    if conf == NULL {
+        PJ_LOG(2, (THIS_FILE, "conf nil"));
+    }
+    PJ_LOG(2, (THIS_FILE, "conf connect src_slot %d, max ports %d, sink slot %d", src_slot, conf->max_ports, sink_slot));
+    
     /* Check arguments */
     PJ_ASSERT_RETURN(conf && src_slot<conf->max_ports && 
                      sink_slot<conf->max_ports, PJ_EINVAL);
@@ -989,6 +994,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     /* Disabled, you can put more than +127, at your own risk:
      PJ_ASSERT_RETURN(adj_level >= -128 && adj_level <= 127, PJ_EINVAL);
      */
+    PJ_LOG(2, (THIS_FILE, "adj_level %d", adj_level))
     PJ_ASSERT_RETURN(adj_level >= -128, PJ_EINVAL);
 
     pj_mutex_lock(conf->mutex);
@@ -996,6 +1002,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     /* Ports must be valid. */
     src_port = conf->ports[src_slot];
     dst_port = conf->ports[sink_slot];
+    PJ_LOG(2, (THIS_FILE, "src_port %d, dst_port %d", src_port, dst_port));
     if (!src_port || !dst_port) {
         pj_mutex_unlock(conf->mutex);
         return PJ_EINVAL;
