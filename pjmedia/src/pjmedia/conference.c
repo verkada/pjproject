@@ -1282,6 +1282,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_remove_port( pjmedia_conf *conf,
     }
 
     /* Remove the port. */
+    PJ_LOG(2, (THIS_FILE, "REMOVING PORT %d", port));
     conf->ports[port] = NULL;
     --conf->port_cnt;
 
