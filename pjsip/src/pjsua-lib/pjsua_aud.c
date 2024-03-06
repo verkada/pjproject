@@ -1076,7 +1076,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
 
                 param.options = 0;
                 status = open_snd_dev(&param);
-                STATUS_CHECK(status);
+                PJ_LOG(2, (THIS_FILE, "location 7 status = %d", status));
                 if (status != PJ_SUCCESS) {
                     pjsua_perror(THIS_FILE, "Error opening sound device",
                                  status);
@@ -1137,7 +1137,7 @@ on_return:
             pj_memcpy(&cc_param, prm, sizeof(cc_param));
         status = pjmedia_conf_connect_port(pjsua_var.mconf, source, sink, 
                                            (int)((cc_param.level-1) * 128));
-        STATUS_CHECK(status);
+        PJ_LOG(2, (THIS_FILE, "location 6 status = %d", status));
     }
 
     pj_log_pop_indent();
