@@ -426,6 +426,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_add_port( pjmedia_conf *conf,
 
     /* Put the port. */
     conf_port->slot = index;
+    PJ_LOG(2, THIS_FILE, "ADDING conf PORT slot %d", index);
     conf->ports[index] = conf_port;
     conf->port_cnt++;
 
