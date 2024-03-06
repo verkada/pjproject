@@ -276,6 +276,7 @@ AudioMediaPlayer::~AudioMediaPlayer()
 {
     if (playerId != PJSUA_INVALID_ID) {
         unregisterMediaPort();
+        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 2"));
         pjsua_player_destroy(playerId);
     }
 }
@@ -300,12 +301,14 @@ void AudioMediaPlayer::createPlayer(const string &file_name,
 
     status = pjsua_player_get_port(playerId, &port);
     if (status != PJ_SUCCESS) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 3"));
         pjsua_player_destroy(playerId);
         PJSUA2_RAISE_ERROR2(status, "AudioMediaPlayer::createPlayer()");
     }
     status = pjmedia_wav_player_set_eof_cb2(port, this, &eof_cb);
     if (status != PJ_SUCCESS) {
         pjsua_player_destroy(playerId);
+        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 4"));
         PJSUA2_RAISE_ERROR2(status, "AudioMediaPlayer::createPlayer()");
     }
 
@@ -348,11 +351,13 @@ void AudioMediaPlayer::createPlaylist(const StringVector &file_names,
     pjmedia_port *port;
     status = pjsua_player_get_port(playerId, &port);
     if (status != PJ_SUCCESS) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 5"));
         pjsua_player_destroy(playerId);
         PJSUA2_RAISE_ERROR2(status, "AudioMediaPlayer::createPlaylist()");
     }
     status = pjmedia_wav_playlist_set_eof_cb2(port, this, &eof_cb);
     if (status != PJ_SUCCESS) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 6"));
         pjsua_player_destroy(playerId);
         PJSUA2_RAISE_ERROR2(status, "AudioMediaPlayer::createPlaylist()");
     }

@@ -514,6 +514,7 @@ pj_status_t pjsua_aud_subsys_destroy()
         if (pjsua_var.player[i].port) {
             PJ_LOG(2,(THIS_FILE, "Destructor for player id=%d "
                       "is not called", i));
+            PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 1"));
             pjsua_player_destroy(i);
         }
     }
