@@ -981,7 +981,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     pj_bool_t start_sound = PJ_FALSE;
     unsigned i;
 
-    if conf == NULL {
+    if (conf == NULL) {
         PJ_LOG(2, (THIS_FILE, "conf nil"));
     }
     PJ_LOG(2, (THIS_FILE, "conf connect src_slot %d, max ports %d, sink slot %d", src_slot, conf->max_ports, sink_slot));
