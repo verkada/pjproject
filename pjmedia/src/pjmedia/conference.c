@@ -654,6 +654,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_destroy( pjmedia_conf *conf )
 
     PJ_ASSERT_RETURN(conf != NULL, PJ_EINVAL);
 
+    PJ_LOG(2, (THIS_FILE, "pjmedia_conf_destroy"));
+
     /* Destroy sound device port. */
     if (conf->snd_dev_port) {
         pjmedia_snd_port_destroy(conf->snd_dev_port);
