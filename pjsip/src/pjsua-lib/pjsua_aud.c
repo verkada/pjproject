@@ -1136,7 +1136,7 @@ on_return:
         else
             pj_memcpy(&cc_param, prm, sizeof(cc_param));
         PJ_LOG(2, (THIS_FILE, "source %d sink %d", source, sink));
-        PJ_LOG(2, (THIS_FILE, "level %d max ports %d", (int)((cc_param.level-1)* 128), *(pjsua_var.mconf).max_ports));
+        PJ_LOG(2, (THIS_FILE, "level %d max ports %d", (int)((cc_param.level-1)* 128), (pjsua_var.mconf)->max_ports));
         status = pjmedia_conf_connect_port(pjsua_var.mconf, source, sink, 
                                            (int)((cc_param.level-1) * 128));
         PJ_LOG(2, (THIS_FILE, "location 6 status = %d", status));
