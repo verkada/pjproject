@@ -520,9 +520,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     /* Check arguments */
     if conf == NULL {
         PJ_LOG(2, (THIS_FILE, "conf nil", status));
-    } else {
-        PJ_LOG(2, (THIS_FILE, "conf connect src_slot %d, max ports %d, sink slot %d", src_slot, conf->max_ports, sink_slot));
     }
+    PJ_LOG(2, (THIS_FILE, "conf connect src_slot %d, max ports %d, sink slot %d", src_slot, conf->max_ports, sink_slot));
     
     PJ_ASSERT_RETURN(conf && src_slot<conf->max_ports && 
                      sink_slot<conf->max_ports, PJ_EINVAL);
