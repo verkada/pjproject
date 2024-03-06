@@ -555,6 +555,7 @@ void pjsua_aud_stop_stream(pjsua_call_media *call_med)
 
         if (call_med->strm.a.conf_slot != PJSUA_INVALID_ID) {
             if (pjsua_var.mconf) {
+                PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port 1"));
                 pjsua_conf_remove_port(call_med->strm.a.conf_slot);
             }
             call_med->strm.a.conf_slot = PJSUA_INVALID_ID;
@@ -816,6 +817,7 @@ pj_status_t pjsua_aud_channel_update(pjsua_call_media *call_med,
             if (port_name.slen < 1) {
                 port_name = pj_str("call");
             }
+            PJ_LOG(2, (THIS_FILE, "pjmedia_conf_add_port 1"));
             status = pjmedia_conf_add_port(pjsua_var.mconf,
                                            call->inv->pool,
                                            call_med->strm.a.media_port,
@@ -931,7 +933,7 @@ PJ_DEF(pj_status_t) pjsua_conf_add_port( pj_pool_t *pool,
                                          pjsua_conf_port_id *p_id)
 {
     pj_status_t status;
-
+    PJ_LOG(2, (THIS_FILE, "pjmedia_conf_add_port 2"));
     status = pjmedia_conf_add_port(pjsua_var.mconf, pool,
                                    port, NULL, (unsigned*)p_id);
     if (status != PJ_SUCCESS) {
@@ -1283,7 +1285,7 @@ PJ_DEF(pj_status_t) pjsua_player_create( const pj_str_t *filename,
         pjsua_perror(THIS_FILE, "Unable to open file for playback", status);
         goto on_error;
     }
-
+    PJ_LOG(2, (THIS_FILE, "pjmedia_conf_add_port 3"));
     status = pjmedia_conf_add_port(pjsua_var.mconf, pool,
                                    port, filename, &slot);
     if (status != PJ_SUCCESS) {
@@ -1369,7 +1371,7 @@ PJ_DEF(pj_status_t) pjsua_playlist_create( const pj_str_t file_names[],
         pjsua_perror(THIS_FILE, "Unable to create playlist", status);
         goto on_error;
     }
-
+    PJ_LOG(2, (THIS_FILE, "pjmedia_conf_add_port 4"));
     status = pjmedia_conf_add_port(pjsua_var.mconf, pool,
                                    port, &port->info.name, &slot);
     if (status != PJ_SUCCESS) {
@@ -1508,6 +1510,7 @@ PJ_DEF(pj_status_t) pjsua_player_destroy(pjsua_player_id id)
     PJSUA_LOCK();
 
     if (pjsua_var.player[id].port) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port 2"));
         pjsua_conf_remove_port(pjsua_var.player[id].slot);
         pjmedia_port_destroy(pjsua_var.player[id].port);
         pjsua_var.player[id].port = NULL;
@@ -1633,7 +1636,7 @@ PJ_DEF(pj_status_t) pjsua_recorder_create( const pj_str_t *filename,
         pjsua_perror(THIS_FILE, "Unable to open file for recording", status);
         goto on_return;
     }
-
+    PJ_LOG(2, (THIS_FILE, "pjmedia_conf_add_port 5"));
     status = pjmedia_conf_add_port(pjsua_var.mconf, pool,
                                    port, filename, &slot);
     if (status != PJ_SUCCESS) {
@@ -1706,6 +1709,7 @@ PJ_DEF(pj_status_t) pjsua_recorder_destroy(pjsua_recorder_id id)
     PJSUA_LOCK();
 
     if (pjsua_var.recorder[id].port) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port 3"));
         pjsua_conf_remove_port(pjsua_var.recorder[id].slot);
         pjmedia_port_destroy(pjsua_var.recorder[id].port);
         pjsua_var.recorder[id].port = NULL;
@@ -2687,6 +2691,7 @@ PJ_DEF(pj_status_t) pjsua_ext_snd_dev_destroy(pjsua_ext_snd_dev *snd)
 
     /* Unregister from the conference bridge */
     if (snd->port_id != PJSUA_INVALID_ID) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port 4"));
         pjsua_conf_remove_port(snd->port_id);
         snd->port_id = PJSUA_INVALID_ID;
     }

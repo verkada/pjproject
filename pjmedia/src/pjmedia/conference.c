@@ -816,15 +816,6 @@ PJ_DEF(pj_status_t) pjmedia_conf_add_port( pjmedia_conf *conf,
 
     /* Put the port. */
     PJ_LOG(2, (THIS_FILE, "ADDING conf PORT slot %d", index));
-    ///
-    void* callstack[128];
-    int i, frames = backtrace(callstack, 128);
-    char** strs = backtrace_symbols(callstack, frames);
-    for (i = 0; i < frames; ++i) {
-        printf("%s\n", strs[i]);
-    }
-    free(strs);
-    ///
     conf->ports[index] = conf_port;
     conf->port_cnt++;
 
@@ -1295,14 +1286,6 @@ PJ_DEF(pj_status_t) pjmedia_conf_remove_port( pjmedia_conf *conf,
 
     /* Remove the port. */
     PJ_LOG(2, (THIS_FILE, "REMOVING PORT %d", port));
-    void* callstack[128];
-    int i, frames = backtrace(callstack, 128);
-    char** strs = backtrace_symbols(callstack, frames);
-    for (i = 0; i < frames; ++i) {
-        printf("%s\n", strs[i]);
-    }
-    free(strs);
-    ///
     conf->ports[port] = NULL;
     --conf->port_cnt;
 
