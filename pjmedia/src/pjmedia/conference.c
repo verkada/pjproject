@@ -994,7 +994,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     /* Disabled, you can put more than +127, at your own risk:
      PJ_ASSERT_RETURN(adj_level >= -128 && adj_level <= 127, PJ_EINVAL);
      */
-    PJ_LOG(2, (THIS_FILE, "adj_level %d", adj_level))
+    PJ_LOG(2, (THIS_FILE, "adj_level %d", adj_level));
     PJ_ASSERT_RETURN(adj_level >= -128, PJ_EINVAL);
 
     pj_mutex_lock(conf->mutex);
