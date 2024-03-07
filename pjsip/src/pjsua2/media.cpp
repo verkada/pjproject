@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <pj/ctype.h>
+#include <pj/os.hpp>
 #include <pjsua2/media.hpp>
 #include <pjsua2/types.hpp>
 #include <pjsua2/endpoint.hpp>
@@ -276,7 +277,7 @@ AudioMediaPlayer::~AudioMediaPlayer()
 {
     if (playerId != PJSUA_INVALID_ID) {
         unregisterMediaPort();
-        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 2"));
+        PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 2 | %s", pj_thread_get_name(pj_thread_this())));
         pjsua_player_destroy(playerId);
     }
 }

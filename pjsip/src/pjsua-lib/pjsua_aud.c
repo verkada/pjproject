@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <pjsua-lib/pjsua.h>
+#include <pj/os.h>
 #include <pjsua-lib/pjsua_internal.h>
 
 #if defined(PJSUA_MEDIA_HAS_PJMEDIA) && PJSUA_MEDIA_HAS_PJMEDIA != 0
@@ -1511,7 +1512,7 @@ PJ_DEF(pj_status_t) pjsua_player_destroy(pjsua_player_id id)
     PJSUA_LOCK();
 
     if (pjsua_var.player[id].port) {
-        PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port 2"));
+        PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port %d B | %s", pjsua_var.player[id].slot, pj_thread_get_name(pj_thread_this())));
         pjsua_conf_remove_port(pjsua_var.player[id].slot);
         pjmedia_port_destroy(pjsua_var.player[id].port);
         pjsua_var.player[id].port = NULL;

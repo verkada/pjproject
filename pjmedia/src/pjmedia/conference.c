@@ -30,6 +30,7 @@
 #include <pj/log.h>
 #include <pj/pool.h>
 #include <pj/string.h>
+#include <pj/os.h>
 
 #if !defined(PJMEDIA_CONF_USE_SWITCH_BOARD) || PJMEDIA_CONF_USE_SWITCH_BOARD==0
 
@@ -1285,7 +1286,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_remove_port( pjmedia_conf *conf,
     }
 
     /* Remove the port. */
-    PJ_LOG(2, (THIS_FILE, "REMOVING PORT %d", port));
+    PJ_LOG(2, (THIS_FILE, "REMOVING PORT %d | %s", port, pj_thread_get_name(pj_thread_this())));
     conf->ports[port] = NULL;
     --conf->port_cnt;
 
