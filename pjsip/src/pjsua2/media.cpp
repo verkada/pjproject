@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <pj/ctype.h>
-#include <pj/os.hpp>
 #include <pjsua2/media.hpp>
 #include <pjsua2/types.hpp>
 #include <pjsua2/endpoint.hpp>

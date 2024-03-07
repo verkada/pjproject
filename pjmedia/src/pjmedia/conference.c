@@ -30,7 +30,6 @@
 #include <pj/log.h>
 #include <pj/pool.h>
 #include <pj/string.h>
-#include <pj/os.h>
 
 #if !defined(PJMEDIA_CONF_USE_SWITCH_BOARD) || PJMEDIA_CONF_USE_SWITCH_BOARD==0
 

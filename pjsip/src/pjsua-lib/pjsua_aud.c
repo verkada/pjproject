@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <pjsua-lib/pjsua.h>
-#include <pj/os.h>
 #include <pjsua-lib/pjsua_internal.h>
 
 #if defined(PJSUA_MEDIA_HAS_PJMEDIA) && PJSUA_MEDIA_HAS_PJMEDIA != 0
