@@ -177,6 +177,7 @@ void AudioMedia::registerMediaPort2(MediaPort port, pj_pool_t *pool)
 void AudioMedia::unregisterMediaPort()
 {
     if (id != PJSUA_INVALID_ID) {
+        PJ_LOG(2, (THIS_FILE, "pjsua_conf_remove_port X"));
         pjsua_conf_remove_port(id);
         id = PJSUA_INVALID_ID;
     }
