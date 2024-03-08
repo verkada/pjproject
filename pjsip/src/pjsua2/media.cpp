@@ -601,6 +601,7 @@ AudioMediaPlayer::AudioMediaPlayer()
 AudioMediaPlayer::~AudioMediaPlayer()
 {
     if (playerId != PJSUA_INVALID_ID) {
+        id = PJSUA_INVALID_ID;
         /* Cancel the EOF callback synchronously while still alive: port destroy
          * is async, so the subscription would otherwise fire eof_cb() on freed
          * memory.
@@ -743,6 +744,15 @@ void AudioMediaPlayer::eof_cb(pjmedia_port *port,
     AudioMediaPlayer *player = (AudioMediaPlayer*)usr_data;
     
     player->onEof2();
+}
+
+void AudioMediaPlayer::invalidatePlayer()
+{
+    // Hack: call the destructor directly (avoiding virtual dispatch) to clean up resources
+    // and ensure onEof() callback is not invoked from this point on.
+    this->AudioMediaPlayer::~AudioMediaPlayer();
+    // Prevent the destructor from running its logic again
+    playerId = PJSUA_INVALID_ID;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
