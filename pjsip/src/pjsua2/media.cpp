@@ -276,6 +276,9 @@ AudioMediaPlayer::AudioMediaPlayer()
 AudioMediaPlayer::~AudioMediaPlayer()
 {
     if (playerId != PJSUA_INVALID_ID) {
+        // unregisterMediaPort is going to destroy the slot, mark it invalid as to not
+        // destroy it again in the pjsua_player_destroy call
+        pjsua_var.player[playerId].slot = 0xFFFF;
         unregisterMediaPort();
         PJ_LOG(2, (THIS_FILE, "pjsua_player_destroy 2 | %s", pj_thread_get_name(pj_thread_this())));
         pjsua_player_destroy(playerId);
