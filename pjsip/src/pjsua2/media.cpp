@@ -275,6 +275,7 @@ AudioMediaPlayer::AudioMediaPlayer()
 AudioMediaPlayer::~AudioMediaPlayer()
 {
     if (playerId != PJSUA_INVALID_ID) {
+        id = PJSUA_INVALID_ID;
         unregisterMediaPort();
         pjsua_player_destroy(playerId);
     }
