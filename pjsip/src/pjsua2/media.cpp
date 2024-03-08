@@ -433,6 +433,7 @@ AudioMediaPlayer::AudioMediaPlayer()
 AudioMediaPlayer::~AudioMediaPlayer()
 {
     if (playerId != PJSUA_INVALID_ID) {
+        id = PJSUA_INVALID_ID;
         PJSUA2_CATCH_IGNORE( unregisterMediaPort() );
         pjsua_player_destroy(playerId);
     }
