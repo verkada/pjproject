@@ -513,6 +513,24 @@ static int pb_thread_func (void *arg)
     char* buf                  = stream->pb_buf;
     pj_timestamp tstamp;
     int result;
+    struct sched_param param;
+    pthread_t* thid;
+
+    thid = (pthread_t*) pj_thread_get_os_handle (pj_thread_this());
+    param.sched_priority = sched_get_priority_max (SCHED_RR);
+    PJ_LOG (5,(THIS_FILE, "pb_thread_func(%u): Set thread priority "
+                          "for audio capture thread.",
+                          (unsigned)syscall(SYS_gettid)));
+    result = pthread_setschedparam (*thid, SCHED_RR, &param);
+    if (result) {
+        if (result == EPERM)
+            PJ_LOG (5,(THIS_FILE, "Unable to increase thread priority, "
+                                  "root access needed."));
+        else
+            PJ_LOG (5,(THIS_FILE, "Unable to increase thread priority, "
+                                  "error: %d",
+                                  result));
+    }
 
     pj_bzero (buf, size);
     tstamp.u64 = 0;
