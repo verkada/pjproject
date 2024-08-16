@@ -540,7 +540,7 @@ static int pb_thread_func (void *arg)
 
         result = snd_pcm_writei (pcm, buf, nframes);
         if (result == -EPIPE) {
-            PJ_LOG (4,(THIS_FILE, "pb_thread_func: underrun!"));
+            PJ_LOG (1,(THIS_FILE, "pb_thread_func: underrun!"));
             snd_pcm_prepare (pcm);
         } else if (result < 0) {
             PJ_LOG (4,(THIS_FILE, "pb_thread_func: error writing data!"));
