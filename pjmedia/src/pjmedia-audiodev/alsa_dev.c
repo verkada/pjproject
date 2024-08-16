@@ -1083,7 +1083,7 @@ static pj_status_t alsa_stream_start (pjmedia_aud_stream *s)
 
     if (stream->param.dir & PJMEDIA_DIR_CAPTURE) {
         status = pj_thread_create (stream->pool,
-                                   "alsasound_playback",
+                                   "alsasound_capture",
                                    ca_thread_func,
                                    stream,
                                    0, //ZERO,
