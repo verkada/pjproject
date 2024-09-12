@@ -804,6 +804,10 @@ public:
      */
     virtual ~AudioMediaPlayer();
 
+    /**
+     * Reset to initial state. Prevents any future callbacks from firing.
+     */
+    void invalidatePlayer();
 public:
     /*
      * Callbacks
