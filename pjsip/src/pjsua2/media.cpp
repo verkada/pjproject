@@ -409,6 +409,15 @@ void AudioMediaPlayer::eof_cb(pjmedia_port *port,
     player->onEof2();
 }
 
+void AudioMediaPlayer::invalidatePlayer()
+{
+    // Hack: call the destructor directly (avoiding virtual dispatch) to clean up resources
+    // and ensure onEof() callback is not invoked from this point on.
+    this->AudioMediaPlayer::~AudioMediaPlayer();
+    // Prevent the destructor from running its logic again
+    playerId = PJSUA_INVALID_ID;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 AudioMediaRecorder::AudioMediaRecorder()
 : recorderId(PJSUA_INVALID_ID)
