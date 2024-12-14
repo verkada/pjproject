@@ -30,6 +30,7 @@
 #include <pj/log.h>
 #include <pj/pool.h>
 #include <pj/string.h>
+#include "agc.h"
 
 #if !defined(PJMEDIA_CONF_USE_SWITCH_BOARD) || PJMEDIA_CONF_USE_SWITCH_BOARD==0
 
@@ -221,6 +222,8 @@ struct conf_port
      * Burst and drift are handled by delay buffer.
      */
     pjmedia_delay_buf   *delay_buf;
+
+    AGC                 agc;           /**< Automatic Gain Control.        */
 };
 
 
@@ -421,6 +424,11 @@ static pj_status_t create_conf_port( pj_pool_t *pool,
                                               sizeof(conf_port->mix_buf[0]));
     PJ_ASSERT_RETURN(conf_port->mix_buf, PJ_ENOMEM);
     conf_port->last_mix_adj = NORMAL_LEVEL;
+
+    // agc_init(&conf_port->agc, -12.0f, 3.0f, 0.1f, 0.1f);
+    // printf("JSS conf_port->clock_rate: %d\n", conf_port->clock_rate);
+    // printf("JSS conf_port->samples_per_frame: %d\n", conf_port->samples_per_frame);
+    // printf("JSS conf_port->channel_count: %d\n", conf_port->channel_count);
 
 
     /* Done */
@@ -1456,6 +1464,17 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     /* Set normalized adjustment level. */
     conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
 
+    // if adj_level > 128, it will increment in step of 128, for maximum 10 steps
+    // map 256, 1408 to a dBFS value of -25, -6
+    if (conf_port->rx_adj_level > 256)
+    {
+        int steps = (adj_level - 128 * 3) / 128;
+        float targetdBFS = -36.0 + steps * 3.0;
+        agc_init(&conf_port->agc, targetdBFS, 3.0f, 0.3f, 0.3f);
+    }
+
+    printf("JSS Adjusting RX level to %d dBFS\n", adj_level);
+
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
 
@@ -2067,26 +2086,36 @@ static pj_status_t get_frame(pjmedia_port *this_port,
          * and calculate the average level at the same time.
          */
         if (conf_port->rx_adj_level != NORMAL_LEVEL) {
+
+            if (conf_port->rx_adj_level > 256) {
+                agc_process(&conf_port->agc, p_in, conf->samples_per_frame);
+            }
+
             for (j=0; j<conf->samples_per_frame; ++j) {
                 /* For the level adjustment, we need to store the sample to
                  * a temporary 32bit integer value to avoid overflowing the
                  * 16bit sample storage.
                  */
-                pj_int32_t itemp;
+                if (conf_port->rx_adj_level < 256) {
+                    pj_int32_t itemp;
 
-                itemp = p_in[j];
-                /*itemp = itemp * adj / NORMAL_LEVEL;*/
-                /* bad code (signed/unsigned badness):
-                 *  itemp = (itemp * conf_port->rx_adj_level) >> 7;
-                 */
-                itemp *= conf_port->rx_adj_level;
-                itemp >>= 7;
+                    itemp = p_in[j];
 
-                /* Clip the signal if it's too loud */
-                if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
-                else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+                    // JSS: MODIFY HERE
 
-                p_in[j] = (pj_int16_t) itemp;
+                    /*itemp = itemp * adj / NORMAL_LEVEL;*/
+                    /* bad code (signed/unsigned badness):
+                    *  itemp = (itemp * conf_port->rx_adj_level) >> 7;
+                    */
+                    itemp *= conf_port->rx_adj_level;
+                    itemp >>= 7;
+
+                    /* Clip the signal if it's too loud */
+                    if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
+                    else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+
+                    p_in[j] = (pj_int16_t) itemp;
+                }
                 level += (p_in[j]>=0? p_in[j] : -p_in[j]);
             }
         } else {

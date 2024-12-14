@@ -87,6 +87,7 @@ typedef struct pjmedia_conf_port_info
     unsigned            bits_per_sample;    /**< Bits per sample.           */
     int                 tx_adj_level;       /**< Tx level adjustment.       */
     int                 rx_adj_level;       /**< Rx level adjustment.       */
+    unsigned num_of_clips;                  /**< Number of clips.           */
 } pjmedia_conf_port_info;
 
 
