@@ -718,14 +718,14 @@ static pj_status_t open_playback (struct alsa_stream* stream,
 
     /* Set clock rate */
     rate = param->clock_rate;
-    TRACE_((THIS_FILE, "open_playback: set clock rate: %d", rate));
+    PJ_LOG (3, (THIS_FILE, "open_playback: set clock rate: %d", rate));
     snd_pcm_hw_params_set_rate_near (stream->pb_pcm, params, &rate, NULL);
     TRACE_((THIS_FILE, "open_playback: clock rate set to: %d", rate));
 
     /* Set period size to samples_per_frame frames. */
     stream->pb_frames = (snd_pcm_uframes_t) param->samples_per_frame /
                                             param->channel_count;
-    TRACE_((THIS_FILE, "open_playback: set period size: %d",
+    PJ_LOG (3,(THIS_FILE, "open_playback: set period size: %d",
             stream->pb_frames));
     tmp_period_size = stream->pb_frames;
     snd_pcm_hw_params_set_period_size_near (stream->pb_pcm, params,
@@ -754,7 +754,7 @@ static pj_status_t open_playback (struct alsa_stream* stream,
                           (param->bits_per_sample/8);
     stream->pb_buf = (char*) pj_pool_alloc(stream->pool, stream->pb_buf_size);
 
-    TRACE_((THIS_FILE, "open_playback: buffer size set to: %d",
+    PJ_LOG(3,(THIS_FILE, "open_playback: buffer size set to: %d",
             (int)tmp_buf_size));
     TRACE_((THIS_FILE, "open_playback: playback_latency set to: %d ms",
             (int)stream->param.output_latency_ms));
@@ -772,7 +772,7 @@ static pj_status_t open_playback (struct alsa_stream* stream,
                             &param->output_vol);
     }
 
-    PJ_LOG (5,(THIS_FILE, "Opened device alsa(%s) for playing, sample rate=%d"
+    PJ_LOG (3,(THIS_FILE, "Opened device alsa(%s) for playing, sample rate=%d"
                ", ch=%d, bits=%d, period size=%d frames, latency=%d ms",
                stream->af->devs[param->play_id].name,
                rate, param->channel_count,
@@ -856,15 +856,15 @@ static pj_status_t open_capture (struct alsa_stream* stream,
 
     /* Set clock rate */
     rate = param->clock_rate;
-    TRACE_((THIS_FILE, "open_capture: set clock rate: %d", rate));
+    PJ_LOG (3,(THIS_FILE, "open_capture: set clock rate: %d", rate));
     snd_pcm_hw_params_set_rate_near (stream->ca_pcm, params, &rate, NULL);
     TRACE_((THIS_FILE, "open_capture: clock rate set to: %d", rate));
 
     /* Set period size to samples_per_frame frames. */
     stream->ca_frames = (snd_pcm_uframes_t) param->samples_per_frame /
                                             param->channel_count;
-    TRACE_((THIS_FILE, "open_capture: set period size: %d",
-            stream->ca_frames));
+    PJ_LOG (3, (THIS_FILE, "open_capture: set period size: %d",
+            stream->ca_frames) );
     tmp_period_size = stream->ca_frames;
     snd_pcm_hw_params_set_period_size_near (stream->ca_pcm, params,
                                             &tmp_period_size, NULL);
@@ -892,7 +892,7 @@ static pj_status_t open_capture (struct alsa_stream* stream,
                           (param->bits_per_sample/8);
     stream->ca_buf = (char*) pj_pool_alloc (stream->pool, stream->ca_buf_size);
 
-    TRACE_((THIS_FILE, "open_capture: buffer size set to: %d",
+    PJ_LOG (3,(THIS_FILE, "open_capture: buffer size set to: %d",
             (int)tmp_buf_size));
     TRACE_((THIS_FILE, "open_capture: capture_latency set to: %d ms",
             (int)stream->param.input_latency_ms));
@@ -910,7 +910,7 @@ static pj_status_t open_capture (struct alsa_stream* stream,
                             &param->input_vol);
     }
 
-    PJ_LOG (5,(THIS_FILE, "Opened device alsa(%s) for capture, sample rate=%d"
+    PJ_LOG (3,(THIS_FILE, "Opened device alsa(%s) for capture, sample rate=%d"
                ", ch=%d, bits=%d, period size=%d frames, latency=%d ms",
                stream->af->devs[param->rec_id].name,
                rate, param->channel_count,

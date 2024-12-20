@@ -1470,7 +1470,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     {
         int steps = (adj_level - 128 * 3) / 128;
         float targetdBFS = -36.0 + steps * 3.0;
-        agc_init(&conf_port->agc, targetdBFS, 3.0f, 0.3f, 0.3f);
+        agc_init(&conf_port->agc, targetdBFS, 3.0f, 0.6f, 0.6f);
     }
 
     printf("JSS Adjusting RX level to %d dBFS\n", adj_level);
