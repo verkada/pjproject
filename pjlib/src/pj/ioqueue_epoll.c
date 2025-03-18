@@ -284,6 +284,8 @@ PJ_DEF(pj_status_t) pj_ioqueue_create2(pj_pool_t *pool,
     unsigned epoll_support, valid_types;
     int i;
 
+    PJ_LOG(1, ("pjlib", "epoll max_fd = %d", max_fd));
+
     /* Check that arguments are valid. */
     PJ_ASSERT_RETURN(pool != NULL && p_ioqueue != NULL && 
                      max_fd > 0, PJ_EINVAL);

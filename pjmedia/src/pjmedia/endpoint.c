@@ -165,6 +165,8 @@ PJ_DEF(pj_status_t) pjmedia_endpt_create2(pj_pool_factory *pf,
         
         endpt->own_ioqueue = PJ_TRUE;
 
+        PJ_LOG(1,(THIS_FILE, "Creating internal ioqueue for media endpoint of size %d",
+                            PJ_IOQUEUE_MAX_HANDLES));
         status = pj_ioqueue_create( endpt->pool, PJ_IOQUEUE_MAX_HANDLES,
                                     &endpt->ioqueue);
         if (status != PJ_SUCCESS)

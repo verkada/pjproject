@@ -504,6 +504,8 @@ PJ_DEF(pj_status_t) pjsip_endpt_create(pj_pool_factory *pf,
     pj_timer_heap_set_max_timed_out_per_poll(endpt->timer_heap, 
                                              PJSIP_MAX_TIMED_OUT_ENTRIES);
 
+    PJ_LOG(1,(THIS_FILE, "creating ioqueue for endpoint of size %d",
+              PJSIP_MAX_TRANSPORTS));
     /* Create ioqueue. */
     status = pj_ioqueue_create( endpt->pool, PJSIP_MAX_TRANSPORTS, &endpt->ioqueue);
     if (status != PJ_SUCCESS) {
