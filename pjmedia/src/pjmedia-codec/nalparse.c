@@ -211,10 +211,17 @@ int nal_parser_next_nalu(struct nal_parser* parser, unsigned char* dst, size_t c
 
             // read more data
             int m = read(parser->fd, parser->end, parser->pagesize);
-            if (-1 == m) {
-                return 0;
-            }
-            if (m > 0) {
+            if (0 == m) {
+                // socket got closed unexpectedly, treat as error
+                return -1;
+            } else if (-1 == m) {
+                // ignore EAGAIN errors, otherwise it's a legit error
+                if (EAGAIN == errno) {
+                    continue;
+                }
+                return -1;
+            } else {
+                // successfully read m bytes
                 parser->end += m;
             }
         }
@@ -233,6 +240,9 @@ void nal_parser_destroy(struct nal_parser* parser)
     if (parser) {
         if (parser->buf) {
             free(parser->buf);
+        }
+        if (parser->fd) {
+            close(parser->fd);
         }
         free(parser);
     }
