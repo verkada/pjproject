@@ -1789,7 +1789,7 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
      * is now not aligned with the signal from the previous frame.
      */
     SIMPLE_AGC(cport->last_mix_adj, cport->mix_adj);
-    PJ_LOG(4,(THIS_FILE, "AGC last_mix_adj %d cur mix_adj %d",
+    PJ_LOG(1,(THIS_FILE, "AGC last_mix_adj %d cur mix_adj %d",
                                  cport->last_mix_adj, cport->mix_adj));
     cport->last_mix_adj = cport->mix_adj;
 
