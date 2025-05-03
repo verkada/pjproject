@@ -2163,6 +2163,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
                  * and calculate appropriate level adjustment if there is
                  * any overflowed level in the mixed signal.
                  */
+                PJ_LOG(1, (THIS_FILE, "Num transmitters: %d", listener->transmitter_cnt));
                 unsigned k, samples_per_frame = conf->samples_per_frame;
                 pj_int32_t mix_buf_min = 0;
                 pj_int32_t mix_buf_max = 0;
