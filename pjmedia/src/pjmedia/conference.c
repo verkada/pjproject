@@ -2158,7 +2158,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
                 p_in_conn_leveled = p_in;
             }
 
-            if (listener->transmitter_cnt > 1) {
+            // if (listener->transmitter_cnt > 1) {
                 /* Mixing signals,
                  * and calculate appropriate level adjustment if there is
                  * any overflowed level in the mixed signal.
@@ -2187,17 +2187,17 @@ static pj_status_t get_frame(pjmedia_port *this_port,
                     if (tmp_adj < listener->mix_adj)
                         listener->mix_adj = tmp_adj;
                 }
-            } else {
-                /* Only 1 transmitter:
-                 * just copy the samples to the mix buffer
-                 * no mixing and level adjustment needed
-                 */
-                unsigned k, samples_per_frame = conf->samples_per_frame;
+            // } else {
+            //     /* Only 1 transmitter:
+            //      * just copy the samples to the mix buffer
+            //      * no mixing and level adjustment needed
+            //      */
+            //     unsigned k, samples_per_frame = conf->samples_per_frame;
 
-                for (k = 0; k < samples_per_frame; ++k) {
-                    mix_buf[k] = p_in_conn_leveled[k];
-                }
-            }
+            //     for (k = 0; k < samples_per_frame; ++k) {
+            //         mix_buf[k] = p_in_conn_leveled[k];
+            //     }
+            // }
         } /* loop the listeners of conf port */
     } /* loop of all conf ports */
 
