@@ -216,13 +216,15 @@ CallSetting::CallSetting(bool useDefaultValues)
         reqKeyframeMethod   = 0;
         audioCount          = 0;
         videoCount          = 0;
+        agcRx = PJ_FALSE;
+        agcTx = PJ_FALSE;
     }
 }
 
 bool CallSetting::isEmpty() const
 {
     return (flag == 0 && reqKeyframeMethod == 0 && audioCount == 0 &&
-            videoCount == 0);
+            videoCount == 0 && agcRx == PJ_FALSE && agcTx == PJ_FALSE);
 }
 
 void CallSetting::fromPj(const pjsua_call_setting &prm)
@@ -233,6 +235,8 @@ void CallSetting::fromPj(const pjsua_call_setting &prm)
     this->reqKeyframeMethod = prm.req_keyframe_method;
     this->audioCount        = prm.aud_cnt;
     this->videoCount        = prm.vid_cnt;
+    this->agcRx             = prm.agc_rx;
+    this->agcTx             = prm.agc_tx;
     this->mediaDir.clear();
     /* Since we don't know the size of media_dir array, we populate
      * mediaDir vector up to the element with non-default value.
@@ -257,6 +261,8 @@ pjsua_call_setting CallSetting::toPj() const
     setting.req_keyframe_method = this->reqKeyframeMethod;
     setting.aud_cnt             = this->audioCount;
     setting.vid_cnt             = this->videoCount;
+    setting.agc_rx              = this->agcRx;
+    setting.agc_tx              = this->agcTx;
     for (mi = 0; mi < this->mediaDir.size(); mi++) {
         setting.media_dir[mi] = (pjmedia_dir)this->mediaDir[mi];
     }
@@ -705,7 +711,6 @@ void Call::answer(const CallOpParam &prm) PJSUA2_THROW(Error)
 {
     call_param param(prm.txOption, prm.opt, prm.reason,
                      sdp_pool, prm.sdp.wholeSdp);
-    
     if (param.sdp) {
         PJSUA2_CHECK_EXPR( pjsua_call_answer_with_sdp(id, param.sdp,
                                                       param.p_opt,

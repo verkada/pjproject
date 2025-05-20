@@ -25,11 +25,14 @@
 #include <pjmedia/silencedet.h>
 #include <pjmedia/sound_port.h>
 #include <pjmedia/stereo.h>
+#include <pjmedia/stream.h>
 #include <pj/array.h>
 #include <pj/assert.h>
 #include <pj/log.h>
 #include <pj/pool.h>
 #include <pj/string.h>
+
+#include <agc.h>
 
 #if !defined(PJMEDIA_CONF_USE_SWITCH_BOARD) || PJMEDIA_CONF_USE_SWITCH_BOARD==0
 
@@ -242,6 +245,10 @@ struct pjmedia_conf
     unsigned              channel_count;/**< Number of channels (1=mono).   */
     unsigned              samples_per_frame;    /**< Samples per frame.     */
     unsigned              bits_per_sample;      /**< Bits per sample.       */
+    Agc                   agc;
+    bool                  agc_created;
+    int                   target_dbfs;
+    int                   compression_gain;
 };
 
 
@@ -285,6 +292,7 @@ static pj_status_t create_conf_port( pj_pool_t *pool,
     /* Default level adjustment is 128 (which means no adjustment) */
     conf_port->tx_adj_level = NORMAL_LEVEL;
     conf_port->rx_adj_level = NORMAL_LEVEL;
+    conf->agc_created = false;
 
     /* Create transmit flag array */
     conf_port->listener_slots = (SLOT_TYPE*) pj_pool_zalloc(pool, 
@@ -687,6 +695,9 @@ PJ_DEF(pj_status_t) pjmedia_conf_destroy( pjmedia_conf *conf )
     /* Destroy mutex */
     if (conf->mutex)
         pj_mutex_destroy(conf->mutex);
+
+    if (conf->agc_created)
+        Agc_Destroy(&conf->agc);
 
     return PJ_SUCCESS;
 }
@@ -1424,6 +1435,90 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_signal_level( pjmedia_conf *conf,
     return PJ_SUCCESS;
 }
 
+void recreate_conf_agc(pjmedia_conf *conf,
+                       struct conf_port *conf_port,
+                       int adj_level) {
+    if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+        pjmedia_stream *stream = (pjmedia_stream*) conf_port->port->port_data.pdata;
+        pjmedia_stream_info si;
+        pjmedia_stream_get_info(stream, &si);
+        if (si.agc_rx) {
+            if (conf->agc_created)
+                Agc_Destroy(&conf->agc);
+
+            // 0 -> -128
+            // 1 -> -127 (lol wth)
+            // 2 -> -127 also (wth)
+            // 3 -> -126
+            // 4 -> -115
+            // 5 -> -102
+            // 6 -> -76
+            // 7 -> -51
+            // 8 -> -25
+            // 9 -> -12
+            // 10 -> 0
+
+            switch(adj_level) {
+                case -128: // 0
+                //     conf->compression_gain = 0;
+                //     conf->target_dbfs = 65;
+                //     limiter = PJ_FALSE;
+                //     break;
+                // case -127: // 1, 2
+                    conf->compression_gain = 8;
+                    conf->target_dbfs = 58;
+                    break;
+                // case -126: // 3
+                case -127: // 1, 2
+                    conf->compression_gain = 8;
+                    conf->target_dbfs = 48;
+                    break;
+                // case -115: // 4
+                case -126: // 3
+                    conf->compression_gain = 8;
+                    conf->target_dbfs = 38;
+                    break;
+                // case -102: // 5
+                case -115: // 4
+                    conf->compression_gain = 12;
+                    conf->target_dbfs = 28;
+                    break;
+                // case -76: // 6
+                case -102: // 5
+                    conf->compression_gain = 12;
+                    conf->target_dbfs = 23;
+                    break;
+                // case -51: // 7
+                case -76: // 6
+                    conf->compression_gain = 12;
+                    conf->target_dbfs = 18;
+                    break;
+                // case -25: // 8
+                case -51: // 7
+                    conf->compression_gain = 12;
+                    conf->target_dbfs = 13;
+                    break;
+                // case -12: // 9
+                case -25: // 8
+                    conf->compression_gain = 16;
+                    conf->target_dbfs = 8;
+                    break;
+                // case 0: // 10
+                case -12: // 9
+                    conf->compression_gain = 16;
+                    conf->target_dbfs = 3;
+                    break;
+                case 0: // 10
+                    conf->compression_gain = 16;
+                    conf->target_dbfs = 1;
+                    break;
+            }
+            PJ_LOG(3,(THIS_FILE, "New Compression Gain: %d, Target dBFS: %d\n", conf->compression_gain, conf->target_dbfs));
+            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, true);
+            conf->agc_created = true;
+        }
+    }
+}
 
 /*
  * Adjust RX level of individual port.
@@ -1454,7 +1549,14 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     }
 
     /* Set normalized adjustment level. */
-    conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+
+
+    if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+        conf_port->rx_adj_level = NORMAL_LEVEL;
+    } else {
+        conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+    }
+    recreate_conf_agc(conf, conf_port, adj_level);
 
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
@@ -1683,6 +1785,19 @@ static pj_status_t read_port( pjmedia_conf *conf,
                                      cport->rx_buf_count);
             }
 
+            if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+                pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
+                pjmedia_stream_info si;
+                pjmedia_stream_get_info(stream, &si);
+                if (si.agc_rx) {
+                    // int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    // unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
+                    // PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
+                    // cport->rx_buf_count -= samples_processed;
+                }
+            }
+
             TRACE_((THIS_FILE, "  rx buffer size is now %d",
                     cport->rx_buf_count));
 
@@ -1784,16 +1899,21 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
      * 2. automatic adjustment of overflowed mixed buffer (mix_adj).
      */
 
-    /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
-     * dramatic change in the level thus causing noise because the signal 
-     * is now not aligned with the signal from the previous frame.
-     */
-    SIMPLE_AGC(cport->last_mix_adj, cport->mix_adj);
-    cport->last_mix_adj = cport->mix_adj;
+    if(cport->port && cport->port->info.signature != SIGNATURE) {
+        /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
+        * dramatic change in the level thus causing noise because the signal 
+        * is now not aligned with the signal from the previous frame.
+        */
+        SIMPLE_AGC(cport->last_mix_adj, cport->mix_adj);
+        cport->last_mix_adj = cport->mix_adj;
 
-    /* adj_level = cport->tx_adj_level * cport->mix_adj / NORMAL_LEVEL;*/
-    adj_level = cport->tx_adj_level * cport->mix_adj;
-    adj_level >>= 7;
+        /* adj_level = cport->tx_adj_level * cport->mix_adj / NORMAL_LEVEL;*/
+        adj_level = cport->tx_adj_level * cport->mix_adj;
+        adj_level >>= 7;
+    } else {
+        adj_level = NORMAL_LEVEL;
+    }
+
 
     tx_level = 0;
 

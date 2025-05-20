@@ -661,6 +661,9 @@ PJ_DEF(void) pjsua_call_setting_default(pjsua_call_setting *opt)
     for (i = 0; i < PJMEDIA_MAX_SDP_MEDIA; i++) {
         opt->media_dir[i] = PJMEDIA_DIR_ENCODING_DECODING;
     }
+
+    opt->agc_rx = PJ_FALSE;
+    opt->agc_tx = PJ_FALSE;
 }
 
 /* 

@@ -1258,6 +1258,11 @@ void Endpoint::on_stream_created2(pjsua_call_id call_id,
     param->port = (pjmedia_port *)prm.pPort;
 }
 
+pj_status_t Endpoint::on_snd_dev_operation(int operation) {
+    Endpoint &ep = Endpoint::instance();
+    return ep.onSndDevOperation(operation);
+}
+
 void Endpoint::on_stream_destroyed(pjsua_call_id call_id,
                                    pjmedia_stream *strm,
                                    unsigned stream_idx)
@@ -1906,6 +1911,7 @@ void Endpoint::libInit(const EpConfig &prmEpConfig) PJSUA2_THROW(Error)
     pj_bzero(&ua_cfg.cb, sizeof(ua_cfg.cb));
     ua_cfg.cb.on_nat_detect     = &Endpoint::on_nat_detect;
     ua_cfg.cb.on_transport_state = &Endpoint::on_transport_state;
+    ua_cfg.cb.on_snd_dev_operation = &Endpoint::on_snd_dev_operation;
 
     ua_cfg.cb.on_incoming_call  = &Endpoint::on_incoming_call;
     ua_cfg.cb.on_reg_started    = &Endpoint::on_reg_started;

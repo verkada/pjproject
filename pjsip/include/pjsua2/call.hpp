@@ -333,7 +333,9 @@ struct CallSetting
      */
     MediaDirVector mediaDir;
 
-    
+    pj_bool_t                agcRx;
+    pj_bool_t                agcTx;
+
 public:
     /**
      * Default constructor initializes with empty or default values.
@@ -1221,7 +1223,7 @@ struct CallOpParam
      * SDP answer. Currently only used for Call::answer().
      */
     SdpSession          sdp;
-    
+
 public:
     /**
      * Default constructor initializes with zero/empty values.

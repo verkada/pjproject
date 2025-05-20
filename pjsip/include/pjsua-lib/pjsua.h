@@ -1054,6 +1054,9 @@ typedef struct pjsua_call_setting
      */
     unsigned         vid_cnt;
 
+    pj_bool_t             agc_tx;
+    pj_bool_t             agc_rx;
+
     /**
      * Media direction. This setting will only be used if the flag
      * PJSUA_CALL_SET_MEDIA_DIR is set, and it will persist for subsequent
