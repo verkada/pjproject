@@ -31,8 +31,11 @@ pjmedia_aud_dev_factory* pjmedia_pa_factory(pj_pool_factory *pf);
 pjmedia_aud_dev_factory* pjmedia_coreaudio_factory(pj_pool_factory *pf);
 #endif
 
-#if PJMEDIA_AUDIO_DEV_HAS_ALSA
-pjmedia_aud_dev_factory* pjmedia_alsa_factory(pj_pool_factory *pf);
+// #if PJMEDIA_AUDIO_DEV_HAS_ALSA
+// pjmedia_aud_dev_factory* pjmedia_alsa_factory(pj_pool_factory *pf);
+// #endif
+#if PJMEDIA_AUDIO_DEV_HAS_AGC
+pjmedia_aud_dev_factory* pjmedia_agc_factory(pj_pool_factory *pf);
 #endif
 
 #if PJMEDIA_AUDIO_DEV_HAS_OPENSL
@@ -118,8 +121,11 @@ PJ_DEF(pj_status_t) pjmedia_aud_subsys_init(pj_pool_factory *pf)
 #if PJMEDIA_AUDIO_DEV_HAS_BB10
     aud_subsys->drv[aud_subsys->drv_cnt++].create = &pjmedia_bb10_factory;
 #endif
-#if PJMEDIA_AUDIO_DEV_HAS_ALSA
-    aud_subsys->drv[aud_subsys->drv_cnt++].create = &pjmedia_alsa_factory;
+// #if PJMEDIA_AUDIO_DEV_HAS_ALSA
+//     aud_subsys->drv[aud_subsys->drv_cnt++].create = &pjmedia_alsa_factory;
+// #endif
+#if PJMEDIA_AUDIO_DEV_HAS_AGC
+    aud_subsys->drv[aud_subsys->drv_cnt++].create = &pjmedia_agc_factory;
 #endif
 #if PJMEDIA_AUDIO_DEV_HAS_COREAUDIO
     aud_subsys->drv[aud_subsys->drv_cnt++].create = &pjmedia_coreaudio_factory;

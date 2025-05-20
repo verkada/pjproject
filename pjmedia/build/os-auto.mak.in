@@ -256,6 +256,7 @@ endif
 #
 ifneq ($(findstring alsa,$(AC_PJMEDIA_SND)),)
 export CFLAGS += -DPJMEDIA_AUDIO_DEV_HAS_ALSA=1 \
+                 -DPJMEDIA_AUDIO_DEV_HAS_AGC=1 \
                  -DPJMEDIA_AUDIO_DEV_HAS_PORTAUDIO=0 \
                  -DPJMEDIA_AUDIO_DEV_HAS_WMME=0
 endif
