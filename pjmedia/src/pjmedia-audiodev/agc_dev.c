@@ -23,6 +23,7 @@
 #include <pj/os.h>
 #include <pj/pool.h>
 #include <pjmedia/errno.h>
+#include <agc.h>
 
 #if defined(PJMEDIA_AUDIO_DEV_HAS_AGC) && PJMEDIA_AUDIO_DEV_HAS_AGC
 
@@ -342,6 +343,10 @@ pjmedia_aud_dev_factory* pjmedia_agc_factory(pj_pool_factory *pf)
     af->pf = pf;
     af->base_pool = pool;
     af->base.op = &agc_factory_op;
+
+    Agc agc;
+    Agc_Create(&agc, kAgcModeAdaptiveDigital, 2, 48000, 0, 9, true);
+    Agc_Destroy(&agc);
 
     return &af->base;
 }
