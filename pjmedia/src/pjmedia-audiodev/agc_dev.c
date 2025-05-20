@@ -131,6 +131,8 @@ struct agc_stream
     unsigned             ca_buf_size;
     char                *ca_buf;
     pj_thread_t         *ca_thread;
+
+    Agc agc;
 };
 
 static pjmedia_aud_dev_factory_op agc_factory_op =
@@ -343,10 +345,6 @@ pjmedia_aud_dev_factory* pjmedia_agc_factory(pj_pool_factory *pf)
     af->pf = pf;
     af->base_pool = pool;
     af->base.op = &agc_factory_op;
-
-    Agc agc;
-    Agc_Create(&agc, kAgcModeAdaptiveDigital, 2, 48000, 0, 9, true);
-    Agc_Destroy(&agc);
 
     return &af->base;
 }
@@ -561,6 +559,7 @@ static int pb_thread_func (void *arg)
         if (frame.type != PJMEDIA_FRAME_TYPE_AUDIO)
             pj_bzero (buf, size);
 
+        ProcessCaptureAudioS16(&stream->agc, (int16_t*) buf, nframes);
         result = snd_pcm_writei (pcm, buf, nframes);
         if (result == -EPIPE) {
             PJ_LOG (1,(THIS_FILE, "pb_thread_func: underrun!"));
@@ -952,6 +951,7 @@ static pj_status_t agc_factory_create_stream(pjmedia_aud_dev_factory *f,
     stream->pb_cb     = play_cb;
     stream->ca_cb     = rec_cb;
     stream->quit      = 0;
+    Agc_Create(&stream->agc, kAgcModeAdaptiveDigital, 1, 8000, 0, 9, true);
     pj_memcpy(&stream->param, param, sizeof(*param));
 
     /* Init playback */
@@ -1175,6 +1175,7 @@ static pj_status_t agc_stream_destroy (pjmedia_aud_stream *s)
         stream->ca_pcm = NULL;
     }
 
+    Agc_Destroy(&stream->agc);
     pj_pool_release (stream->pool);
 
     return PJ_SUCCESS;
