@@ -1222,8 +1222,8 @@ struct CallOpParam
      */
     SdpSession          sdp;
 
-    bool                agcRx;
-    bool                agcTx;
+    pj_bool_t                agcRx;
+    pj_bool_t                agcTx;
     
 public:
     /**

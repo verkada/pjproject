@@ -1054,8 +1054,8 @@ typedef struct pjsua_call_setting
      */
     unsigned         vid_cnt;
 
-    bool             agc_tx;
-    bool             agc_rx;
+    pj_bool_t             agc_tx;
+    pj_bool_t             agc_rx;
 
     /**
      * Media direction. This setting will only be used if the flag
