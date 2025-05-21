@@ -575,7 +575,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_create( pj_pool_t *pool,
     conf->channel_count = channel_count;
     conf->samples_per_frame = samples_per_frame;
     conf->bits_per_sample = bits_per_sample;
-    Agc_Create(&conf->agc, kAgcModeAdapativeDigital, conf->channel_count, conf->clock_rate, 0, 9, true);
+    Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, 0, 9, true);
     
     /* Create and initialize the master port interface. */
     conf->master_port = PJ_POOL_ZALLOC_T(pool, pjmedia_port);
@@ -692,7 +692,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_destroy( pjmedia_conf *conf )
     if (conf->mutex)
         pj_mutex_destroy(conf->mutex);
 
-    Agc_Destory(&conf->agc);
+    Agc_Destroy(&conf->agc);
 
     return PJ_SUCCESS;
 }
