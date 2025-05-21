@@ -1221,6 +1221,9 @@ struct CallOpParam
      * SDP answer. Currently only used for Call::answer().
      */
     SdpSession          sdp;
+
+    bool                agcRx;
+    bool                agcTx;
     
 public:
     /**

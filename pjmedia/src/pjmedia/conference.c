@@ -25,11 +25,14 @@
 #include <pjmedia/silencedet.h>
 #include <pjmedia/sound_port.h>
 #include <pjmedia/stereo.h>
+#include <pjmedia/stream.h>
 #include <pj/array.h>
 #include <pj/assert.h>
 #include <pj/log.h>
 #include <pj/pool.h>
 #include <pj/string.h>
+
+#include <agc.h>
 
 #if !defined(PJMEDIA_CONF_USE_SWITCH_BOARD) || PJMEDIA_CONF_USE_SWITCH_BOARD==0
 
@@ -242,6 +245,7 @@ struct pjmedia_conf
     unsigned              channel_count;/**< Number of channels (1=mono).   */
     unsigned              samples_per_frame;    /**< Samples per frame.     */
     unsigned              bits_per_sample;      /**< Bits per sample.       */
+    Agc                   agc;
 };
 
 
@@ -571,7 +575,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_create( pj_pool_t *pool,
     conf->channel_count = channel_count;
     conf->samples_per_frame = samples_per_frame;
     conf->bits_per_sample = bits_per_sample;
-
+    Agc_Create(&conf->agc, kAgcModeAdapativeDigital, conf->channel_count, conf->clock_rate, 0, 9, true);
     
     /* Create and initialize the master port interface. */
     conf->master_port = PJ_POOL_ZALLOC_T(pool, pjmedia_port);
@@ -687,6 +691,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_destroy( pjmedia_conf *conf )
     /* Destroy mutex */
     if (conf->mutex)
         pj_mutex_destroy(conf->mutex);
+
+    Agc_Destory(&conf->agc);
 
     return PJ_SUCCESS;
 }
@@ -1681,6 +1687,15 @@ static pj_status_t read_port( pjmedia_conf *conf,
             if (cport->rx_buf_count) {
                 pjmedia_move_samples(cport->rx_buf, cport->rx_buf+src_count,
                                      cport->rx_buf_count);
+            }
+
+            if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+                pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
+                pjmedia_stream_info si;
+                pjmedia_stream_get_info(stream, &si);
+                if (si.agc_rx) {
+                    ProcessCaptureAudioS16(&conf->agc, (int16_t*) cport->rx_buf, cport->rx_buf_count / conf->channel_count);
+                }
             }
 
             TRACE_((THIS_FILE, "  rx buffer size is now %d",

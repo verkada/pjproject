@@ -151,6 +151,8 @@ typedef struct pjmedia_stream_info
     pj_bool_t           rtcp_sdes_bye_disabled; 
                                     /**< Disable automatic sending of RTCP
                                          SDES and BYE.                      */
+    pj_bool_t           agc_tx;
+    pj_bool_t           agc_rx;
 } pjmedia_stream_info;
 
 /**

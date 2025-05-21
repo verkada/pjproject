@@ -687,7 +687,8 @@ pj_status_t pjsua_aud_channel_update(pjsua_call_media *call_med,
     pj_log_push_indent();
 
     si->rtcp_sdes_bye_disabled = pjsua_var.media_cfg.no_rtcp_sdes_bye;
-
+    si->agc_tx = call->opt.agc_tx;
+    si->agc_rx = call->opt.agc_rx;
     /* Check if no media is active */
     if (local_sdp->media[strm_idx]->desc.port != 0) {
 
