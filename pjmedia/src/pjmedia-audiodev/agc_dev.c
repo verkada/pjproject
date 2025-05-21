@@ -273,7 +273,7 @@ static pj_status_t add_dev (struct agc_factory *af, const char *dev_name)
     adi->default_samples_per_sec = 8000;
 
     /* Driver name */
-    strcpy(adi->driver, "ALSA");
+    strcpy(adi->driver, "AGC");
 
     ++af->dev_cnt;
 
@@ -951,7 +951,17 @@ static pj_status_t agc_factory_create_stream(pjmedia_aud_dev_factory *f,
     stream->pb_cb     = play_cb;
     stream->ca_cb     = rec_cb;
     stream->quit      = 0;
-    Agc_Create(&stream->agc, kAgcModeAdaptiveDigital, 1, 8000, 0, 9, true);
+    // Despite some places suggesting its 8k in this file, the following lines from pjsua2.h
+    // shows the default for PJSUA2 is 16k
+    //
+    // The default clock rate to be used by the conference bridge. This setting
+    // is the default value for pjsua_media_config.clock_rate.
+    //
+    //  #ifndef PJSUA_DEFAULT_CLOCK_RATE
+    //  #   define PJSUA_DEFAULT_CLOCK_RATE     16000
+    //  #endif
+
+    Agc_Create(&stream->agc, kAgcModeAdaptiveDigital, 1, 16000, 0, 9, true);
     pj_memcpy(&stream->param, param, sizeof(*param));
 
     /* Init playback */
