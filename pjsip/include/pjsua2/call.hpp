@@ -333,7 +333,9 @@ struct CallSetting
      */
     MediaDirVector mediaDir;
 
-    
+    pj_bool_t                agcRx;
+    pj_bool_t                agcTx;
+
 public:
     /**
      * Default constructor initializes with empty or default values.
@@ -1222,9 +1224,6 @@ struct CallOpParam
      */
     SdpSession          sdp;
 
-    pj_bool_t                agcRx;
-    pj_bool_t                agcTx;
-    
 public:
     /**
      * Default constructor initializes with zero/empty values.
