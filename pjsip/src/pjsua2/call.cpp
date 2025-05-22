@@ -222,7 +222,7 @@ CallSetting::CallSetting(bool useDefaultValues)
 bool CallSetting::isEmpty() const
 {
     return (flag == 0 && reqKeyframeMethod == 0 && audioCount == 0 &&
-            videoCount == 0);
+            videoCount == 0 && agcRx == PJ_FALSE && agcTx == PJ_FALSE);
 }
 
 void CallSetting::fromPj(const pjsua_call_setting &prm)
