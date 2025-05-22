@@ -3603,6 +3603,9 @@ static pj_bool_t is_media_changed(const pjsua_call *call,
         if (old_si->rtcp_mux != new_si->rtcp_mux)
             return PJ_TRUE;
 
+        if (old_si->agc_rx != new_si->agc_rx || old_si->agc_tx != new_si->agc_tx) {
+            return PJ_TRUE;
+        }
         /* Compare remote RTP address. If ICE is running, change in default
          * address can happen after negotiation, this can be handled
          * internally by ICE and does not need to cause media restart.
