@@ -216,6 +216,8 @@ CallSetting::CallSetting(bool useDefaultValues)
         reqKeyframeMethod   = 0;
         audioCount          = 0;
         videoCount          = 0;
+        agcRx = PJ_FALSE;
+        agcTx = PJ_FALSE;
     }
 }
 

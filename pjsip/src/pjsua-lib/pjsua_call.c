@@ -661,6 +661,9 @@ PJ_DEF(void) pjsua_call_setting_default(pjsua_call_setting *opt)
     for (i = 0; i < PJMEDIA_MAX_SDP_MEDIA; i++) {
         opt->media_dir[i] = PJMEDIA_DIR_ENCODING_DECODING;
     }
+
+    opt->agc_rx = PJ_FALSE;
+    opt->agc_tx = PJ_FALSE;
 }
 
 /* 
@@ -2703,6 +2706,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
          pjmedia_sdp_neg_get_state(call->inv->neg) ==
                 PJMEDIA_SDP_NEG_STATE_NULL))
     {
+        PJ_LOG(3,(THIS_FILE, "In pjsua_call_answer2 initializing media channel\n"));
         /* Mark call setting as initialized as it is just about to be used
          * for initializing the media channel.
          */
