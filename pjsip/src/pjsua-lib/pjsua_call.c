@@ -2700,6 +2700,9 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
      * - call setting has just been set, or SDP offer needs to be sent, i.e:
      *   answer code 183 or 2xx is issued
      */
+    PJ_LOG(3,(THIS_FILE, "!call->med_ch_cb: %d\n", !call->med_ch_cb));
+    PJ_LOG(3,(THIS_FILE, "call->opt_inited: %d, code: %d\n", call->opt_inited, code));
+    PJ_LOG(3,(THIS_FILE, "!call->inv->neg: %d, sdp_neg_get_state: %d\n", !call->inv->neg, pjmedia_sdp_neg_get_state(call->inv->neg) == PJMEDIA_SDP_NEG_STATE_NULL));
     if (!call->med_ch_cb &&
         (call->opt_inited || (code==183 || code/100==2)) &&
         (!call->inv->neg ||

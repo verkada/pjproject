@@ -3786,6 +3786,7 @@ pj_status_t pjsua_media_channel_update(pjsua_call_id call_id,
         ((maudcnt > call->opt.aud_cnt || mvidcnt > call->opt.vid_cnt) ||
         (acc->cfg.rtcp_fb_cfg.cap_count)))
     {
+        PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_update: reneging\n"));
         pjmedia_sdp_session *local_sdp_renego = NULL;
 
         local_sdp_renego = pjmedia_sdp_session_clone(tmp_pool, local_sdp);
