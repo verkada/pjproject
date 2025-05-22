@@ -1438,7 +1438,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                                                   unsigned slot,
                                                   int adj_level )
 {
-    printf("ADJUST RX LEVEL: %d\n", adj_level);
+    PJ_LOG(3,(THIS_FILE, "ADJUST RX LEVEL: %d\n", adj_level));
     struct conf_port *conf_port;
 
     /* Check arguments */
@@ -1477,7 +1477,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
                                                   unsigned slot,
                                                   int adj_level )
 {
-    printf("ADJUST TX LEVEL: %d\n", adj_level);
+    PJ_LOG(3,(THIS_FILE, "ADJUST TX LEVEL: %d\n", adj_level));
     struct conf_port *conf_port;
 
     /* Check arguments */
