@@ -1491,7 +1491,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     // 9 -> -12
     // 10 -> 0
 
-    switch(adj_leve) {
+    switch(adj_level) {
         case -128:
            conf->target_dbfs = 30;
             break;
@@ -1579,7 +1579,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
     // 9 -> -12
     // 10 -> 0
 
-    switch(adj_leve) {
+    switch(adj_level) {
         case -128:
             conf->compression_gain = 0;
             break;
