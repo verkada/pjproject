@@ -246,6 +246,8 @@ struct pjmedia_conf
     unsigned              samples_per_frame;    /**< Samples per frame.     */
     unsigned              bits_per_sample;      /**< Bits per sample.       */
     Agc                   agc;
+    int                   target_dbfs;
+    int                   compression_gain;
 };
 
 
@@ -1438,6 +1440,18 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                                                   unsigned slot,
                                                   int adj_level )
 {
+
+    // 0 -> -128
+    // 1 -> -127 (lol wth)
+    // 2 -> -127 also (wth)
+    // 3 -> -126
+    // 4 -> -115
+    // 5 -> -102
+    // 6 -> -76
+    // 7 -> -51
+    // 8 -> -25
+    // 9 -> -12
+    // 10 -> 0
     PJ_LOG(3,(THIS_FILE, "ADJUST RX LEVEL: %d\n", adj_level));
     struct conf_port *conf_port;
 
@@ -1460,8 +1474,57 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
         return PJ_EINVAL;
     }
 
-    /* Set normalized adjustment level. */
-    conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+    // /* Set normalized adjustment level. */
+    // conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+
+    Agc_Destroy(&conf->agc);
+
+    // 0 -> -128
+    // 1 -> -127 (lol wth)
+    // 2 -> -127 also (wth)
+    // 3 -> -126
+    // 4 -> -115
+    // 5 -> -102
+    // 6 -> -76
+    // 7 -> -51
+    // 8 -> -25
+    // 9 -> -12
+    // 10 -> 0
+
+    switch(adj_leve) {
+        case -128:
+           conf->target_dbfs = 30;
+            break;
+        case -127:
+            conf->target_dbfs = 25;
+            break;
+        case -126:
+            conf->target_dbfs = 20;
+            break;
+        case -115:
+            conf->target_dbfs = 15;
+            break;
+        case -102:
+            conf->target_dbfs = 10;
+            break;
+        case -76:
+            conf->target_dbfs = 7;
+            break;
+        case -51:
+            conf->target_dbfs = 5;
+            break;
+        case -25:
+            conf->target_dbfs = 3;
+            break;
+        case -12:
+            conf->target_dbfs = 1;
+            break;
+        case 0:
+            conf->target_dbfs = 0;
+            break;
+    }
+    PJ_LOG(3,(THIS_FILE, "NEW TARGET DBFS -%d\n", conf->target_dbfs));
+    Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, true);
 
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
@@ -1499,8 +1562,57 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
         return PJ_EINVAL;
     }
 
-    /* Set normalized adjustment level. */
-    conf_port->tx_adj_level = adj_level + NORMAL_LEVEL;
+    // /* Set normalized adjustment level. */
+    // conf_port->tx_adj_level = adj_level + NORMAL_LEVEL;
+
+    Agc_Destroy(&conf->agc);
+
+    // 0 -> -128
+    // 1 -> -127 (lol wth)
+    // 2 -> -127 also (wth)
+    // 3 -> -126
+    // 4 -> -115
+    // 5 -> -102
+    // 6 -> -76
+    // 7 -> -51
+    // 8 -> -25
+    // 9 -> -12
+    // 10 -> 0
+
+    switch(adj_leve) {
+        case -128:
+            conf->compression_gain = 0;
+            break;
+        case -127:
+            conf->compression_gain = 2;
+            break;
+        case -126:
+            conf->compression_gain = 4;
+            break;
+        case -115:
+            conf->compression_gain = 6;
+            break;
+        case -102:
+            conf->compression_gain = 9;
+            break;
+        case -76:
+            conf->compression_gain = 10;
+            break;
+        case -51:
+            conf->compression_gain = 15;
+            break;
+        case -25:
+            conf->compression_gain = 20;
+            break;
+        case -12:
+            conf->compression_gain = 30;
+            break;
+        case 0:
+            conf->compression_gain = 40;
+            break;
+    }
+    PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d\n", conf->target_dbfs));
+    Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, true);
 
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
