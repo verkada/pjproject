@@ -884,6 +884,7 @@ PJ_DEF(pj_status_t) pjsua_call_make_call(pjsua_acc_id acc_id,
 
     /* Apply call setting */
     status = apply_call_setting(call, opt, NULL);
+    PJ_LOG(3,(THIS_FILE, "pjsua_call_make_call opt->agc_rx: %d call->opt->agc_rx: %d\n", opt->agc_rx, call->opt->agc_rx));
     if (status != PJ_SUCCESS) {
         pjsua_perror(THIS_FILE, "Failed to apply call setting", status);
         goto on_error;

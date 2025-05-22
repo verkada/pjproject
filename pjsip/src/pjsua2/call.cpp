@@ -699,6 +699,7 @@ void Call::makeCall(const string &dst_uri, const CallOpParam &prm)
 {
     pj_str_t pj_dst_uri = str2Pj(dst_uri);
     call_param param(prm.txOption, prm.opt, prm.reason);
+    PJ_LOG(3,(THIS_FILE, "Call::makeCall %d\n", param.p_opt->agc_rx));
     
     PJSUA2_CHECK_EXPR( pjsua_call_make_call(acc.getId(), &pj_dst_uri,
                                             param.p_opt, this,
