@@ -2531,14 +2531,14 @@ pj_status_t pjsua_media_channel_init(pjsua_call_id call_id,
         if (enabled) {
             call_med->enable_rtcp_mux = acc->cfg.enable_rtcp_mux;
 
-            PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_init before media init call_med->call->opt->agc_rx: %d\n", call_med->call->opt->agc_rx));
+            PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_init before media init call_med->call->opt->agc_rx: %d\n", call_med->call->opt.agc_rx));
             status = pjsua_call_media_init(call_med, media_type,
                                            &acc->cfg.rtp_cfg,
                                            security_level, sip_err_code,
                                            async,
                                            (async? &media_channel_init_cb:
                                             NULL));
-            PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_init after media init call_med->call->opt->agc_rx: %d\n", call_med->call->opt->agc_rx));
+            PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_init after media init call_med->call->opt->agc_rx: %d\n", call_med->call->opt.agc_rx));
 
             if (status == PJ_EPENDING) {
                 pending_med_tp = PJ_TRUE;
