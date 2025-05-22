@@ -2656,7 +2656,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
     PJ_ASSERT_RETURN(call_id>=0 && call_id<(int)pjsua_var.ua_cfg.max_calls,
                      PJ_EINVAL);
 
-    PJ_LOG(4,(THIS_FILE, "Answering call %d: code=%d", call_id, code));
+    PJ_LOG(3,(THIS_FILE, "Answering call %d: code=%d", call_id, code));
     pj_log_push_indent();
 
     status = acquire_call("pjsua_call_answer()", call_id, &call, &dlg);
@@ -2685,7 +2685,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
             PJ_LOG(2,(THIS_FILE, "The call setting changes is ignored."));
         }
     }
-
+    PJ_LOG(3,(THIS_FILE, "In pjsua_call_answer2 call->opt.agc_rx: %d\n", call->opt.agc_rx));
     PJSUA_LOCK();
 
     /* Ticket #1526: When the incoming call contains no SDP offer, the media

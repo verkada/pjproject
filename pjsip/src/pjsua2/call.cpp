@@ -710,14 +710,15 @@ void Call::answer(const CallOpParam &prm) PJSUA2_THROW(Error)
 {
     call_param param(prm.txOption, prm.opt, prm.reason,
                      sdp_pool, prm.sdp.wholeSdp);
-    
     if (param.sdp) {
+        PJ_LOG(3,(THIS_FILE, "Call::answer before pjsua_call_answer_with_sdp param.p_opt->agc_rx: %d\n", param.p_opt->agc_rx));
         PJSUA2_CHECK_EXPR( pjsua_call_answer_with_sdp(id, param.sdp,
                                                       param.p_opt,
                                                       prm.statusCode,
                                                       param.p_reason,
                                                       param.p_msg_data) );
     } else {
+        PJ_LOG(3,(THIS_FILE, "Call::answer before pjsua_call_answer2 param.p_opt->agc_rx: %d\n", param.p_opt->agc_rx));
         PJSUA2_CHECK_EXPR( pjsua_call_answer2(id, param.p_opt, prm.statusCode,
                                               param.p_reason,
                                               param.p_msg_data) );
