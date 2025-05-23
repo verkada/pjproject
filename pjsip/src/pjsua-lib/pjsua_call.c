@@ -683,6 +683,7 @@ static pj_status_t apply_call_setting(pjsua_call *call,
     pj_assert(call);
 
     if (!opt) {
+        PJ_LOG(3,(THIS_FILE, "call cleanup flag called\n"));
         pjsua_call_cleanup_flag(&call->opt);
     } else {
         call->opt = *opt;
@@ -693,7 +694,7 @@ static pj_status_t apply_call_setting(pjsua_call *call,
 #endif
 
     if (call->opt.flag & PJSUA_CALL_REINIT_MEDIA) {
-        PJ_LOG(4, (THIS_FILE, "PJSUA_CALL_REINIT_MEDIA"));
+        PJ_LOG(3, (THIS_FILE, "PJSUA_CALL_REINIT_MEDIA"));
         pjsua_media_channel_deinit(call->index);
     }
 
@@ -705,6 +706,7 @@ static pj_status_t apply_call_setting(pjsua_call *call,
         (call->inv && call->inv->state == PJSIP_INV_STATE_CONFIRMED) ||
         (call->opt.flag & PJSUA_CALL_REINIT_MEDIA))
     {
+        PJ_LOG(3, (THIS_FILE, "call->opt.flag & PJSUA_CALL_REINIT_MEDIA: %d, inv %p ", call->opt.flag & PJSUA_CALL_REINIT_MEDIA, call->inv));
         pjsip_role_e role = rem_sdp? PJSIP_ROLE_UAS : PJSIP_ROLE_UAC;
         pj_status_t status;
 
@@ -2739,6 +2741,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
      * initial answer is sent (see #1923).
      */
     if (call->med_ch_cb || !call->inv->last_answer) {
+        PJ_LOG(3, (THIS_FILE, "call->med_ch_cb: %d, !call->inv->last_answer: %d\n", call->med_ch_cb, !call->inv->last_answer))
         struct call_answer *answer;
 
         PJ_LOG(4,(THIS_FILE, "Pending answering call %d upon completion "
