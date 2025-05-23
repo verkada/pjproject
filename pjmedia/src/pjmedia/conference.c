@@ -1496,7 +1496,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
             // 8 -> -25
             // 9 -> -12
             // 10 -> 0
-            pj_bool_t limiter = PJ_FALSE;
+            pj_bool_t limiter = PJ_TRUE;
             PJ_LOG(3,(THIS_FILE, "adj_level %d\n", adj_level));
             switch(adj_level) {
                 case -128: // Yoda 0
@@ -1531,7 +1531,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                 case 0:
                 case 102: //Yoda 6
                     conf->target_dbfs = 0;
-                    limiter = PJ_TRUE;
+                    limiter = PJ_FALSE;
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW TARGET DBFS -%d\n", conf->target_dbfs));
@@ -1597,7 +1597,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
             // 9 -> -12
             // 10 -> 0
 
-            pj_bool_t limiter = PJ_FALSE;
+            pj_bool_t limiter = PJ_TRUE;
             PJ_LOG(3,(THIS_FILE, "adj_level %d\n", adj_level));
             switch(adj_level) {
                 case -128:
@@ -1629,7 +1629,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
                     break;
                 case 0:
                     conf->compression_gain = 40;
-                    limiter = PJ_TRUE;
+                    limiter = PJ_FALSE;
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d\n", conf->compression_gain));
