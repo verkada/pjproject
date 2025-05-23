@@ -1823,11 +1823,8 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
                 if (si.agc_rx) {
-                    PJ_LOG(3,(THIS_FILE, "AGCing STREAM sig port: %s\n", cport->name));
                     ProcessCaptureAudioS16(&conf->agc, (int16_t*) cport->rx_buf, cport->rx_buf_count / conf->channel_count);
                 }
-            } else if (cport->port->info.signature == PJMEDIA_SIG_PORT_WAV_PLAYER) {
-                PJ_LOG(3,(THIS_FILE, "WAV PLAYER PORT: %s\n", cport->name));
             }
 
             TRACE_((THIS_FILE, "  rx buffer size is now %d",
