@@ -1534,7 +1534,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW TARGET DBFS -%d\n", conf->target_dbfs));
-            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, adj_level == 102 || adj_level == 0);
+            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, adj_level != 102 && adj_level != 0);
         }
     }
 
@@ -1630,7 +1630,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d\n", conf->compression_gain));
-            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, adj_level == 0);
+            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, adj_level != 0);
         }
     }
 
