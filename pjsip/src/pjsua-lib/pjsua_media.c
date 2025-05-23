@@ -3777,6 +3777,10 @@ pj_status_t pjsua_media_channel_update(pjsua_call_id call_id,
     mvidcnt = mtotvidcnt = 0;
 #endif
 
+    PJ_LOG(3,(THIS_FILE, "!pjmedia_sdp_neg_was_answer_remote(call->inv->neg): %d\n", !pjmedia_sdp_neg_was_answer_remote(call->inv->neg)));
+    PJ_LOG(3,(THIS_FILE, "maudcnt: %d, call->opt.aud_cnt: %d\n", maudcnt, call->opt.aud_cnt));
+    PJ_LOG(3,(THIS_FILE, "mvidcnt: %d, call->opt.vid_cnt: %d\n", mvidcnt, call->opt.vid_cnt));
+    PJ_LOG(3,(THIS_FILE, "acc->cfg.rtcp_fb_cfg.cap_count: %d\n", acc->cfg.rtcp_fb_cfg.cap_count));
     /* We need to re-nego SDP or modify our answer when:
      * - media count exceeds the configured limit,
      * - RTCP-FB is enabled (so a=rtcp-fb will only be printed for negotiated
