@@ -1499,19 +1499,20 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
 
             PJ_LOG(3,(THIS_FILE, "adj_level %d\n", adj_level));
             switch(adj_level) {
-                case -128:
+                case -128: // Yoda 0
                 conf->target_dbfs = 30;
                     break;
-                case -127:
+                case -127: // Yoda 1
                     conf->target_dbfs = 25;
                     break;
-                case -126:
+                case -126: // Yoda 2
                     conf->target_dbfs = 20;
                     break;
                 case -115:
                     conf->target_dbfs = 15;
                     break;
                 case -102:
+                case -117: // Yoda 3
                     conf->target_dbfs = 10;
                     break;
                 case -76:
@@ -1520,13 +1521,15 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                 case -51:
                     conf->target_dbfs = 5;
                     break;
-                case -25:
+                case -25: // Yoda 4
                     conf->target_dbfs = 3;
                     break;
                 case -12:
+                case 76: // Yoda 5
                     conf->target_dbfs = 1;
                     break;
                 case 0:
+                case 102: //Yoda 6
                     conf->target_dbfs = 0;
                     break;
             }
