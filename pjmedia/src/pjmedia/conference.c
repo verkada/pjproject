@@ -1452,7 +1452,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     // 8 -> -25
     // 9 -> -12
     // 10 -> 0
-    PJ_LOG(3,(THIS_FILE, "ADJUST RX LEVEL: %d\n", adj_level));
+    // PJ_LOG(3,(THIS_FILE, "ADJUST RX LEVEL: %d\n", adj_level));
     struct conf_port *conf_port;
 
     /* Check arguments */
@@ -1478,7 +1478,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     // conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
 
     if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
-        PJ_LOG(3,(THIS_FILE, "PORT STREAM SIG\n")); 
+        // PJ_LOG(3,(THIS_FILE, "PORT STREAM SIG\n")); 
         pjmedia_stream *stream = (pjmedia_stream*) conf_port->port->port_data.pdata;
         pjmedia_stream_info si;
         pjmedia_stream_get_info(stream, &si);
@@ -1548,7 +1548,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
                                                   unsigned slot,
                                                   int adj_level )
 {
-    PJ_LOG(3,(THIS_FILE, "ADJUST TX LEVEL: %d\n", adj_level));
+    // PJ_LOG(3,(THIS_FILE, "ADJUST TX LEVEL: %d\n", adj_level));
     struct conf_port *conf_port;
 
     /* Check arguments */
@@ -1573,7 +1573,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
     // /* Set normalized adjustment level. */
     // conf_port->tx_adj_level = adj_level + NORMAL_LEVEL;
     if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
-        PJ_LOG(3,(THIS_FILE, "PORT STREAM SIG\n")); 
+        // PJ_LOG(3,(THIS_FILE, "PORT STREAM SIG\n")); 
         pjmedia_stream *stream = (pjmedia_stream*) conf_port->port->port_data.pdata;
         pjmedia_stream_info si;
         pjmedia_stream_get_info(stream, &si);
@@ -1698,11 +1698,11 @@ static pj_status_t read_port( pjmedia_conf *conf,
     TRACE_((THIS_FILE, "read_port %.*s: count=%d", 
                        (int)cport->name.slen, cport->name.ptr,
                        count));
-    if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
-        PJ_LOG(3,(THIS_FILE, "STREAM PORT: %s\n", cport->name));
-    } else if (cport->port->info.signature == PJMEDIA_SIG_PORT_WAV_PLAYER) {
-        PJ_LOG(3,(THIS_FILE, "WAV PLAYER PORT: %s\n", cport->name));
-    }
+    // if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+    //     PJ_LOG(3,(THIS_FILE, "STREAM PORT: %s\n", cport->name));
+    // } else if (cport->port->info.signature == PJMEDIA_SIG_PORT_WAV_PLAYER) {
+    //     PJ_LOG(3,(THIS_FILE, "WAV PLAYER PORT: %s\n", cport->name));
+    // }
 
     /* 
      * If port's samples per frame and sampling rate and channel count
