@@ -1698,6 +1698,11 @@ static pj_status_t read_port( pjmedia_conf *conf,
     TRACE_((THIS_FILE, "read_port %.*s: count=%d", 
                        (int)cport->name.slen, cport->name.ptr,
                        count));
+    if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+        PJ_LOG(3,(THIS_FILE, "STREAM PORT: %s\n", cport->name));
+    } else if (cport->port->info.signature == PJMEDIA_SIG_PORT_WAV_PLAYER) {
+        PJ_LOG(3,(THIS_FILE, "WAV PLAYER PORT: %s\n", cport->name));
+    }
 
     /* 
      * If port's samples per frame and sampling rate and channel count
