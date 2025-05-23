@@ -2740,8 +2740,8 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
      * Or if initial answer is not sent yet, we will answer the call after
      * initial answer is sent (see #1923).
      */
+    PJ_LOG(3, (THIS_FILE, "call->med_ch_cb: %d, !call->inv->last_answer: %d\n", call->med_ch_cb, !call->inv->last_answer));
     if (call->med_ch_cb || !call->inv->last_answer) {
-        PJ_LOG(3, (THIS_FILE, "call->med_ch_cb: %d, !call->inv->last_answer: %d\n", call->med_ch_cb, !call->inv->last_answer));
         struct call_answer *answer;
 
         PJ_LOG(4,(THIS_FILE, "Pending answering call %d upon completion "
