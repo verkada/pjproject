@@ -1500,33 +1500,33 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
             PJ_LOG(3,(THIS_FILE, "adj_level %d\n", adj_level));
             switch(adj_level) {
                 case -128: // Yoda 0
-                conf->target_dbfs = 30;
-                    break;
-                case -127: // Yoda 1
                     conf->target_dbfs = 25;
                     break;
-                case -126: // Yoda 2
+                case -127: // Yoda 1
                     conf->target_dbfs = 20;
                     break;
-                case -115:
+                case -126: // Yoda 2
                     conf->target_dbfs = 15;
+                    break;
+                case -115:
+                    conf->target_dbfs = 10;
                     break;
                 case -102:
                 case -117: // Yoda 3
-                    conf->target_dbfs = 10;
-                    break;
-                case -76:
                     conf->target_dbfs = 7;
                     break;
-                case -51:
+                case -76:
                     conf->target_dbfs = 5;
                     break;
-                case -25: // Yoda 4
+                case -51:
                     conf->target_dbfs = 3;
+                    break;
+                case -25: // Yoda 4
+                    conf->target_dbfs = 1;
                     break;
                 case -12:
                 case 76: // Yoda 5
-                    conf->target_dbfs = 1;
+                    conf->target_dbfs = 0;
                     break;
                 case 0:
                 case 102: //Yoda 6
@@ -1534,7 +1534,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW TARGET DBFS -%d\n", conf->target_dbfs));
-            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, true);
+            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, adj_level == 102 || adj_level == 0);
         }
     }
 
@@ -1602,35 +1602,35 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
                     conf->compression_gain = 0;
                     break;
                 case -127:
-                    conf->compression_gain = 2;
-                    break;
-                case -126:
                     conf->compression_gain = 4;
                     break;
-                case -115:
+                case -126:
                     conf->compression_gain = 6;
                     break;
-                case -102:
+                case -115:
                     conf->compression_gain = 9;
                     break;
-                case -76:
+                case -102:
                     conf->compression_gain = 10;
                     break;
-                case -51:
+                case -76:
                     conf->compression_gain = 15;
                     break;
-                case -25:
+                case -51:
                     conf->compression_gain = 20;
                     break;
-                case -12:
+                case -25:
                     conf->compression_gain = 30;
+                    break;
+                case -12:
+                    conf->compression_gain = 40;
                     break;
                 case 0:
                     conf->compression_gain = 40;
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d\n", conf->compression_gain));
-            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, true);
+            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, adj_level == 0);
         }
     }
 
