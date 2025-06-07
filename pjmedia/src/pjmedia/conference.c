@@ -1835,9 +1835,14 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
-                PJ_LOG(2,(THIS_FILE, "STREAM PORT RECOGNIZED, AGC: %d\n", si.agc_rx));
                 if (si.agc_rx) {
-                    ProcessCaptureAudioS16(&conf->agc, (int16_t*) cport->rx_buf, cport->rx_buf_count / conf->channel_count);
+                    int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) cport->rx_buf, cport->rx_buf_count / conf->channel_count);
+                    unsigned int samples_processed = cport->rx_buf_count - leftover * conf->channel_count;
+                    conf->rx_buf_count -= samples_processed;
+                    if (cport->rx_buf_count) {
+                        pjmedia_copy_samples(frame, cport->rx_buf, samples_processed);
+                        pjmedia_move_samples(cport->rx_buf, cport->rx_buf + samples_processed, conf->rx_buf_count)
+                    }
                 }
             }
 
