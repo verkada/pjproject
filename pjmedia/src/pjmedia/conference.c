@@ -1839,8 +1839,10 @@ static pj_status_t read_port( pjmedia_conf *conf,
                     int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) cport->rx_buf, cport->rx_buf_count / conf->channel_count);
                     unsigned int samples_processed = cport->rx_buf_count - leftover * conf->channel_count;
                     cport->rx_buf_count -= samples_processed;
+
+                    PJ_LOG(2,(THIS_FILE, "Processed %d samples", samples_processed));
+                    pjmedia_copy_samples(frame, cport->rx_buf, samples_processed);
                     if (cport->rx_buf_count) {
-                        pjmedia_copy_samples(frame, cport->rx_buf, samples_processed);
                         pjmedia_move_samples(cport->rx_buf, cport->rx_buf + samples_processed, cport->rx_buf_count);
                     }
                 }
@@ -1850,7 +1852,6 @@ static pj_status_t read_port( pjmedia_conf *conf,
                     cport->rx_buf_count));
 
         } else {
-
             pjmedia_copy_samples(frame, cport->rx_buf, (unsigned)count);
             cport->rx_buf_count -= (unsigned)count;
             if (cport->rx_buf_count) {
