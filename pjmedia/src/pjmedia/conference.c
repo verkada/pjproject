@@ -1841,7 +1841,7 @@ static pj_status_t read_port( pjmedia_conf *conf,
                     conf->rx_buf_count -= samples_processed;
                     if (cport->rx_buf_count) {
                         pjmedia_copy_samples(frame, cport->rx_buf, samples_processed);
-                        pjmedia_move_samples(cport->rx_buf, cport->rx_buf + samples_processed, conf->rx_buf_count)
+                        pjmedia_move_samples(cport->rx_buf, cport->rx_buf + samples_processed, conf->rx_buf_count);
                     }
                 }
             }
