@@ -2300,36 +2300,36 @@ static pj_status_t get_frame(pjmedia_port *this_port,
             mix_buf = listener->mix_buf;
 
             /* apply connection level, if not normal */
-            if (conf_port->listener_adj_level[cj] != NORMAL_LEVEL) {
-                unsigned k = 0;
-                for (; k < conf->samples_per_frame; ++k) {
-                    /* For the level adjustment, we need to store the sample to
-                     * a temporary 32bit integer value to avoid overflowing the
-                     * 16bit sample storage.
-                     */
-                    pj_int32_t itemp;
+            // if (conf_port->listener_adj_level[cj] != NORMAL_LEVEL) {
+            //     unsigned k = 0;
+            //     for (; k < conf->samples_per_frame; ++k) {
+            //         /* For the level adjustment, we need to store the sample to
+            //          * a temporary 32bit integer value to avoid overflowing the
+            //          * 16bit sample storage.
+            //          */
+            //         pj_int32_t itemp;
 
-                    itemp = p_in[k];
-                    /*itemp = itemp * adj / NORMAL_LEVEL;*/
-                    /* bad code (signed/unsigned badness):
-                     *  itemp = (itemp * conf_port->listsener_adj_level) >> 7;
-                     */
-                    itemp *= conf_port->listener_adj_level[cj];
-                    itemp >>= 7;
+            //         itemp = p_in[k];
+            //         /*itemp = itemp * adj / NORMAL_LEVEL;*/
+            //         /* bad code (signed/unsigned badness):
+            //          *  itemp = (itemp * conf_port->listsener_adj_level) >> 7;
+            //          */
+            //         itemp *= conf_port->listener_adj_level[cj];
+            //         itemp >>= 7;
 
-                    /* Clip the signal if it's too loud */
-                    if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
-                    else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+            //         /* Clip the signal if it's too loud */
+            //         if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
+            //         else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
 
-                    conf_port->adj_level_buf[k] = (pj_int16_t)itemp;
-                }
+            //         conf_port->adj_level_buf[k] = (pj_int16_t)itemp;
+            //     }
 
-                /* take the leveled frame */
-                p_in_conn_leveled = conf_port->adj_level_buf;
-            } else {
+            //     /* take the leveled frame */
+            //     p_in_conn_leveled = conf_port->adj_level_buf;
+            // } else {
                 /* take the frame as-is */
                 p_in_conn_leveled = p_in;
-            }
+            // }
 
             if (listener->transmitter_cnt > 1) {
                 /* Mixing signals,
