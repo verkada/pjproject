@@ -1543,7 +1543,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                     limiter = PJ_FALSE;
                     break;
             }
-            PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d\n", conf->compression_gain));
+            PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d, channel count: %d, target_dbfs: %d\n", conf->compression_gain, conf->channel_count, conf->target_dbfs));
             Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, limiter);
         }
     }
@@ -1972,29 +1972,29 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
 
     tx_level = 0;
 
-    if (adj_level != NORMAL_LEVEL) {
-        for (j=0; j<conf->samples_per_frame; ++j) {
-            pj_int32_t itemp = cport->mix_buf[j];
+    // if (adj_level != NORMAL_LEVEL) {
+    //     for (j=0; j<conf->samples_per_frame; ++j) {
+    //         pj_int32_t itemp = cport->mix_buf[j];
 
-            /* Adjust the level */
-            /*itemp = itemp * adj_level / NORMAL_LEVEL;*/
-            itemp = (itemp * adj_level) >> 7;
+    //         /* Adjust the level */
+    //         /*itemp = itemp * adj_level / NORMAL_LEVEL;*/
+    //         itemp = (itemp * adj_level) >> 7;
 
-            /* Clip the signal if it's too loud */
-            if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
-            else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+    //         /* Clip the signal if it's too loud */
+    //         if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
+    //         else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
 
-            /* Put back in the buffer. */
-            buf[j] = (pj_int16_t) itemp;
+    //         /* Put back in the buffer. */
+    //         buf[j] = (pj_int16_t) itemp;
 
-            tx_level += (buf[j]>=0? buf[j] : -buf[j]);
-        }
-    } else {
+    //         tx_level += (buf[j]>=0? buf[j] : -buf[j]);
+    //     }
+    // } else {
         for (j=0; j<conf->samples_per_frame; ++j) {
             buf[j] = (pj_int16_t) cport->mix_buf[j];
             tx_level += (buf[j]>=0? buf[j] : -buf[j]);
         }
-    }
+    // }
 
     tx_level /= conf->samples_per_frame;
 
