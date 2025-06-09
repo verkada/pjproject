@@ -2241,34 +2241,34 @@ static pj_status_t get_frame(pjmedia_port *this_port,
         /* Adjust the RX level from this port
          * and calculate the average level at the same time.
          */
-        if (conf_port->rx_adj_level != NORMAL_LEVEL) {
+        // if (conf_port->rx_adj_level != NORMAL_LEVEL) {
+        //     for (j=0; j<conf->samples_per_frame; ++j) {
+        //         /* For the level adjustment, we need to store the sample to
+        //          * a temporary 32bit integer value to avoid overflowing the
+        //          * 16bit sample storage.
+        //          */
+        //         pj_int32_t itemp;
+
+        //         itemp = p_in[j];
+        //         /*itemp = itemp * adj / NORMAL_LEVEL;*/
+        //         /* bad code (signed/unsigned badness):
+        //          *  itemp = (itemp * conf_port->rx_adj_level) >> 7;
+        //          */
+        //         itemp *= conf_port->rx_adj_level;
+        //         itemp >>= 7;
+
+        //         /* Clip the signal if it's too loud */
+        //         if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
+        //         else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+
+        //         p_in[j] = (pj_int16_t) itemp;
+        //         level += (p_in[j]>=0? p_in[j] : -p_in[j]);
+        //     }
+        // } else {
             for (j=0; j<conf->samples_per_frame; ++j) {
-                /* For the level adjustment, we need to store the sample to
-                 * a temporary 32bit integer value to avoid overflowing the
-                 * 16bit sample storage.
-                 */
-                pj_int32_t itemp;
-
-                itemp = p_in[j];
-                /*itemp = itemp * adj / NORMAL_LEVEL;*/
-                /* bad code (signed/unsigned badness):
-                 *  itemp = (itemp * conf_port->rx_adj_level) >> 7;
-                 */
-                itemp *= conf_port->rx_adj_level;
-                itemp >>= 7;
-
-                /* Clip the signal if it's too loud */
-                if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
-                else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
-
-                p_in[j] = (pj_int16_t) itemp;
                 level += (p_in[j]>=0? p_in[j] : -p_in[j]);
             }
-        } else {
-            for (j=0; j<conf->samples_per_frame; ++j) {
-                level += (p_in[j]>=0? p_in[j] : -p_in[j]);
-            }
-        }
+        // }
 
         level /= conf->samples_per_frame;
 
