@@ -1480,7 +1480,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     }
 
     // /* Set normalized adjustment level. */
-    // conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+    conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
 
     if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
         // PJ_LOG(3,(THIS_FILE, "PORT STREAM SIG\n")); 
@@ -1992,29 +1992,29 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
 
     tx_level = 0;
 
-    // if (adj_level != NORMAL_LEVEL) {
-    //     for (j=0; j<conf->samples_per_frame; ++j) {
-    //         pj_int32_t itemp = cport->mix_buf[j];
+    if (adj_level != NORMAL_LEVEL) {
+        for (j=0; j<conf->samples_per_frame; ++j) {
+            pj_int32_t itemp = cport->mix_buf[j];
 
-    //         /* Adjust the level */
-    //         /*itemp = itemp * adj_level / NORMAL_LEVEL;*/
-    //         itemp = (itemp * adj_level) >> 7;
+            /* Adjust the level */
+            /*itemp = itemp * adj_level / NORMAL_LEVEL;*/
+            itemp = (itemp * adj_level) >> 7;
 
-    //         /* Clip the signal if it's too loud */
-    //         if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
-    //         else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+            /* Clip the signal if it's too loud */
+            if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
+            else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
 
-    //         /* Put back in the buffer. */
-    //         buf[j] = (pj_int16_t) itemp;
+            /* Put back in the buffer. */
+            buf[j] = (pj_int16_t) itemp;
 
-    //         tx_level += (buf[j]>=0? buf[j] : -buf[j]);
-    //     }
-    // } else {
+            tx_level += (buf[j]>=0? buf[j] : -buf[j]);
+        }
+    } else {
         for (j=0; j<conf->samples_per_frame; ++j) {
             buf[j] = (pj_int16_t) cport->mix_buf[j];
             tx_level += (buf[j]>=0? buf[j] : -buf[j]);
         }
-    // }
+    }
 
     tx_level /= conf->samples_per_frame;
 
@@ -2261,34 +2261,45 @@ static pj_status_t get_frame(pjmedia_port *this_port,
         /* Adjust the RX level from this port
          * and calculate the average level at the same time.
          */
-        // if (conf_port->rx_adj_level != NORMAL_LEVEL) {
-        //     for (j=0; j<conf->samples_per_frame; ++j) {
-        //         /* For the level adjustment, we need to store the sample to
-        //          * a temporary 32bit integer value to avoid overflowing the
-        //          * 16bit sample storage.
-        //          */
-        //         pj_int32_t itemp;
+        if (conf_port->rx_adj_level != NORMAL_LEVEL) {
+            bool run_pj_rx_adjust = true;
+            if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+                pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
+                pjmedia_stream_info si;
+                pjmedia_stream_get_info(stream, &si);
+                if (si.agc_rx) {
+                    run_pj_rx_adjust = false;
+                }
+            }
+            if (run_pj_rx_adjust) {
+                for (j=0; j<conf->samples_per_frame; ++j) {
+                    /* For the level adjustment, we need to store the sample to
+                    * a temporary 32bit integer value to avoid overflowing the
+                    * 16bit sample storage.
+                    */
+                    pj_int32_t itemp;
 
-        //         itemp = p_in[j];
-        //         /*itemp = itemp * adj / NORMAL_LEVEL;*/
-        //         /* bad code (signed/unsigned badness):
-        //          *  itemp = (itemp * conf_port->rx_adj_level) >> 7;
-        //          */
-        //         itemp *= conf_port->rx_adj_level;
-        //         itemp >>= 7;
+                    itemp = p_in[j];
+                    /*itemp = itemp * adj / NORMAL_LEVEL;*/
+                    /* bad code (signed/unsigned badness):
+                    *  itemp = (itemp * conf_port->rx_adj_level) >> 7;
+                    */
+                    itemp *= conf_port->rx_adj_level;
+                    itemp >>= 7;
 
-        //         /* Clip the signal if it's too loud */
-        //         if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
-        //         else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
+                    /* Clip the signal if it's too loud */
+                    if (itemp > MAX_LEVEL) itemp = MAX_LEVEL;
+                    else if (itemp < MIN_LEVEL) itemp = MIN_LEVEL;
 
-        //         p_in[j] = (pj_int16_t) itemp;
-        //         level += (p_in[j]>=0? p_in[j] : -p_in[j]);
-        //     }
-        // } else {
+                    p_in[j] = (pj_int16_t) itemp;
+                    level += (p_in[j]>=0? p_in[j] : -p_in[j]);
+                }
+            } 
+        } else {
             for (j=0; j<conf->samples_per_frame; ++j) {
                 level += (p_in[j]>=0? p_in[j] : -p_in[j]);
             }
-        // }
+        }
 
         level /= conf->samples_per_frame;
 
