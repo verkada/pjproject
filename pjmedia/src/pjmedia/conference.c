@@ -1510,35 +1510,35 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                     conf->target_dbfs = 43;
                     break;
                 case -126:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 23;
                     break;
                 case -115:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 17;
                     break;
                 case -102:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 11;
                     break;
                 case -76:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 8;
                     break;
                 case -51:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 5;
                     break;
                 case -25:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 3;
                     break;
                 case -12:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 2;
                     break;
                 case 0:
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 14;
                     conf->target_dbfs = 0;
                     break;
             }
