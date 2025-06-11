@@ -545,8 +545,8 @@ static pj_status_t create_sound_port( pj_pool_t *pool,
  * Create conference bridge.
  */
 
- FILE* dump_before;
- FILE* dump_after;
+//  FILE* dump_before;
+//  FILE* dump_after;
 PJ_DEF(pj_status_t) pjmedia_conf_create( pj_pool_t *pool,
                                          unsigned max_ports,
                                          unsigned clock_rate,
@@ -556,8 +556,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_create( pj_pool_t *pool,
                                          unsigned options,
                                          pjmedia_conf **p_conf )
 {
-    dump_before = fopen("/mnt/data/intercom/audio_dump_before_pj", "wb");
-    dump_after = fopen("/mnt/data/intercom/audio_dump_after_pj", "wb");
+    // dump_before = fopen("/mnt/data/intercom/audio_dump_before_pj", "wb");
+    // dump_after = fopen("/mnt/data/intercom/audio_dump_after_pj", "wb");
     pjmedia_conf *conf;
     const pj_str_t name = { "Conf", 4 };
     pj_status_t status;
@@ -1506,46 +1506,58 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
             PJ_LOG(3,(THIS_FILE, "adj_level %d\n", adj_level));
             switch(adj_level) {
                 case -128: // 0
-                    conf->compression_gain = 0;
-                    conf->target_dbfs = 65;
-                    limiter = PJ_FALSE;
-                    break;
-                case -127: 
+                //     conf->compression_gain = 0;
+                //     conf->target_dbfs = 65;
+                //     limiter = PJ_FALSE;
+                //     break;
+                // case -127: // 1, 2
                     conf->compression_gain = 9;
                     conf->target_dbfs = 43;
                     break;
-                case -126:
+                // case -126: // 3
+                case -127: // 1, 2
                     conf->compression_gain = 14;
                     conf->target_dbfs = 23;
                     break;
-                case -115:
+                // case -115: // 4
+                case -126: // 3
                     conf->compression_gain = 14;
                     conf->target_dbfs = 17;
                     break;
-                case -102:
+                // case -102: // 5
+                case -115: // 4
                     conf->compression_gain = 14;
                     conf->target_dbfs = 11;
                     break;
-                case -76:
-                    conf->compression_gain = 14;
+                // case -76: // 6
+                case -102: // 5
+                    conf->compression_gain = 16;
                     conf->target_dbfs = 8;
                     break;
-                case -51:
-                    conf->compression_gain = 14;
+                // case -51: // 7
+                case -76: // 6
+                    conf->compression_gain = 16;
                     conf->target_dbfs = 5;
                     break;
-                case -25:
-                    conf->compression_gain = 14;
+                // case -25: // 8
+                case -51: // 7
+                    conf->compression_gain = 18;
                     conf->target_dbfs = 3;
                     break;
-                case -12:
-                    conf->compression_gain = 14;
+                // case -12: // 9
+                case -25: // 8
+                    conf->compression_gain = 20;
                     conf->target_dbfs = 2;
                     break;
-                case 0:
-                    conf->compression_gain = 14;
+                // case 0: // 10
+                case -12: // 9
+                    conf->compression_gain = 22;
                     conf->target_dbfs = 0;
                     break;
+                case 0: // 10
+                    conf->compression_gain = 22;
+                    conf->target_dbfs = 0;
+                    limiter = PJ_FALSE;
             }
             PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d, channel count: %d, target_dbfs: %d\n", conf->compression_gain, conf->channel_count, conf->target_dbfs));
             Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, limiter);
@@ -1851,11 +1863,11 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
                 if (si.agc_rx) {
-                    fwrite(frame, sizeof(int16_t), count, dump_before);
+                    // fwrite(frame, sizeof(int16_t), count, dump_before);
                     int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
-                    fwrite(frame, sizeof(int16_t), count, dump_after);
-                    fflush(dump_before);
-                    fflush(dump_after);
+                    // fwrite(frame, sizeof(int16_t), count, dump_after);
+                    // fflush(dump_before);
+                    // fflush(dump_after);
                     unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
                     // PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
                     // cport->rx_buf_count -= samples_processed;
