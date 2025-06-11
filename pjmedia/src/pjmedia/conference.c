@@ -544,6 +544,9 @@ static pj_status_t create_sound_port( pj_pool_t *pool,
 /*
  * Create conference bridge.
  */
+
+ FILE* dump_before;
+ FILE* dump_after;
 PJ_DEF(pj_status_t) pjmedia_conf_create( pj_pool_t *pool,
                                          unsigned max_ports,
                                          unsigned clock_rate,
@@ -553,6 +556,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_create( pj_pool_t *pool,
                                          unsigned options,
                                          pjmedia_conf **p_conf )
 {
+    dump_before = fopen("/mnt/data/intercom/audio_dump_before_pj");
+    dump_after = fopen("/mnt/data/intercom/audio_dump_after_pj");
     pjmedia_conf *conf;
     const pj_str_t name = { "Conf", 4 };
     pj_status_t status;
@@ -1846,7 +1851,11 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
                 if (si.agc_rx) {
+                    fwrite(frame, sizeof(int16_t) * count, dump_before);
                     int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    fwrite(frame, sizeof(int16_t) * count, dump_after);
+                    fflush(dump_before);
+                    fflush(dump_after);
                     unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
                     // PJ_LOG(2,(THIS_FILE, "Processed %d samples out of %d", samples_processed, count));
                     // cport->rx_buf_count -= samples_processed;
