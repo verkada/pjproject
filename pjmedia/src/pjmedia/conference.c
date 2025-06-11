@@ -1857,7 +1857,7 @@ static pj_status_t read_port( pjmedia_conf *conf,
                     fflush(dump_before);
                     fflush(dump_after);
                     unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
-                    // PJ_LOG(2,(THIS_FILE, "Processed %d samples out of %d", samples_processed, count));
+                    PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
                     // cport->rx_buf_count -= samples_processed;
 
                     // pjmedia_copy_samples(frame, cport->rx_buf, samples_processed);
