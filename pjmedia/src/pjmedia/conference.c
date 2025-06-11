@@ -2263,8 +2263,8 @@ static pj_status_t get_frame(pjmedia_port *this_port,
          */
         if (conf_port->rx_adj_level != NORMAL_LEVEL) {
             bool run_pj_rx_adjust = true;
-            if (cport->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
-                pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
+            if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+                pjmedia_stream *stream = (pjmedia_stream*) conf_port->port->port_data.pdata;
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
                 if (si.agc_rx) {
