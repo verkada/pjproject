@@ -1549,7 +1549,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     /* Set normalized adjustment level. */
     // conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
     conf_port->rx_adj_level = NORMAL_LEVEL;
-    recreate_conf_agc(conf_port, adj_level);
+    recreate_conf_agc(conf, conf_port, adj_level);
 
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
