@@ -1480,7 +1480,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     }
 
     // /* Set normalized adjustment level. */
-    conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+    // conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+    conf_port->rx_adj_level = NORMAL_LEVEL;
 
     if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
         // PJ_LOG(3,(THIS_FILE, "PORT STREAM SIG\n")); 
