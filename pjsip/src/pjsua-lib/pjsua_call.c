@@ -683,7 +683,6 @@ static pj_status_t apply_call_setting(pjsua_call *call,
     pj_assert(call);
 
     if (!opt) {
-        PJ_LOG(3,(THIS_FILE, "call cleanup flag called\n"));
         pjsua_call_cleanup_flag(&call->opt);
     } else {
         call->opt = *opt;
@@ -694,7 +693,7 @@ static pj_status_t apply_call_setting(pjsua_call *call,
 #endif
 
     if (call->opt.flag & PJSUA_CALL_REINIT_MEDIA) {
-        PJ_LOG(3, (THIS_FILE, "PJSUA_CALL_REINIT_MEDIA"));
+        PJ_LOG(4, (THIS_FILE, "PJSUA_CALL_REINIT_MEDIA"));
         pjsua_media_channel_deinit(call->index);
     }
 
@@ -706,7 +705,6 @@ static pj_status_t apply_call_setting(pjsua_call *call,
         (call->inv && call->inv->state == PJSIP_INV_STATE_CONFIRMED) ||
         (call->opt.flag & PJSUA_CALL_REINIT_MEDIA))
     {
-        PJ_LOG(3, (THIS_FILE, "call->opt.flag & PJSUA_CALL_REINIT_MEDIA: %d, inv %p ", call->opt.flag & PJSUA_CALL_REINIT_MEDIA, call->inv));
         pjsip_role_e role = rem_sdp? PJSIP_ROLE_UAS : PJSIP_ROLE_UAC;
         pj_status_t status;
 
@@ -889,7 +887,6 @@ PJ_DEF(pj_status_t) pjsua_call_make_call(pjsua_acc_id acc_id,
 
     /* Apply call setting */
     status = apply_call_setting(call, opt, NULL);
-    PJ_LOG(3,(THIS_FILE, "pjsua_call_make_call opt->agc_rx: %d call->opt->agc_rx: %d\n", opt->agc_rx, call->opt.agc_rx));
     if (status != PJ_SUCCESS) {
         pjsua_perror(THIS_FILE, "Failed to apply call setting", status);
         goto on_error;
@@ -2661,7 +2658,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
     PJ_ASSERT_RETURN(call_id>=0 && call_id<(int)pjsua_var.ua_cfg.max_calls,
                      PJ_EINVAL);
 
-    PJ_LOG(3,(THIS_FILE, "Answering call %d: code=%d", call_id, code));
+    PJ_LOG(4,(THIS_FILE, "Answering call %d: code=%d", call_id, code));
     pj_log_push_indent();
 
     status = acquire_call("pjsua_call_answer()", call_id, &call, &dlg);
@@ -2690,7 +2687,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
             PJ_LOG(2,(THIS_FILE, "The call setting changes is ignored."));
         }
     }
-    PJ_LOG(3,(THIS_FILE, "In pjsua_call_answer2 call->opt.agc_rx: %d\n", call->opt.agc_rx));
+
     PJSUA_LOCK();
 
     /* Ticket #1526: When the incoming call contains no SDP offer, the media
@@ -2702,16 +2699,12 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
      * - call setting has just been set, or SDP offer needs to be sent, i.e:
      *   answer code 183 or 2xx is issued
      */
-    PJ_LOG(3,(THIS_FILE, "!call->med_ch_cb: %d\n", !call->med_ch_cb));
-    PJ_LOG(3,(THIS_FILE, "call->opt_inited: %d, code: %d\n", call->opt_inited, code));
-    PJ_LOG(3,(THIS_FILE, "!call->inv->neg: %d, sdp_neg_get_state: %d\n", !call->inv->neg, pjmedia_sdp_neg_get_state(call->inv->neg) == PJMEDIA_SDP_NEG_STATE_NULL));
     if (!call->med_ch_cb &&
         (call->opt_inited || (code==183 || code/100==2)) &&
         (!call->inv->neg ||
          pjmedia_sdp_neg_get_state(call->inv->neg) ==
                 PJMEDIA_SDP_NEG_STATE_NULL))
     {
-        PJ_LOG(3,(THIS_FILE, "In pjsua_call_answer2 initializing media channel\n"));
         /* Mark call setting as initialized as it is just about to be used
          * for initializing the media channel.
          */
@@ -2740,7 +2733,6 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
      * Or if initial answer is not sent yet, we will answer the call after
      * initial answer is sent (see #1923).
      */
-    PJ_LOG(3, (THIS_FILE, "call->med_ch_cb: %d, !call->inv->last_answer: %d\n", call->med_ch_cb, !call->inv->last_answer));
     if (call->med_ch_cb || !call->inv->last_answer) {
         struct call_answer *answer;
 

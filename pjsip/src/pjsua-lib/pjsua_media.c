@@ -2531,15 +2531,12 @@ pj_status_t pjsua_media_channel_init(pjsua_call_id call_id,
         if (enabled) {
             call_med->enable_rtcp_mux = acc->cfg.enable_rtcp_mux;
 
-            PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_init before media init call_med->call->opt->agc_rx: %d\n", call_med->call->opt.agc_rx));
             status = pjsua_call_media_init(call_med, media_type,
                                            &acc->cfg.rtp_cfg,
                                            security_level, sip_err_code,
                                            async,
                                            (async? &media_channel_init_cb:
                                             NULL));
-            PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_init after media init call_med->call->opt->agc_rx: %d\n", call_med->call->opt.agc_rx));
-
             if (status == PJ_EPENDING) {
                 pending_med_tp = PJ_TRUE;
             } else if (status != PJ_SUCCESS) {
@@ -3777,10 +3774,6 @@ pj_status_t pjsua_media_channel_update(pjsua_call_id call_id,
     mvidcnt = mtotvidcnt = 0;
 #endif
 
-    PJ_LOG(3,(THIS_FILE, "!pjmedia_sdp_neg_was_answer_remote(call->inv->neg): %d\n", !pjmedia_sdp_neg_was_answer_remote(call->inv->neg)));
-    PJ_LOG(3,(THIS_FILE, "maudcnt: %d, call->opt.aud_cnt: %d\n", maudcnt, call->opt.aud_cnt));
-    PJ_LOG(3,(THIS_FILE, "mvidcnt: %d, call->opt.vid_cnt: %d\n", mvidcnt, call->opt.vid_cnt));
-    PJ_LOG(3,(THIS_FILE, "acc->cfg.rtcp_fb_cfg.cap_count: %d\n", acc->cfg.rtcp_fb_cfg.cap_count));
     /* We need to re-nego SDP or modify our answer when:
      * - media count exceeds the configured limit,
      * - RTCP-FB is enabled (so a=rtcp-fb will only be printed for negotiated
@@ -3790,7 +3783,6 @@ pj_status_t pjsua_media_channel_update(pjsua_call_id call_id,
         ((maudcnt > call->opt.aud_cnt || mvidcnt > call->opt.vid_cnt) ||
         (acc->cfg.rtcp_fb_cfg.cap_count)))
     {
-        PJ_LOG(3,(THIS_FILE, "pjsua_media_channel_update: reneging\n"));
         pjmedia_sdp_session *local_sdp_renego = NULL;
 
         local_sdp_renego = pjmedia_sdp_session_clone(tmp_pool, local_sdp);

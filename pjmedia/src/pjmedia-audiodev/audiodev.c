@@ -30,6 +30,7 @@ pjmedia_aud_dev_factory* pjmedia_pa_factory(pj_pool_factory *pf);
 #if PJMEDIA_AUDIO_DEV_HAS_COREAUDIO
 pjmedia_aud_dev_factory* pjmedia_coreaudio_factory(pj_pool_factory *pf);
 #endif
+
 #if PJMEDIA_AUDIO_DEV_HAS_ALSA
 pjmedia_aud_dev_factory* pjmedia_alsa_factory(pj_pool_factory *pf);
 #endif
