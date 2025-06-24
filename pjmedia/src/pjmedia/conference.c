@@ -1513,52 +1513,52 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
                 //     break;
                 // case -127: // 1, 2
                     conf->compression_gain = 12;
-                    conf->target_dbfs = 2;
+                    conf->target_dbfs = 11;
                     break;
                 // case -126: // 3
                 case -127: // 1, 2
                     conf->compression_gain = 12;
-                    conf->target_dbfs = 1;
+                    conf->target_dbfs = 8;
                     break;
                 // case -115: // 4
                 case -126: // 3
-                    conf->compression_gain = 12;
-                    conf->target_dbfs = 0;
+                    conf->compression_gain = 16;
+                    conf->target_dbfs = 8;
                     break;
                 // case -102: // 5
                 case -115: // 4
                     conf->compression_gain = 16;
-                    conf->target_dbfs = 2;
+                    conf->target_dbfs = 5;
                     break;
                 // case -76: // 6
                 case -102: // 5
                     conf->compression_gain = 16;
-                    conf->target_dbfs = 1;
+                    conf->target_dbfs = 3;
                     break;
                 // case -51: // 7
                 case -76: // 6
                     conf->compression_gain = 16;
-                    conf->target_dbfs = 0;
+                    conf->target_dbfs = 1;
                     break;
                 // case -25: // 8
                 case -51: // 7
-                    conf->compression_gain = 22;
-                    conf->target_dbfs = 2;
+                    conf->compression_gain = 16;
+                    conf->target_dbfs = 0;
                     break;
                 // case -12: // 9
                 case -25: // 8
                     conf->compression_gain = 22;
-                    conf->target_dbfs = 1;
+                    conf->target_dbfs = 2;
                     break;
                 // case 0: // 10
                 case -12: // 9
                     conf->compression_gain = 22;
-                    conf->target_dbfs = 0;
+                    conf->target_dbfs = 1;
                     break;
                 case 0: // 10
                     conf->compression_gain = 22;
                     conf->target_dbfs = 0;
-                    limiter = PJ_FALSE;
+                    break;
             }
             PJ_LOG(3,(THIS_FILE, "NEW COMPRESSION GAIN %d, channel count: %d, target_dbfs: %d\n", conf->compression_gain, conf->channel_count, conf->target_dbfs));
             Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, limiter);
