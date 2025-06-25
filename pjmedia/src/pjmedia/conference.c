@@ -1782,11 +1782,12 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
+                PJ_LOG(2,(THIS_FILE, "si.agc_rx is %d", si.agc_rx));
                 if (si.agc_rx) {
-                    // int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
-                    ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
-                    // unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
-                    // PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
+                    int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    // ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
+                    PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
                     // cport->rx_buf_count -= samples_processed;
                 }
             }
