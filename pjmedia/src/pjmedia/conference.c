@@ -1792,6 +1792,7 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
                 if (si.agc_rx) {
+                    PJ_LOG(3,(THIS_FILE, "Running my AGC for %.*s", (int)cport->name.slen, cport->name.ptr)); 
                     // int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
                     ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
                     // unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
