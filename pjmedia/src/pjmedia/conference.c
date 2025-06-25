@@ -1901,16 +1901,21 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
      * 2. automatic adjustment of overflowed mixed buffer (mix_adj).
      */
 
-    /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
-     * dramatic change in the level thus causing noise because the signal 
-     * is now not aligned with the signal from the previous frame.
-     */
-    SIMPLE_AGC(cport->last_mix_adj, cport->mix_adj);
-    cport->last_mix_adj = cport->mix_adj;
+    if(cport->port->info.signature == SIGNATURE) {
+        /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
+        * dramatic change in the level thus causing noise because the signal 
+        * is now not aligned with the signal from the previous frame.
+        */
+        SIMPLE_AGC(cport->last_mix_adj, cport->mix_adj);
+        cport->last_mix_adj = cport->mix_adj;
 
-    /* adj_level = cport->tx_adj_level * cport->mix_adj / NORMAL_LEVEL;*/
-    adj_level = cport->tx_adj_level * cport->mix_adj;
-    adj_level >>= 7;
+        /* adj_level = cport->tx_adj_level * cport->mix_adj / NORMAL_LEVEL;*/
+        adj_level = cport->tx_adj_level * cport->mix_adj;
+        adj_level >>= 7;
+    } else {
+        adj_level = NORMAL_LEVEL;
+    }
+
 
     tx_level = 0;
 
