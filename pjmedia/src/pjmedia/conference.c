@@ -1902,6 +1902,7 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
      */
 
     if(cport->port && cport->port->info.signature != SIGNATURE) {
+        PJ_LOG(3,(THIS_FILE, "Running AGC for some monoroic reason"));
         /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
         * dramatic change in the level thus causing noise because the signal 
         * is now not aligned with the signal from the previous frame.
@@ -1920,6 +1921,7 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
     tx_level = 0;
 
     if (adj_level != NORMAL_LEVEL) {
+        PJ_LOG(3,(THIS_FILE, "Stupid piece of shit is adjusting mix"));
         for (j=0; j<conf->samples_per_frame; ++j) {
             pj_int32_t itemp = cport->mix_buf[j];
 
@@ -2189,6 +2191,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
          * and calculate the average level at the same time.
          */
         if (conf_port->rx_adj_level != NORMAL_LEVEL) {
+            PJ_LOG(3,(THIS_FILE, "Stupid piece of shit is adjusting rx"));
             for (j=0; j<conf->samples_per_frame; ++j) {
                 /* For the level adjustment, we need to store the sample to
                  * a temporary 32bit integer value to avoid overflowing the
@@ -2248,6 +2251,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
 
             /* apply connection level, if not normal */
             if (conf_port->listener_adj_level[cj] != NORMAL_LEVEL) {
+                PJ_LOG(3,(THIS_FILE, "Stupid piece of shit is listener adjusting"));
                 unsigned k = 0;
                 for (; k < conf->samples_per_frame; ++k) {
                     /* For the level adjustment, we need to store the sample to
