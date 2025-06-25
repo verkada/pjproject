@@ -1362,8 +1362,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_port_info( pjmedia_conf *conf,
     info->samples_per_frame = conf_port->samples_per_frame;
     info->bits_per_sample = conf->bits_per_sample;
     info->tx_adj_level = conf_port->tx_adj_level - NORMAL_LEVEL;
-    // info->rx_adj_level = conf_port->rx_adj_level - NORMAL_LEVEL;
-    info->rx_adj_level = NORMAL_LEVEL;
+    info->rx_adj_level = conf_port->rx_adj_level - NORMAL_LEVEL;
 
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
@@ -1548,8 +1547,13 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     }
 
     /* Set normalized adjustment level. */
-    // conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
-    conf_port->rx_adj_level = NORMAL_LEVEL;
+
+
+    if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+        conf_port->rx_adj_level = NORMAL_LEVEL;
+    } else {
+        conf_port->rx_adj_level = adj_level + NORMAL_LEVEL;
+    }
     recreate_conf_agc(conf, conf_port, adj_level);
 
     /* Unlock mutex */
@@ -1588,7 +1592,11 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
     }
 
     /* Set normalized adjustment level. */
-    conf_port->tx_adj_level = adj_level + NORMAL_LEVEL;
+    if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+        conf_port->tx_adj_level = NORMAL_LEVEL;
+    } else {
+        conf_port->tx_adj_level = adj_level + NORMAL_LEVEL;
+    }
 
     /* Unlock mutex */
     pj_mutex_unlock(conf->mutex);
@@ -1783,12 +1791,11 @@ static pj_status_t read_port( pjmedia_conf *conf,
                 pjmedia_stream *stream = (pjmedia_stream*) cport->port->port_data.pdata;
                 pjmedia_stream_info si;
                 pjmedia_stream_get_info(stream, &si);
-                PJ_LOG(2,(THIS_FILE, "si.agc_rx is %d", si.agc_rx));
                 if (si.agc_rx) {
-                    int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
-                    // ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
-                    unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
-                    PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
+                    // int leftover = ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    ProcessCaptureAudioS16(&conf->agc, (int16_t*) frame, count / conf->channel_count);
+                    // unsigned int samples_processed = (count / conf->channel_count) - leftover * conf->channel_count;
+                    // PJ_LOG(2,(THIS_FILE, "Processed %d samples (sample rate %d) out of %d for %d channels", samples_processed, conf->clock_rate, count, conf->channel_count));
                     // cport->rx_buf_count -= samples_processed;
                 }
             }
