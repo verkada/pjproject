@@ -1902,7 +1902,7 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
      */
 
     if(cport->port && cport->port->info.signature != SIGNATURE) {
-        PJ_LOG(3,(THIS_FILE, "Running AGC for some monoroic reason"));
+        PJ_LOG(3,(THIS_FILE, "Running AGC for some moronic reason for %.*s", (int)cport->name.slen, cport->name.ptr));
         /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
         * dramatic change in the level thus causing noise because the signal 
         * is now not aligned with the signal from the previous frame.
@@ -1921,7 +1921,7 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
     tx_level = 0;
 
     if (adj_level != NORMAL_LEVEL) {
-        PJ_LOG(3,(THIS_FILE, "Stupid piece of shit is adjusting mix"));
+        PJ_LOG(3,(THIS_FILE, "Stupid piece of shit is adjusting mix for %.*s", (int)cport->name.slen, cport->name.ptr));
         for (j=0; j<conf->samples_per_frame; ++j) {
             pj_int32_t itemp = cport->mix_buf[j];
 
