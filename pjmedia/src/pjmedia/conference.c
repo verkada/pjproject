@@ -1019,8 +1019,9 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
     if (i == src_port->listener_cnt) {
         src_port->listener_slots[src_port->listener_cnt] = sink_slot;
         /* Set normalized adjustment level. */
-        src_port->listener_adj_level[src_port->listener_cnt] = adj_level +
-                                                               NORMAL_LEVEL;
+        // src_port->listener_adj_level[src_port->listener_cnt] = adj_level +
+        //                                                        NORMAL_LEVEL;
+        src_port->listener_adj_level[src_port->listener_cnt] = NORMAL_LEVEL;
         ++conf->connect_cnt;
         ++src_port->listener_cnt;
         ++dst_port->transmitter_cnt;
