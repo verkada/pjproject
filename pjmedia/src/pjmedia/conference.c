@@ -246,6 +246,7 @@ struct pjmedia_conf
     unsigned              samples_per_frame;    /**< Samples per frame.     */
     unsigned              bits_per_sample;      /**< Bits per sample.       */
     Agc                   agc;
+    bool                  agc_created;
     int                   target_dbfs;
     int                   compression_gain;
 };
@@ -291,7 +292,8 @@ static pj_status_t create_conf_port( pj_pool_t *pool,
     /* Default level adjustment is 128 (which means no adjustment) */
     conf_port->tx_adj_level = NORMAL_LEVEL;
     conf_port->rx_adj_level = NORMAL_LEVEL;
-    Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, 0, 9, true);
+    conf->agc_created = false;
+    // Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, 0, 9, true);
 
     /* Create transmit flag array */
     conf_port->listener_slots = (SLOT_TYPE*) pj_pool_zalloc(pool, 
@@ -695,7 +697,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_destroy( pjmedia_conf *conf )
     if (conf->mutex)
         pj_mutex_destroy(conf->mutex);
 
-    Agc_Destroy(&conf->agc);
+    if (conf->agc_created)
+        Agc_Destroy(&conf->agc);
 
     return PJ_SUCCESS;
 }
@@ -1442,7 +1445,8 @@ void recreate_conf_agc(pjmedia_conf *conf,
         pjmedia_stream_info si;
         pjmedia_stream_get_info(stream, &si);
         if (si.agc_rx) {
-            Agc_Destroy(&conf->agc);
+            if (conf->agc_created)
+                Agc_Destroy(&conf->agc);
 
             // 0 -> -128
             // 1 -> -127 (lol wth)
@@ -1514,6 +1518,7 @@ void recreate_conf_agc(pjmedia_conf *conf,
             }
             PJ_LOG(3,(THIS_FILE, "New Compression Gain: %d, Target dBFS: %d\n", conf->compression_gain, conf->target_dbfs));
             Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, limiter);
+            conf->agc_created = true;
         }
     }
 }
