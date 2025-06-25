@@ -1901,7 +1901,7 @@ static pj_status_t write_port(pjmedia_conf *conf, struct conf_port *cport,
      * 2. automatic adjustment of overflowed mixed buffer (mix_adj).
      */
 
-    if(cport->port->info.signature == SIGNATURE) {
+    if(cport->port && cport->port->info.signature == SIGNATURE) {
         /* Apply simple AGC to the mix_adj, the automatic adjust, to avoid 
         * dramatic change in the level thus causing noise because the signal 
         * is now not aligned with the signal from the previous frame.
