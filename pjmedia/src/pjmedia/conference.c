@@ -1592,7 +1592,7 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
     }
 
     /* Set normalized adjustment level. */
-    if (conf_port->port->info.signature == PJMEDIA_SIG_PORT_STREAM) {
+    if (conf_port->port->info.signature != PJMEDIA_SIG_PORT_STREAM) {
         conf_port->tx_adj_level = NORMAL_LEVEL;
     } else {
         conf_port->tx_adj_level = adj_level + NORMAL_LEVEL;
