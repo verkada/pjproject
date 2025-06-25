@@ -1464,17 +1464,17 @@ void recreate_conf_agc(pjmedia_conf *conf,
                 //     limiter = PJ_FALSE;
                 //     break;
                 // case -127: // 1, 2
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 8;
                     conf->target_dbfs = 58;
                     break;
                 // case -126: // 3
                 case -127: // 1, 2
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 8;
                     conf->target_dbfs = 48;
                     break;
                 // case -115: // 4
                 case -126: // 3
-                    conf->compression_gain = 12;
+                    conf->compression_gain = 8;
                     conf->target_dbfs = 38;
                     break;
                 // case -102: // 5
