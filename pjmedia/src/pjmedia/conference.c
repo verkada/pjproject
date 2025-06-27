@@ -1459,7 +1459,6 @@ void recreate_conf_agc(pjmedia_conf *conf,
             // 9 -> -12
             // 10 -> 0
 
-            pj_bool_t limiter = PJ_TRUE;
             switch(adj_level) {
                 case -128: // 0
                 //     conf->compression_gain = 0;
@@ -1516,7 +1515,7 @@ void recreate_conf_agc(pjmedia_conf *conf,
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "New Compression Gain: %d, Target dBFS: %d\n", conf->compression_gain, conf->target_dbfs));
-            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, limiter);
+            Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, conf->target_dbfs, conf->compression_gain, true);
             conf->agc_created = true;
         }
     }
