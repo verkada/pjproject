@@ -1496,22 +1496,22 @@ void recreate_conf_agc(pjmedia_conf *conf,
                     break;
                 // case -25: // 8
                 case -51: // 7
-                    conf->compression_gain = 16;
-                    conf->target_dbfs = 8;
+                    conf->compression_gain = 12;
+                    conf->target_dbfs = 13;
                     break;
                 // case -12: // 9
                 case -25: // 8
                     conf->compression_gain = 16;
-                    conf->target_dbfs = 3;
+                    conf->target_dbfs = 8;
                     break;
                 // case 0: // 10
                 case -12: // 9
                     conf->compression_gain = 16;
-                    conf->target_dbfs = 1;
+                    conf->target_dbfs = 3;
                     break;
                 case 0: // 10
                     conf->compression_gain = 16;
-                    conf->target_dbfs = 0;
+                    conf->target_dbfs = 1;
                     break;
             }
             PJ_LOG(3,(THIS_FILE, "New Compression Gain: %d, Target dBFS: %d\n", conf->compression_gain, conf->target_dbfs));
