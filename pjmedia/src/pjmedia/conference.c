@@ -293,7 +293,6 @@ static pj_status_t create_conf_port( pj_pool_t *pool,
     conf_port->tx_adj_level = NORMAL_LEVEL;
     conf_port->rx_adj_level = NORMAL_LEVEL;
     conf->agc_created = false;
-    // Agc_Create(&conf->agc, kAgcModeAdaptiveDigital, conf->channel_count, conf->clock_rate, 0, 9, true);
 
     /* Create transmit flag array */
     conf_port->listener_slots = (SLOT_TYPE*) pj_pool_zalloc(pool, 
