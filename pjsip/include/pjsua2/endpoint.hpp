@@ -1904,6 +1904,9 @@ public:
                         const OnTransportStateParam &prm)
     { PJ_UNUSED_ARG(prm); }
 
+    virtual pj_status_t onSndDevOperation(int operation)
+    { PJ_UNUSED_ARG(operation); return PJ_SUCCESS; }
+
     /**
      * Callback when a timer has fired. The timer was scheduled by
      * utilTimerSchedule().
@@ -2025,6 +2028,7 @@ private:
     static void on_transport_state(pjsip_transport *tp,
                                    pjsip_transport_state state,
                                    const pjsip_transport_state_info *info);
+    static pj_status_t on_snd_dev_operation(int operation);
 
 private:
     /*
