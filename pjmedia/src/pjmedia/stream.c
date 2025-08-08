@@ -1328,14 +1328,14 @@ static pj_status_t put_frame_imp( pjmedia_port *port,
 
 
 #if defined(PJMEDIA_STREAM_ENABLE_KA) && PJMEDIA_STREAM_ENABLE_KA != 0
-    PJ_LOG(2,("PJMEDIA_STREAM_ENABLE_KA is enabled"));
+    PJ_LOG(2,(__FILE__, "PJMEDIA_STREAM_ENABLE_KA is enabled"));
  
     /* If the interval since last sending packet is greater than
      * PJMEDIA_STREAM_KA_INTERVAL, send keep-alive packet.
      */
     if (stream->use_ka)
     {
-        PJ_LOG(2,("stream->use_ka enabled"));
+        PJ_LOG(2,(__FILE__, "stream->use_ka enabled"));
         pj_uint32_t dtx_duration, ka_interval;
         pj_time_val now, tmp;
 
@@ -1349,7 +1349,7 @@ static pj_status_t put_frame_imp( pjmedia_port *port,
             ka_interval = stream->ka_interval * 1000;
         }
         if (dtx_duration > ka_interval) {
-            PJ_LOG(2,("sending keep alive packet in pj"));
+            PJ_LOG(2,(__FILE__, "sending keep alive packet in pj"));
             send_keep_alive_packet(stream);
             stream->last_frm_ts_sent = now;
 
