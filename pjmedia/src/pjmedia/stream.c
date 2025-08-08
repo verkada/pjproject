@@ -1348,6 +1348,7 @@ static pj_status_t put_frame_imp( pjmedia_port *port,
         }  else {
             ka_interval = stream->ka_interval * 1000;
         }
+        PJ_LOG(2,(__FILE__, "sending checking if need keep alive, interval %d, dtx_duration %d", ka_interval, dtx_duration));
         if (dtx_duration > ka_interval) {
             PJ_LOG(2,(__FILE__, "sending keep alive packet in pj"));
             send_keep_alive_packet(stream);
