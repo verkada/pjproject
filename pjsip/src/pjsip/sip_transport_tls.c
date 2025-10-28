@@ -1865,6 +1865,48 @@ static pj_bool_t on_data_read(pj_ssl_sock_t *ssock,
     return PJ_TRUE;
 }
 
+static void remove_first_subdomain(pj_str_t* remote_name) {
+    if (remote_name->slen < 2) {
+        return;
+    }
+    int i = 0;
+    for (; i < remote_name->slen; i++) {
+        if (remote_name->ptr[i] == '.') {
+            break;
+        }
+    }
+
+    if (i < remote_name->slen) {
+        // Dot was found at index i
+        remote_name->ptr += i + 1;
+        remote_name->slen -= i + 1;
+    } else {
+        // No dot found
+        // It cannot match a wildcard, so set to empty string safely.
+        remote_name->slen = 0;
+    }
+}
+
+static pj_bool_t wildcard_aware_match(pj_str_t* remote_name, pj_str_t* cert_name, pj_str_t* wildcard_adjusted_remote, pj_bool_t* wildcard_adjusted_remote_set) {
+    pj_bool_t matched = PJ_FALSE;
+
+    if (cert_name->slen > 2 && cert_name->ptr[0] == '*' && cert_name->ptr[1] == '.') {
+        if (!*wildcard_adjusted_remote_set) {
+            *wildcard_adjusted_remote = *remote_name;
+            remove_first_subdomain(wildcard_adjusted_remote);
+            *wildcard_adjusted_remote_set = PJ_TRUE;
+        }
+        pj_str_t wildcard_adjusted_cert_name = *cert_name;
+        wildcard_adjusted_cert_name.ptr += 2;
+        wildcard_adjusted_cert_name.slen -= 2;
+
+        matched = !pj_stricmp(wildcard_adjusted_remote, &wildcard_adjusted_cert_name);
+    } else {
+        matched = !pj_stricmp(remote_name, cert_name);
+    }
+
+    return matched;
+}
 
 /* 
  * Callback from ioqueue when asynchronous connect() operation completes.
@@ -1948,6 +1990,9 @@ static pj_bool_t on_connect_complete(pj_ssl_sock_t *ssock,
         else
             remote_name = &tls->base.remote_name.host;
 
+        pj_str_t wildcard_adjusted_remote;
+        pj_bool_t wildcard_adjusted_remote_set = PJ_FALSE;
+
         /* Start matching remote name with SubjectAltName fields of 
          * server certificate.
          */
@@ -1956,6 +2001,8 @@ static pj_bool_t on_connect_complete(pj_ssl_sock_t *ssock,
 
             switch (serv_cert->subj_alt_name.entry[i].type) {
             case PJ_SSL_CERT_NAME_DNS:
+                matched = wildcard_aware_match(remote_name, cert_name, &wildcard_adjusted_remote, &wildcard_adjusted_remote_set);
+                break;
             case PJ_SSL_CERT_NAME_IP:
                 matched = !pj_stricmp(remote_name, cert_name);
                 break;
@@ -1981,7 +2028,7 @@ static pj_bool_t on_connect_complete(pj_ssl_sock_t *ssock,
          * certificate, try with Common Name of Subject field.
          */
         if (!matched) {
-            matched = !pj_stricmp(remote_name, &serv_cert->subject.cn);
+            matched = wildcard_aware_match(remote_name, &serv_cert->subject.cn, &wildcard_adjusted_remote, &wildcard_adjusted_remote_set);
         }
 
         if (!matched) {
