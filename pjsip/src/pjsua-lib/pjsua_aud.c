@@ -1123,8 +1123,10 @@ on_return:
         else
             pj_memcpy(&cc_param, prm, sizeof(cc_param));
         PJ_LOG(3, (THIS_FILE, "Connecting sound conf port"));
+        sleep(3);
         status = pjmedia_conf_connect_port(pjsua_var.mconf, source, sink, 
                                            (int)((cc_param.level-1) * 128));
+        PJ_LOG(3, (THIS_FILE, "sound port connected"));
     }
 
     pj_log_pop_indent();
