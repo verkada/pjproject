@@ -981,7 +981,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
 {
     pj_status_t status = PJ_SUCCESS;
 
-    PJ_LOG(4,(THIS_FILE, "%s connect: %d --> %d",
+    PJ_LOG(3,(THIS_FILE, "%s connect: %d --> %d",
               (pjsua_var.is_mswitch ? "Switch" : "Conf"),
               source, sink));
 
@@ -1097,6 +1097,7 @@ PJ_DEF(pj_status_t) pjsua_conf_connect2( pjsua_conf_port_id source,
         if (pjsua_var.snd_port==NULL && pjsua_var.null_snd==NULL &&
             !pjsua_var.no_snd)
         {
+            PJ_LOG(3, (THIS_FILE, "Creating sound port because uninstantiated"));
             status = pjsua_set_snd_dev(pjsua_var.cap_dev, pjsua_var.play_dev);
             if (status != PJ_SUCCESS) {
                 pjsua_perror(THIS_FILE, "Error opening sound device", status);
@@ -1121,6 +1122,7 @@ on_return:
             pjsua_conf_connect_param_default(&cc_param);
         else
             pj_memcpy(&cc_param, prm, sizeof(cc_param));
+        PJ_LOG(3, (THIS_FILE, "Connecting sound conf port"));
         status = pjmedia_conf_connect_port(pjsua_var.mconf, source, sink, 
                                            (int)((cc_param.level-1) * 128));
     }
