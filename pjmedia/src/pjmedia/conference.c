@@ -789,7 +789,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_add_port( pjmedia_conf *conf,
         return PJMEDIA_ENCCHANNEL;
     }
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     if (conf->port_cnt >= conf->max_ports) {
         pj_assert(!"Too many ports");
@@ -868,7 +869,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_add_passive_port( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(options == 0, PJ_EINVAL);
     PJ_UNUSED_ARG(options);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     if (conf->port_cnt >= conf->max_ports) {
         pj_assert(!"Too many ports");
@@ -946,7 +948,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_configure_port( pjmedia_conf *conf,
     /* Check arguments */
     PJ_ASSERT_RETURN(conf && slot<conf->max_ports, PJ_EINVAL);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     conf_port = conf->ports[slot];
@@ -991,7 +994,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_connect_port( pjmedia_conf *conf,
      */
     PJ_ASSERT_RETURN(adj_level >= -128, PJ_EINVAL);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Ports must be valid. */
     src_port = conf->ports[src_slot];
@@ -1054,7 +1058,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_disconnect_port( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(conf && src_slot<conf->max_ports && 
                      sink_slot<conf->max_ports, PJ_EINVAL);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Ports must be valid. */
     src_port = conf->ports[src_slot];
@@ -1119,7 +1124,8 @@ pjmedia_conf_disconnect_port_from_sources( pjmedia_conf *conf,
     /* Check arguments */
     PJ_ASSERT_RETURN(conf && sink_slot<conf->max_ports, PJ_EINVAL);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Remove this port from transmit array of other ports. */
     for (i=0; i<conf->max_ports; ++i) {
@@ -1170,7 +1176,8 @@ pjmedia_conf_disconnect_port_from_sinks( pjmedia_conf *conf,
     /* Check arguments */
     PJ_ASSERT_RETURN(conf && src_slot<conf->max_ports, PJ_EINVAL);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     src_port = conf->ports[src_slot];
@@ -1235,7 +1242,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_remove_port( pjmedia_conf *conf,
      * device's threads!
      */
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     conf_port = conf->ports[port];
@@ -1296,7 +1304,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_enum_ports( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(conf && p_count && ports, PJ_EINVAL);
 
     /* Lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     for (i=0; i<conf->max_ports && count<*p_count; ++i) {
         if (!conf->ports[i])
@@ -1325,7 +1334,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_port_info( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(conf && slot<conf->max_ports, PJ_EINVAL);
 
     /* Lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     conf_port = conf->ports[slot];
@@ -1370,7 +1380,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_ports_info(pjmedia_conf *conf,
     PJ_ASSERT_RETURN(conf && size && info, PJ_EINVAL);
 
     /* Lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     for (i=0; i<conf->max_ports && count<*size; ++i) {
         if (!conf->ports[i])
@@ -1402,7 +1413,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_get_signal_level( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(conf && slot<conf->max_ports, PJ_EINVAL);
 
     /* Lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     conf_port = conf->ports[slot];
@@ -1444,7 +1456,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_rx_level( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(adj_level >= -128, PJ_EINVAL);
 
     /* Lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     conf_port = conf->ports[slot];
@@ -1482,7 +1495,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_tx_level( pjmedia_conf *conf,
     PJ_ASSERT_RETURN(adj_level >= -128, PJ_EINVAL);
 
     /* Lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Port must be valid. */
     conf_port = conf->ports[slot];
@@ -1521,7 +1535,8 @@ PJ_DEF(pj_status_t) pjmedia_conf_adjust_conn_level( pjmedia_conf *conf,
      */
     PJ_ASSERT_RETURN(adj_level >= -128, PJ_EINVAL);
 
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Ports must be valid. */
     src_port = conf->ports[src_slot];
@@ -1960,7 +1975,8 @@ static pj_status_t get_frame(pjmedia_port *this_port,
                              conf->bits_per_sample / 8);
 
     /* Must lock mutex */
-    pj_mutex_lock(conf->mutex);
+    PJ_LOG(3, (THIS_FILE, __func__, "Locking mutex"));
+pj_mutex_lock(conf->mutex);
 
     /* Reset port source count. We will only reset port's mix
      * buffer when we have someone transmitting to it.
