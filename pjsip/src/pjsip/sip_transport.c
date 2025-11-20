@@ -2313,7 +2313,7 @@ PJ_DEF(pj_status_t) pjsip_tpmgr_acquire_transport2(pjsip_tpmgr *mgr,
         {
             if (sel->u.listener->type != type) {
                 pj_lock_release(mgr->lock);
-                TRACE_((THIS_FILE, "Listener type in tpsel not matched"));
+                PJ_LOG(3, (THIS_FILE, "Listener type in tpsel not matched"));
                 return PJSIP_ETPNOTSUITABLE;
             }
         }
