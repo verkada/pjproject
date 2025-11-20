@@ -2265,14 +2265,14 @@ PJ_DEF(pj_status_t) pjsip_tpmgr_acquire_transport2(pjsip_tpmgr *mgr,
         /* See if the transport is (not) suitable */
         if (seltp->key.type != type) {
             pj_lock_release(mgr->lock);
-            TRACE_((THIS_FILE, "Transport type in tpsel not matched"));
+            PJ_LOG(3, (THIS_FILE, "Transport type in tpsel not matched"));
             return PJSIP_ETPNOTSUITABLE;
         }
 
         /* Make sure the transport is not being destroyed */
         if (seltp->is_destroying) {
             pj_lock_release(mgr->lock);
-            TRACE_((THIS_FILE,"Transport to be acquired is being destroyed"));
+            PJ_LOG(3, (THIS_FILE,"Transport to be acquired is being destroyed"));
             return PJ_ENOTFOUND;
         }
 
