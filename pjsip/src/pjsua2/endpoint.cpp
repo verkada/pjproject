@@ -799,6 +799,28 @@ void Endpoint::on_nat_detect(const pj_stun_nat_detect_result *res)
     ep.onNatDetectionComplete(prm);
 }
 
+void Endpoint::on_srv_resolved(pj_status_t status,
+                               const pjsip_server_addresses *addr)
+{
+    Endpoint &ep = Endpoint::instance();
+
+    OnSrvResolvedParam prm;
+    prm.status = status;
+    if (addr) {
+        for (unsigned i = 0; i < addr->count; ++i) {
+            SrvResolvedAddress entry;
+            entry.type     = addr->entry[i].type;
+            entry.priority = addr->entry[i].priority;
+            entry.weight   = addr->entry[i].weight;
+            entry.addr     = addr->entry[i].addr;
+            entry.addrLen  = addr->entry[i].addr_len;
+            prm.entries.push_back(entry);
+        }
+    }
+
+    ep.onSrvResolved(prm);
+}
+
 void Endpoint::on_transport_state( pjsip_transport *tp,
                                    pjsip_transport_state state,
                                    const pjsip_transport_state_info *info)
@@ -1943,8 +1965,9 @@ void Endpoint::libInit(const EpConfig &prmEpConfig) PJSUA2_THROW(Error)
 
     /* Setup UA callbacks */
     pj_bzero(&ua_cfg.cb, sizeof(ua_cfg.cb));
-    ua_cfg.cb.on_nat_detect     = &Endpoint::on_nat_detect;
+    ua_cfg.cb.on_nat_detect      = &Endpoint::on_nat_detect;
     ua_cfg.cb.on_transport_state = &Endpoint::on_transport_state;
+    ua_cfg.cb.on_srv_resolved    = &Endpoint::on_srv_resolved;
 
     ua_cfg.cb.on_acc_send_request       = &Endpoint::on_acc_send_request;
     ua_cfg.cb.on_incoming_call          = &Endpoint::on_incoming_call;

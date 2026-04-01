@@ -27,6 +27,8 @@
 
 /* Internal prototypes */
 static void resolve_stun_entry(pjsua_stun_resolve *sess);
+static void on_srv_resolved(pj_status_t status,
+                             const pjsip_server_addresses *addr);
 
 
 /* PJSUA application instance. */
@@ -1103,6 +1105,9 @@ PJ_DEF(pj_status_t) pjsua_init( const pjsua_config *ua_cfg,
             pjsua_perror(THIS_FILE, "Error setting DNS resolver", status);
             goto on_error;
         }
+
+        pjsip_resolver_set_on_resolved_cb(
+            pjsip_endpt_get_sip_resolver(pjsua_var.endpt), &on_srv_resolved);
 
         /* Print nameservers */
         for (ii=0; ii<ua_cfg->nameserver_count; ++ii) {
@@ -3285,6 +3290,13 @@ static void nat_detect_cb(void *user_data,
     if (pjsua_var.ua_cfg.cb.on_nat_detect) {
         (*pjsua_var.ua_cfg.cb.on_nat_detect)(res);
     }
+}
+
+static void on_srv_resolved(pj_status_t status,
+                             const pjsip_server_addresses *addr)
+{
+    if (pjsua_var.ua_cfg.cb.on_srv_resolved)
+        (*pjsua_var.ua_cfg.cb.on_srv_resolved)(status, addr);
 }
 
 

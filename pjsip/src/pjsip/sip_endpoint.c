@@ -1193,6 +1193,12 @@ PJ_DEF(pj_dns_resolver*) pjsip_endpt_get_resolver(pjsip_endpoint *endpt)
     return pjsip_resolver_get_resolver(endpt->resolver);
 }
 
+PJ_DEF(pjsip_resolver_t*) pjsip_endpt_get_sip_resolver(pjsip_endpoint *endpt)
+{
+    PJ_ASSERT_RETURN(endpt, NULL);
+    return endpt->resolver;
+}
+
 /*
  * Resolve
  */

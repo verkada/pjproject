@@ -457,6 +457,17 @@ PJ_DECL(pj_status_t) pjsip_endpt_set_ext_resolver(pjsip_endpoint *endpt,
 PJ_DECL(pj_dns_resolver*) pjsip_endpt_get_resolver(pjsip_endpoint *endpt);
 
 /**
+ * Get the SIP-level resolver (pjsip_resolver_t) used by the endpoint.
+ * Unlike pjsip_endpt_get_resolver() which returns the underlying pj_dns_resolver,
+ * this returns the pjsip_resolver_t wrapper that pjsip_resolve() operates on.
+ *
+ * @param endpt         The SIP endpoint instance.
+ *
+ * @return              The pjsip_resolver_t instance used by the endpoint.
+ */
+PJ_DECL(pjsip_resolver_t*) pjsip_endpt_get_sip_resolver(pjsip_endpoint *endpt);
+
+/**
  * Asynchronously resolve a SIP target host or domain according to rule 
  * specified in RFC 3263 (Locating SIP Servers). When the resolving operation
  * has completed, the callback will be called.

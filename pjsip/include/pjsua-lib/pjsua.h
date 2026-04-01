@@ -2105,6 +2105,17 @@ typedef struct pjsua_callback
      */
     pjsua_on_rejected_incoming_call_cb on_rejected_incoming_call;
 
+    /**
+     * Callback invoked after every DNS resolution (SRV or A) completes.
+     * Useful for inspecting resolved server addresses and ports, e.g. to
+     * open firewall rules before the first outbound connection is made.
+     *
+     * @param status    PJ_SUCCESS on success.
+     * @param addr      Resolved server addresses, or NULL on failure.
+     */
+    void (*on_srv_resolved)(pj_status_t status,
+                            const pjsip_server_addresses *addr);
+
 } pjsua_callback;
 
 

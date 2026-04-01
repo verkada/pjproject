@@ -217,6 +217,16 @@ typedef void pjsip_resolver_callback(pj_status_t status,
                                      const struct pjsip_server_addresses *addr);
 
 /**
+ * Callback type invoked after every DNS resolution (SRV or A) completes.
+ * Applications can use this to inspect resolved addresses and ports.
+ *
+ * @param status    PJ_SUCCESS on success.
+ * @param addr      Resolved server addresses, or NULL on failure.
+ */
+typedef void pjsip_on_resolved_cb(pj_status_t status,
+                                   const struct pjsip_server_addresses *addr);
+
+/**
  * This structure describes application callback to receive various event from 
  * the SIP resolver engine. Application can use this for its own resolver
  * implementation. 
@@ -304,6 +314,16 @@ PJ_DECL(pj_status_t) pjsip_resolver_set_ext_resolver(
  * @return          The DNS resolver instance (may be NULL)
  */
 PJ_DECL(pj_dns_resolver*) pjsip_resolver_get_resolver(pjsip_resolver_t *res);
+
+/**
+ * Set a callback to be invoked whenever a DNS resolution completes.
+ * The callback fires for both SRV and A record resolutions.
+ *
+ * @param res   The SIP resolver engine.
+ * @param cb    The callback, or NULL to clear.
+ */
+PJ_DECL(void) pjsip_resolver_set_on_resolved_cb(pjsip_resolver_t *res,
+                                                  pjsip_on_resolved_cb *cb);
 
 /**
  * Destroy resolver engine. Note that this will also destroy the internal

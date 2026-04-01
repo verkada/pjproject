@@ -53,6 +53,7 @@ struct query
     pj_dns_async_query      *object6;
     pj_grp_lock_t           *grp_lock;
     pj_status_t              last_error;
+    pjsip_resolver_t        *resolver;
 
     /* Original request: */
     struct {
@@ -71,9 +72,10 @@ struct query
 
 struct pjsip_resolver_t
 {
-    pj_dns_resolver *res;
-    pj_grp_lock_t   *grp_lock;
-    pjsip_ext_resolver *ext_res;
+    pj_dns_resolver     *res;
+    pj_grp_lock_t       *grp_lock;
+    pjsip_ext_resolver  *ext_res;
+    pjsip_on_resolved_cb *on_resolved;
 };
 
 
@@ -157,6 +159,12 @@ PJ_DEF(pj_status_t) pjsip_resolver_set_ext_resolver(pjsip_resolver_t *res,
 PJ_DEF(pj_dns_resolver*) pjsip_resolver_get_resolver(pjsip_resolver_t *res)
 {
     return res->res;
+}
+
+PJ_DEF(void) pjsip_resolver_set_on_resolved_cb(pjsip_resolver_t *res,
+                                                pjsip_on_resolved_cb *cb)
+{
+    res->on_resolved = cb;
 }
 
 
@@ -410,6 +418,7 @@ PJ_DEF(void) pjsip_resolve( pjsip_resolver_t *resolver,
     query->token = token;
     query->cb = cb;
     query->grp_lock = resolver->grp_lock;
+    query->resolver = resolver;
     query->req.target = *target;
     pj_strdup(pool, &query->req.target.addr.host, &target->addr.host);
 
@@ -713,6 +722,9 @@ static void srv_resolver_cb(void *user_data,
             ++srv.count;
         }
     }
+
+    if (query->resolver && query->resolver->on_resolved)
+        (*query->resolver->on_resolved)(PJ_SUCCESS, srv.count ? &srv : NULL);
 
     /* Call the callback */
     (*query->cb)(PJ_SUCCESS, query->token, &srv);
