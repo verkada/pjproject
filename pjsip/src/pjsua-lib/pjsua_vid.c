@@ -115,7 +115,9 @@ pj_status_t pjsua_vid_subsys_init(void)
     }
 #endif
 #else
-    status = pjmedia_codec_intercom_vid_init(NULL, &pjsua_var.cp.factory);
+    status = pjmedia_codec_intercom_vid_init(NULL, &pjsua_var.cp.factory,
+                                             pjsua_var.media_cfg.vstream_sock_path,
+                                             pjsua_var.media_cfg.vstream_stream_num);
     if (status != PJ_SUCCESS) {
         pjsua_perror(THIS_FILE, "Error initializing ffmpeg library", status);
         goto on_error;

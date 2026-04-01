@@ -7591,6 +7591,30 @@ struct pjsua_media_config
      *   will not work properly.
      */
     void (*on_aud_prev_rec_frame)(pjmedia_frame *frame);
+
+    /**
+     * Unix socket path for the intercom video stream source.
+     * Only used when PJMEDIA_VERKADA_INTERCOM is defined.
+     *
+     * This field MUST be set by the application before calling pjsua_init().
+     * Leaving it empty (default) will cause pjmedia_codec_intercom_vid_init()
+     * to return PJ_EINVAL.
+     *
+     * Default: "" (empty — must be configured)
+     */
+    char vstream_sock_path[256];
+
+    /**
+     * Stream number passed to test_encode when requesting a key frame.
+     * Only used when PJMEDIA_VERKADA_INTERCOM is defined.
+     *
+     * This field MUST be set by the application before calling pjsua_init().
+     * Leaving it at the default sentinel value will cause
+     * pjmedia_codec_intercom_vid_init() to return PJ_EINVAL.
+     *
+     * Default: (unsigned)-1 (sentinel — must be configured)
+     */
+    unsigned vstream_stream_num;
 };
 
 
