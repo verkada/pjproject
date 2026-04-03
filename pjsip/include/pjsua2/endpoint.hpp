@@ -45,6 +45,39 @@ using std::vector;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+ * A single resolved server entry from an SRV lookup.
+ */
+struct SrvResolvedAddress
+{
+    /** Transport type (UDP, TCP, TLS, etc.) */
+    pjsip_transport_type_e  type;
+
+    /** Priority from the SRV record (lower = higher priority). */
+    unsigned                priority;
+
+    /** Weight from the SRV record. */
+    unsigned                weight;
+
+    /** Resolved socket address, including the port from the SRV record. */
+    pj_sockaddr             addr;
+
+    /** Length of addr. */
+    int                     addrLen;
+};
+
+/**
+ * Argument to Endpoint::onSrvResolved() callback.
+ */
+struct OnSrvResolvedParam
+{
+    /** PJ_SUCCESS if resolution succeeded. */
+    pj_status_t                     status;
+
+    /** Resolved server addresses (empty on failure). */
+    std::vector<SrvResolvedAddress>  entries;
+};
+
+/**
  * Argument to Endpoint::onNatDetectionComplete() callback.
  */
 struct OnNatDetectionCompleteParam
@@ -1905,6 +1938,15 @@ public:
     { PJ_UNUSED_ARG(prm); }
 
     /**
+     * Callback invoked when DNS SRV resolution completes.
+     * Use this to inspect resolved ports, e.g. to open firewall rules.
+     *
+     * @param prm   Callback parameters including status and resolved entries.
+     */
+    virtual void onSrvResolved(const OnSrvResolvedParam &prm)
+    { PJ_UNUSED_ARG(prm); }
+
+    /**
      * Callback when a timer has fired. The timer was scheduled by
      * utilTimerSchedule().
      *
@@ -2025,6 +2067,8 @@ private:
     static void on_transport_state(pjsip_transport *tp,
                                    pjsip_transport_state state,
                                    const pjsip_transport_state_info *info);
+    static void on_srv_resolved(pj_status_t status,
+                                const pjsip_server_addresses *addr);
 
 private:
     /*
