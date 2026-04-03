@@ -33,8 +33,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <sys/un.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -53,8 +52,6 @@
 
 /* AVCodec H264 default PT */
 #define AVC_H264_PT PJMEDIA_RTP_PT_H264_RSV3
-
-#define INTERCOM_SUBSYSTEM_VSTREAM_VIDEO_PORT 20001
 
 /* Prototypes for FFMPEG codecs factory */
 static pj_status_t ffmpeg_test_alloc(pjmedia_vid_codec_factory *factory,
@@ -121,6 +118,8 @@ static struct ffmpeg_factory
     pj_pool_factory *pf;
     pj_pool_t *pool;
     pj_mutex_t *mutex;
+    char vstream_sock_path[256];
+    unsigned vstream_stream_num;
 } ffmpeg_factory;
 
 typedef struct ffmpeg_codec_desc ffmpeg_codec_desc;
@@ -340,7 +339,9 @@ static void init_codec(pj_bool_t is_encoder,
  */
 PJ_DEF(pj_status_t)
 pjmedia_codec_intercom_vid_init(pjmedia_vid_codec_mgr *mgr,
-                               pj_pool_factory *pf)
+                                pj_pool_factory *pf,
+                                const char *vstream_sock_path,
+                                unsigned vstream_stream_num)
 {
     pj_pool_t *pool;
     pj_status_t status;
@@ -356,11 +357,21 @@ pjmedia_codec_intercom_vid_init(pjmedia_vid_codec_mgr *mgr,
         mgr = pjmedia_vid_codec_mgr_instance();
     PJ_ASSERT_RETURN(mgr, PJ_EINVAL);
 
+    /* Validate required config — application must set these before pjsua_init() */
+    PJ_ASSERT_RETURN(vstream_sock_path && vstream_sock_path[0] != '\0', PJ_EINVAL);
+    PJ_ASSERT_RETURN(vstream_stream_num != (unsigned)-1, PJ_EINVAL);
+
     /* Create FFMPEG codec factory. */
     ffmpeg_factory.base.op = &ffmpeg_factory_op;
     ffmpeg_factory.base.factory_data = NULL;
     ffmpeg_factory.mgr = mgr;
     ffmpeg_factory.pf = pf;
+    strncpy(ffmpeg_factory.vstream_sock_path, vstream_sock_path,
+            sizeof(ffmpeg_factory.vstream_sock_path) - 1);
+    ffmpeg_factory.vstream_sock_path[sizeof(ffmpeg_factory.vstream_sock_path) - 1] = '\0';
+    ffmpeg_factory.vstream_stream_num = vstream_stream_num;
+    PJ_LOG(3, (THIS_FILE, "intercom_vid_init: sock_path='%s' stream_num=%u",
+               ffmpeg_factory.vstream_sock_path, ffmpeg_factory.vstream_stream_num));
 
     pool = pj_pool_create(pf, "ffmpeg codec factory", 256, 256, NULL);
     if (!pool)
@@ -617,40 +628,40 @@ static pj_status_t ffmpeg_dealloc_codec(pjmedia_vid_codec_factory *factory,
 
 /*
  * Socket init
- * connect to intercom subsystem ( process handling camera capture and encoding ) using TCP port.
- * process sends video stream on multiple ports. ports of interest in this case is 20002 for Vstream
+ * Connect to intercom subsystem via Unix domain socket to receive video stream.
  */
 static int socket_init()
 {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in servaddr;
+    int sockfd;
+
+    /* Ensure config was set — should have been caught at init, but guard here too */
+    if (ffmpeg_factory.vstream_sock_path[0] == '\0') {
+        PJ_LOG(1, (THIS_FILE, "socket_init: vstream_sock_path not configured"));
+        return -1;
+    }
+
+    sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    struct sockaddr_un servaddr;
     if (sockfd == -1)
     {
-        PJ_LOG(3, (THIS_FILE, "message=\"socket creation failed... err: %s\"", strerror(errno)));
+        PJ_LOG(3, (THIS_FILE, "socket creation failed, err: %s", strerror(errno)));
         return -1;
     }
     bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    servaddr.sin_port = htons(INTERCOM_SUBSYSTEM_VSTREAM_VIDEO_PORT);
+    servaddr.sun_family = AF_UNIX;
+    strncpy(servaddr.sun_path, ffmpeg_factory.vstream_sock_path,
+            sizeof(servaddr.sun_path) - 1);
 
-    // This is purely for testing purposes to switch between SD and HD streams
-    // Keeping this commented for sometime, eventually will be removed
-    // FILE *fp = fopen("/tmp/stream_port", "r");
-    // if (fp != NULL)
-    // {
-    //     PJ_LOG(3, (THIS_FILE, "failed to open /tmp/stream_port file, err: %s", strerror(errno)));
-    //     char port[10];
-    //     fgets(port, 10, fp);
-    //     fclose(fp);
-    //     servaddr.sin_port = htons(atoi(port));
-    // }
-
+    PJ_LOG(3, (THIS_FILE, "socket_init: connecting to '%s'",
+               ffmpeg_factory.vstream_sock_path));
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
     {
-        PJ_LOG(3, (THIS_FILE, "connection with the server failed, port: %d, err: %s", servaddr.sin_port, strerror(errno)));
+        PJ_LOG(3, (THIS_FILE, "socket_init: connection to '%s' failed, err: %s",
+                   ffmpeg_factory.vstream_sock_path, strerror(errno)));
         return -1;
     }
+    PJ_LOG(3, (THIS_FILE, "socket_init: connected to '%s'",
+               ffmpeg_factory.vstream_sock_path));
     return sockfd;
 }
 
@@ -884,7 +895,14 @@ static pj_status_t ffmpeg_codec_encode_begin(pjmedia_vid_codec *codec,
             break;
         }
 
-        system("test_encode --stream 2 --force-idr");
+        {
+            char idr_cmd[128];
+            snprintf(idr_cmd, sizeof(idr_cmd),
+                     "test_encode --stream %u --force-idr",
+                     ffmpeg_factory.vstream_stream_num);
+            PJ_LOG(3, (THIS_FILE, "requesting IDR: %s", idr_cmd));
+            system(idr_cmd);
+        }
     }
 
     status = ffmpeg_codec_encode_more(codec, out_size, output, has_more);

@@ -1171,6 +1171,30 @@ public:
      */
     bool                vidPreviewEnableNative;
 
+    /**
+     * Unix socket path for the intercom video stream source.
+     * Only used when PJMEDIA_VERKADA_INTERCOM is defined.
+     *
+     * This field MUST be set by the application before calling libInit().
+     * Leaving it empty (default) will cause codec initialization to fail
+     * with PJ_EINVAL.
+     *
+     * Default: "" (empty — must be configured)
+     */
+    string              vstreamSockPath;
+
+    /**
+     * Stream number passed to test_encode when requesting a key frame.
+     * Only used when PJMEDIA_VERKADA_INTERCOM is defined.
+     *
+     * This field MUST be set by the application before calling libInit().
+     * Leaving it at the default sentinel value will cause codec
+     * initialization to fail with PJ_EINVAL.
+     *
+     * Default: (unsigned)-1 (sentinel — must be configured)
+     */
+    unsigned            vstreamStreamNum;
+
 public:
     /** Default constructor initialises with default values */
     MediaConfig();
