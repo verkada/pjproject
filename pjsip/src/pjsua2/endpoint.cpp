@@ -515,6 +515,8 @@ void MediaConfig::fromPj(const pjsua_media_config &mc)
     this->jbDiscardAlgo = mc.jb_discard_algo;
     this->sndAutoCloseTime = mc.snd_auto_close_time;
     this->vidPreviewEnableNative = PJ2BOOL(mc.vid_preview_enable_native);
+    this->vstreamSockPath = mc.vstream_sock_path;
+    this->vstreamStreamNum = mc.vstream_stream_num;
 }
 
 pjsua_media_config MediaConfig::toPj() const
@@ -549,6 +551,9 @@ pjsua_media_config MediaConfig::toPj() const
     mcfg.jb_discard_algo = this->jbDiscardAlgo;
     mcfg.snd_auto_close_time = this->sndAutoCloseTime;
     mcfg.vid_preview_enable_native = this->vidPreviewEnableNative;
+    pj_ansi_strncpy(mcfg.vstream_sock_path, this->vstreamSockPath.c_str(),
+                    sizeof(mcfg.vstream_sock_path) - 1);
+    mcfg.vstream_stream_num = this->vstreamStreamNum;
 
     return mcfg;
 }
@@ -583,6 +588,8 @@ void MediaConfig::readObject(const ContainerNode &node) PJSUA2_THROW(Error)
     NODE_READ_INT     ( this_node, sndAutoCloseTime);
     NODE_READ_BOOL    ( this_node, vidPreviewEnableNative);
     NODE_READ_BOOL    ( this_node, sndUseSwClock);
+    NODE_READ_STRING  ( this_node, vstreamSockPath);
+    NODE_READ_UNSIGNED( this_node, vstreamStreamNum);
 }
 
 void MediaConfig::writeObject(ContainerNode &node) const PJSUA2_THROW(Error)
@@ -615,6 +622,8 @@ void MediaConfig::writeObject(ContainerNode &node) const PJSUA2_THROW(Error)
     NODE_WRITE_INT     ( this_node, sndAutoCloseTime);
     NODE_WRITE_BOOL    ( this_node, vidPreviewEnableNative);
     NODE_WRITE_BOOL    ( this_node, sndUseSwClock);
+    NODE_WRITE_STRING  ( this_node, vstreamSockPath);
+    NODE_WRITE_UNSIGNED( this_node, vstreamStreamNum);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

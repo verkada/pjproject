@@ -47,11 +47,27 @@ PJ_DECL(pj_status_t) pjmedia_codec_ffmpeg_vid_init(pjmedia_vid_codec_mgr *mgr,
 
 
 /**
- * Initialize and register intercom Video codec. This is dummy codec that pulls
- * frames from the intercom camera subsystem process over TCP socket.
+ * Initialize and register intercom Video codec. This is a codec that pulls
+ * frames from the intercom camera subsystem process over a Unix domain socket.
+ *
+ * @param mgr               The video codec manager instance (NULL for default).
+ * @param pf                Pool factory.
+ * @param vstream_sock_path Path to the Unix domain socket for video frames.
+ * @param vstream_stream_num Stream number passed to test_encode for IDR requests.
+ *
+ * @return                  PJ_SUCCESS on success.
  */
 PJ_DECL(pj_status_t) pjmedia_codec_intercom_vid_init(pjmedia_vid_codec_mgr *mgr,
-                                                   pj_pool_factory *pf);
+                                                      pj_pool_factory *pf,
+                                                      const char *vstream_sock_path,
+                                                      unsigned vstream_stream_num);
+
+/**
+ * Unregister intercom video codec factory.
+ *
+ * @return          PJ_SUCCESS on success.
+ */
+PJ_DECL(pj_status_t) pjmedia_codec_intercom_vid_deinit(void);
 
 /**
  * Unregister FFMPEG video codecs factory from the video codec manager and
