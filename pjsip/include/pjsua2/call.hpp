@@ -1848,7 +1848,21 @@ public:
      * @return              The stream statistic.
      */
     StreamStat getStreamStat(unsigned med_idx) const PJSUA2_THROW(Error);
-    
+
+    /**
+     * Send a keep-alive packet (empty RTP plus RTCP) for the specified audio
+     * media stream on demand. Use this to keep the media path / NAT binding
+     * alive while the stream is not being driven by the local sound device
+     * (e.g. audio parked, but the SIP/media session must stay up).
+     *
+     * It is safe to call from an application thread concurrently with call
+     * teardown: the keep-alive is sent under the pjsua lock and only if the
+     * stream is still active, otherwise it throws an Error.
+     *
+     * @param med_idx       Media stream index.
+     */
+    void sendStreamKeepAlive(unsigned med_idx) PJSUA2_THROW(Error);
+
     /**
      * Get media transport info for the specified media index.
      *

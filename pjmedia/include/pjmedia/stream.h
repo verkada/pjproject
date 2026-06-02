@@ -534,6 +534,24 @@ pjmedia_stream_send_rtcp_bye( pjmedia_stream *stream );
 
 
 /**
+ * Send a keep-alive packet (empty RTP plus RTCP) for the media stream on
+ * demand. This is useful to keep the media path / NAT binding alive while the
+ * stream is not being driven by put_frame() (e.g. when the local audio device
+ * has been disconnected from the stream but the session must stay up).
+ *
+ * Unlike the automatic keep-alive (PJMEDIA_STREAM_ENABLE_KA), which is only
+ * emitted from within put_frame(), this sends a keep-alive packet immediately
+ * regardless of the PJMEDIA_STREAM_ENABLE_KA build setting.
+ *
+ * @param stream        The media stream.
+ *
+ * @return              PJ_SUCCESS on success.
+ */
+PJ_DECL(pj_status_t)
+pjmedia_stream_send_keep_alive( pjmedia_stream *stream );
+
+
+/**
  * Get the RTP session information of the media stream. This function can be 
  * useful for app with custom media transport to inject/filter some 
  * outgoing/incoming proprietary packets into normal audio RTP traffics.

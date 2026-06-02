@@ -929,6 +929,11 @@ StreamStat Call::getStreamStat(unsigned med_idx) const PJSUA2_THROW(Error)
     return ss;
 }
 
+void Call::sendStreamKeepAlive(unsigned med_idx) PJSUA2_THROW(Error)
+{
+    PJSUA2_CHECK_EXPR( pjsua_call_send_stream_keep_alive(id, med_idx) );
+}
+
 MediaTransportInfo Call::getMedTransportInfo(unsigned med_idx) const
     PJSUA2_THROW(Error)
 {

@@ -6475,6 +6475,26 @@ PJ_DECL(pj_status_t) pjsua_call_get_stream_stat(pjsua_call_id call_id,
                                                 pjsua_stream_stat *stat);
 
 /**
+ * Send a keep-alive packet (empty RTP plus RTCP) for the specified audio
+ * media stream on demand. This keeps the media path / NAT binding alive while
+ * the stream is not being driven by the local sound device (e.g. audio has
+ * been parked but the SIP/media session must stay up).
+ *
+ * The keep-alive is sent under the pjsua lock and only if the stream is still
+ * active, so it is safe to call from an application thread concurrently with
+ * call teardown: if the stream has already been destroyed the call returns an
+ * error instead of touching freed memory.
+ *
+ * @param call_id       The call identification.
+ * @param med_idx       Media stream index.
+ *
+ * @return              PJ_SUCCESS on success, or PJ_EINVALIDOP if the stream
+ *                      is not an active audio stream (e.g. already destroyed).
+ */
+PJ_DECL(pj_status_t) pjsua_call_send_stream_keep_alive(pjsua_call_id call_id,
+                                                       unsigned med_idx);
+
+/**
  * Get media transport info for the specified media index.
  *
  * @param call_id       The call identification.

@@ -240,6 +240,49 @@ on_return:
 }
 
 /*
+ * Send a keep-alive packet (empty RTP plus RTCP) for an audio media stream.
+ *
+ * Held under PJSUA_LOCK and revalidated each call, so it is mutually exclusive
+ * with pjsua_media_channel_deinit() (which destroys the stream under the same
+ * lock and nulls call_med->strm.a.stream). This makes it safe to call from an
+ * application thread without risking a use-after-free on the pjmedia stream.
+ */
+PJ_DEF(pj_status_t) pjsua_call_send_stream_keep_alive(pjsua_call_id call_id,
+                                                      unsigned med_idx)
+{
+    pjsua_call *call;
+    pjsua_call_media *call_med;
+    pj_status_t status = PJ_EINVALIDOP;
+
+    PJ_ASSERT_RETURN(call_id>=0 && call_id<(int)pjsua_var.ua_cfg.max_calls,
+                     PJ_EINVAL);
+
+    PJSUA_LOCK();
+
+    call = &pjsua_var.calls[call_id];
+
+    if (med_idx >= call->med_cnt)
+        goto on_return;
+
+    call_med = &call->media[med_idx];
+
+    /* Only send on an active audio stream that is still alive. Both
+     * call_med->state and call_med->strm.a.stream are mutated under PJSUA_LOCK
+     * during teardown, so observing them here can never race the destroy.
+     */
+    if (call_med->type == PJMEDIA_TYPE_AUDIO &&
+        call_med->state == PJSUA_CALL_MEDIA_ACTIVE &&
+        call_med->strm.a.stream)
+    {
+        status = pjmedia_stream_send_keep_alive(call_med->strm.a.stream);
+    }
+
+on_return:
+    PJSUA_UNLOCK();
+    return status;
+}
+
+/*
  * Send DTMF digits to remote using RFC 2833 payload formats.
  */
 PJ_DEF(pj_status_t) pjsua_call_dial_dtmf( pjsua_call_id call_id,
