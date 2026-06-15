@@ -516,45 +516,15 @@ static void send_keep_alive_packet(pjmedia_stream *stream)
 #endif  /* defined(PJMEDIA_STREAM_ENABLE_KA) */
 
 
-/*
- * Send a keep-alive packet (empty RTP plus RTCP) on demand.
- *
- * This is the public, build-flag-independent counterpart of the automatic
- * keep-alive above: it lets the application keep the media path / NAT binding
- * alive even when nothing is driving put_frame() (e.g. the local sound device
- * has been disconnected from the stream). It sends a zero-length RTP packet
- * built from the encoder's RTP session, followed by an RTCP report - it does
- * NOT go through the codec/encode path.
- */
 PJ_DEF(pj_status_t) pjmedia_stream_send_keep_alive(pjmedia_stream *stream)
 {
-    pj_status_t status;
-    void *pkt;
-    int pkt_len;
-
     PJ_ASSERT_RETURN(stream, PJ_EINVAL);
-
-    /* Send empty RTP */
-    status = pjmedia_rtp_encode_rtp( &stream->enc->rtp,
-                                     stream->enc->pt, 0,
-                                     1,
-                                     0,
-                                     (const void**)&pkt,
-                                     &pkt_len);
-    if (status != PJ_SUCCESS)
-        return status;
-
-    pj_memcpy(stream->enc->out_pkt, pkt, pkt_len);
-    status = pjmedia_transport_send_rtp(stream->transport, stream->enc->out_pkt,
-                                        pkt_len);
-
-    /* Send RTCP */
-    send_rtcp(stream, PJ_TRUE, PJ_FALSE, PJ_FALSE, PJ_FALSE);
-
-    /* Update stats since the stream's TX path may be otherwise idle */
-    stream->rtcp.stat.rtp_tx_last_seq = pj_ntohs(stream->enc->rtp.out_hdr.seq);
-
-    return status;
+#if defined(PJMEDIA_STREAM_ENABLE_KA) && PJMEDIA_STREAM_ENABLE_KA != 0
+    send_keep_alive_packet(stream);
+    return PJ_SUCCESS;
+#else
+    return PJ_ENOTSUP;
+#endif
 }
 
 
