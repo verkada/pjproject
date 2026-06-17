@@ -515,6 +515,19 @@ static void send_keep_alive_packet(pjmedia_stream *stream)
 }
 #endif  /* defined(PJMEDIA_STREAM_ENABLE_KA) */
 
+
+PJ_DEF(pj_status_t) pjmedia_stream_send_keep_alive(pjmedia_stream *stream)
+{
+    PJ_ASSERT_RETURN(stream, PJ_EINVAL);
+#if defined(PJMEDIA_STREAM_ENABLE_KA) && PJMEDIA_STREAM_ENABLE_KA != 0
+    send_keep_alive_packet(stream);
+    return PJ_SUCCESS;
+#else
+    return PJ_ENOTSUP;
+#endif
+}
+
+
 /*
  * play_callback()
  *
