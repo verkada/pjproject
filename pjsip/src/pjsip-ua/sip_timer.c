@@ -437,8 +437,18 @@ static void timer_cb(pj_timer_heap_t *timer_heap, struct pj_timer_entry *entry)
             inv->timer->timer.id = 0;
 
         /* Terminate the session */
-        status = pjsip_inv_end_session(inv, PJSIP_SC_REQUEST_TIMEOUT, 
+        status = pjsip_inv_end_session(inv, PJSIP_SC_REQUEST_TIMEOUT,
                                        &reason, &tdata);
+
+        /* VERKADA: mark the 408 caused by a missed session timer refresh so
+         * it is greppable alongside transaction/registration 408s. Warning
+         * level (2) so it always shows in intercom-sip logs.
+         */
+        PJ_LOG(2, (obj_name,
+                   "VERKADA-408: ending session with 408 (no session %s "
+                   "received, as_refresher=%d)",
+                   (as_refresher?"refresh response":"refresh"),
+                   as_refresher));
 
         pj_gettimeofday(&now);
         PJ_LOG(3, (obj_name,

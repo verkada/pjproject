@@ -2485,9 +2485,33 @@ static void regc_cb(struct pjsip_regc_cbparam *param)
         }
 
     } else if (param->code < 0 || param->code >= 300) {
-        PJ_LOG(2, (THIS_FILE, "SIP registration failed, status=%d (%.*s)", 
-                   param->code, 
+        PJ_LOG(2, (THIS_FILE, "SIP registration failed, status=%d (%.*s)",
+                   param->code,
                    (int)param->reason.slen, param->reason.ptr));
+
+        /* VERKADA: extra detail for registration 408 (Request Timeout) to
+         * debug SIP registration timeouts. Warning level (2) so it always
+         * shows in intercom-sip logs.
+         */
+        if (param->code == PJSIP_SC_REQUEST_TIMEOUT) {
+            pjsip_regc_info rinfo;
+
+            pj_bzero(&rinfo, sizeof(rinfo));
+            if (param->regc)
+                pjsip_regc_get_info(param->regc, &rinfo);
+
+            PJ_LOG(2, (THIS_FILE,
+                       "VERKADA-408: account[%d] '%s' registration TIMED OUT "
+                       "(status=408) registrar='%.*s' is_unreg=%d "
+                       "auto_rereg.active=%d attempt=%d",
+                       acc->index,
+                       pjsua_var.acc[acc->index].cfg.id.ptr,
+                       (int)rinfo.server_uri.slen, rinfo.server_uri.ptr,
+                       param->is_unreg,
+                       acc->auto_rereg.active,
+                       acc->auto_rereg.attempt_cnt));
+        }
+
         destroy_regc(acc, PJ_TRUE);
 
         /* Clear Service-Route header */

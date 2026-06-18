@@ -1864,6 +1864,37 @@ static void tsx_set_status_code(pjsip_transaction *tsx,
         pj_strdup(tsx->pool, &tsx->status_text, reason);
     else
         tsx->status_text = *pjsip_get_status_text(code);
+
+    /* VERKADA: verbose logging for every transaction that ends up with a 408
+     * (Request Timeout / Tsx Timeout). This is the single chokepoint for all
+     * 408s, whether generated locally on timeout or received from the network.
+     * Logged at warning level (2) so it always appears in intercom-sip logs.
+     */
+    if (code == PJSIP_SC_REQUEST_TIMEOUT) {
+        char dst[PJ_INET6_ADDRSTRLEN+10];
+        const char *tp_name = tsx->transport ? tsx->transport->obj_name :
+                                                "(no-transport)";
+        const char *dst_str = "(unknown)";
+
+        /* pj_sockaddr_print() returns the buffer on success or a static ""
+         * on failure; using its return value avoids reading an uninitialized
+         * dst[] in any case. The has_addr() guard already ensures the family
+         * is valid before we format.
+         */
+        if (pj_sockaddr_has_addr(&tsx->addr)) {
+            dst_str = pj_sockaddr_print(&tsx->addr, dst, sizeof(dst), 3);
+        }
+
+        PJ_LOG(2,(tsx->obj_name,
+                  "VERKADA-408: status set to 408 '%.*s' method=%.*s "
+                  "role=%s state=%s branch=%.*s dest=%s transport=%s",
+                  (int)tsx->status_text.slen, tsx->status_text.ptr,
+                  (int)tsx->method.name.slen, tsx->method.name.ptr,
+                  (tsx->role==PJSIP_ROLE_UAC ? "UAC" : "UAS"),
+                  pjsip_tsx_state_str(tsx->state),
+                  (int)tsx->branch.slen, tsx->branch.ptr,
+                  dst_str, tp_name));
+    }
 }
 
 
