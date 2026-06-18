@@ -231,6 +231,17 @@ PJ_DEF(void) pjsip_resolve( pjsip_resolver_t *resolver,
         return;
     }
 
+    /* VERKADA: log the start of SIP server resolution. A REGISTER can time
+     * out at the transaction level (Timer F -> 408) while this lookup is
+     * still pending, so pairing this with the resolve-done log below tells
+     * us whether DNS stalled. Log-only; 'target' is dereferenced below, so
+     * it is valid here.
+     */
+    PJ_LOG(2,(THIS_FILE,
+              "VERKADA-DNS: resolve start target='%.*s' port=%d type=%d flag=%u",
+              (int)target->addr.host.slen, target->addr.host.ptr,
+              target->addr.port, (int)target->type, target->flag));
+
     /* Is it IP address or hostname? And if it's an IP, which version? */
     ip_addr_ver = get_ip_addr_ver(&target->addr.host);
 
@@ -683,6 +694,18 @@ static void srv_resolver_cb(void *user_data,
     struct query *query = (struct query*) user_data;
     pjsip_server_addresses srv;
     unsigned i;
+
+    /* VERKADA: log SRV resolution completion (pairs with 'resolve start').
+     * Absence of this log within ~32s of a start, followed by a tsx 408
+     * with resolved_srv=0, confirms a stalled DNS lookup. Log-only; 'rec'
+     * is only valid on success, so it is read only when status==SUCCESS.
+     */
+    PJ_LOG(2,(query->objname,
+              "VERKADA-DNS: resolve done target='%.*s' status=%d srv_count=%d",
+              (int)query->req.target.addr.host.slen,
+              query->req.target.addr.host.ptr,
+              status,
+              (status == PJ_SUCCESS && rec) ? (int)rec->count : -1));
 
     if (status != PJ_SUCCESS) {
         PJ_PERROR(4,(query->objname, status,

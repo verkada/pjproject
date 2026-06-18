@@ -1887,13 +1887,17 @@ static void tsx_set_status_code(pjsip_transaction *tsx,
 
         PJ_LOG(2,(tsx->obj_name,
                   "VERKADA-408: status set to 408 '%.*s' method=%.*s "
-                  "role=%s state=%s branch=%.*s dest=%s transport=%s",
+                  "role=%s state=%s branch=%.*s dest=%s transport=%s "
+                  "pending_tp=%d resolved_srv=%d pending_send=%d",
                   (int)tsx->status_text.slen, tsx->status_text.ptr,
                   (int)tsx->method.name.slen, tsx->method.name.ptr,
                   (tsx->role==PJSIP_ROLE_UAC ? "UAC" : "UAS"),
                   pjsip_tsx_state_str(tsx->state),
                   (int)tsx->branch.slen, tsx->branch.ptr,
-                  dst_str, tp_name));
+                  dst_str, tp_name,
+                  (tsx->transport_flag & TSX_HAS_PENDING_TRANSPORT) ? 1 : 0,
+                  (tsx->transport_flag & TSX_HAS_RESOLVED_SERVER)   ? 1 : 0,
+                  (tsx->transport_flag & TSX_HAS_PENDING_SEND)      ? 1 : 0));
     }
 }
 
