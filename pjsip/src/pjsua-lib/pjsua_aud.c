@@ -557,13 +557,29 @@ static void close_snd_timer_cb( pj_timer_heap_t *th,
     PJ_UNUSED_ARG(th);
 
     PJSUA_LOCK();
-    if (entry->id && pjmedia_conf_get_connect_count(pjsua_var.mconf) == 0) {
-        PJ_LOG(2,(THIS_FILE,"Closing sound device after idle for %d second(s)",
-                  pjsua_var.media_cfg.snd_auto_close_time));
+    if (entry->id) {
+        if (pjmedia_conf_get_connect_count(pjsua_var.mconf) == 0) {
+            PJ_LOG(2,(THIS_FILE,
+                      "Closing sound device after idle for %d second(s)",
+                      pjsua_var.media_cfg.snd_auto_close_time));
 
-        close_snd_dev();
+            entry->id = PJ_FALSE;
+            close_snd_dev();
+        } else {
+            /* The bridge still reports connections. This may be a stale
+             * count (a queued disconnect op the conference clock thread
+             * has not drained yet) rather than real audio. Re-arm and
+             * check again later instead of abandoning the close: no
+             * other event may come to re-trigger the idle check.
+             */
+            pj_time_val delay;
+
+            delay.sec = pjsua_var.media_cfg.snd_auto_close_time;
+            delay.msec = (delay.sec == 0) ? 100 : 0;
+            pjsip_endpt_schedule_timer(pjsua_var.endpt,
+                                       &pjsua_var.snd_idle_timer, &delay);
+        }
     }
-    entry->id = PJ_FALSE;
     PJSUA_UNLOCK();
 }
 
