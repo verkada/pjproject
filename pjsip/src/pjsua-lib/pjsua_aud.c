@@ -523,11 +523,12 @@ void pjsua_check_snd_dev_idle()
      * It is idle when there is no port connection in the bridge and
      * there is no active call.
      * Update: as bridge conn/disconn is now async, the check is moved to
-     *         the timer callback.
+     *         the timer callback. Checking the connect count here would
+     *         see disconnects that are still queued in the bridge and never
+     *         schedule the timer, leaving the sound device open forever.
      */
     if (pjsua_var.snd_idle_timer.id == PJ_FALSE &&
-        call_cnt <= 1 &&
-        pjmedia_conf_get_connect_count(pjsua_var.mconf) == 0)
+        call_cnt <= 1)
     {
         pj_time_val delay;
 
@@ -547,7 +548,7 @@ static void close_snd_timer_cb( pj_timer_heap_t *th,
     PJ_UNUSED_ARG(th);
 
     PJSUA_LOCK();
-    if (entry->id) {
+    if (entry->id && pjmedia_conf_get_connect_count(pjsua_var.mconf) == 0) {
         PJ_LOG(2,(THIS_FILE,"Closing sound device after idle for %d second(s)",
                   pjsua_var.media_cfg.snd_auto_close_time));
 
