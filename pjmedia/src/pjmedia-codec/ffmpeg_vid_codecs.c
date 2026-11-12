@@ -547,7 +547,9 @@ static pj_status_t h264_preopen(ffmpeg_private *ff)
         /* Apply profile constraint bits. */
         //PJ_TODO(set_h264_constraint_bits_properly_in_ffmpeg);
         if (data->fmtp.profile_iop) {
-#if defined(FF_PROFILE_H264_CONSTRAINED)
+#if defined(AV_PROFILE_H264_CONSTRAINED)
+            ctx->profile |= AV_PROFILE_H264_CONSTRAINED;
+#elif defined(FF_PROFILE_H264_CONSTRAINED)
             ctx->profile |= FF_PROFILE_H264_CONSTRAINED;
 #endif
         }
