@@ -1206,6 +1206,20 @@ PJ_INLINE(pjsip_cfg_t*) pjsip_cfg(void)
 #endif
 
 /**
+ * Always compute MD5 digest authentication with pjlib's built-in MD5
+ * instead of OpenSSL's, even when OpenSSL provides MD5. Without this,
+ * MD5 goes through OpenSSL and falls back to the built-in implementation
+ * only when OpenSSL refuses it (FIPS-only configurations). Set it where
+ * policy requires that OpenSSL is never asked for a non-approved digest.
+ * The other digest algorithms are unaffected.
+ *
+ * Default: 0
+ */
+#if !defined(PJSIP_AUTH_MD5_FORCE_BUILTIN)
+#   define PJSIP_AUTH_MD5_FORCE_BUILTIN     0
+#endif
+
+/**
  * If this flag is set, the stack will proactively send Authorization/Proxy-
  * Authorization header for next requests. If next request has the same method
  * with any of previous requests, then the last header which is saved in

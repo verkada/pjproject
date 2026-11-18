@@ -86,6 +86,9 @@
 static int g_md5_evp_supported = -1; /* -1=unknown, 0=no, 1=yes */
 static pj_bool_t md5_evp_is_supported(void)
 {
+#if PJSIP_AUTH_MD5_FORCE_BUILTIN
+    return PJ_FALSE;
+#endif
     if (g_md5_evp_supported == -1) {
         const EVP_MD *md = EVP_get_digestbyname("MD5");
         if (!md) {
