@@ -1757,21 +1757,24 @@ PJ_DEF(pj_status_t) pjsip_tpmgr_find_local_addr2(pjsip_tpmgr *tpmgr,
         prm->tp_sel->u.transport)
     {
         const pjsip_transport *tp = prm->tp_sel->u.transport;
-        /* If transport selector is specified, we can use the transport's
-         * address instead of using the address obtained from
-         * get_net_interface().
+        unsigned tp_flag = pjsip_transport_get_flag_from_type(
+                               (pjsip_transport_type_e)tp->key.type);
+
+        /* A datagram transport bound to the wildcard address only guessed
+         * its published name once, at creation time. When the caller wants
+         * the local interface, resolve it for this destination like the
+         * non-selector datagram path does; otherwise, or if the lookup
+         * fails, use the transport's published name.
          */
-        /*
-        if (prm->local_if) {
-            status = get_net_interface((pjsip_transport_type_e)tp->key.type,
-                                       &prm->dst_host, &tmp_str);
-            if (status != PJ_SUCCESS)
-                goto on_return;
-            pj_strdup(pool, &prm->ret_addr, &tmp_str);
-            prm->ret_port = pj_sockaddr_get_port(&tp->local_addr);
-            prm->ret_tp = tp;
-        } else */
+        if (prm->local_if && (tp_flag & PJSIP_TRANSPORT_DATAGRAM) &&
+            !pj_sockaddr_has_addr(&tp->local_addr) &&
+            get_net_interface((pjsip_transport_type_e)tp->key.type,
+                              &prm->dst_host, &tmp_str) == PJ_SUCCESS)
         {
+            pj_strdup(pool, &prm->ret_addr, &tmp_str);
+            prm->ret_port = (pj_uint16_t)tp->local_name.port;
+            prm->ret_tp = tp;
+        } else {
             pj_strdup(pool, &prm->ret_addr, &tp->local_name.host);
             prm->ret_port = (pj_uint16_t)tp->local_name.port;
         }
